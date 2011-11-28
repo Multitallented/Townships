@@ -1,4 +1,4 @@
-package main.java.me.multitallented.plugins.herostronghold;
+package main.java.multitallented.plugins.herostronghold;
 
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;

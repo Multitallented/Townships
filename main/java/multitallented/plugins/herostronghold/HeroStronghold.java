@@ -1,4 +1,4 @@
-package main.java.me.multitallented.plugins.herostronghold;
+package main.java.multitallented.plugins.herostronghold;
 /**
  *
  * @author Multitallented
