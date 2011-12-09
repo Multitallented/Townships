@@ -1,0 +1,28 @@
+regions:
+    magetower:
+        name: Mage Tower
+        friendly-classes: #Classes that will gain buffs while in the region
+        - Mystic
+        - Tempest
+        - Summoner
+        - Apothecary
+        enemy-classes: #Classes that will gain debuffs while in the region
+        - Maceman
+        - Heretic
+        effects: #Effects the region bestows on players in the region every 5 seconds
+        - regenmanabuff.1
+        - regenmanadebuff.1
+        radius: 10 #Size of the region
+        requirements: #Blocks that need to exist within the radius in order to construct the region
+        - ENCHANTING_TABLE.1
+        - BOOKSHELF.12
+        - OBSIDIAN.9
+        - PUMPKIN.4
+        reagents: #Items needed in a chest in order for the region to exist
+        - REDSTONE.16
+        upkeep: #Items to be depleted during upkeep
+        - REDSTONE.1
+        upkeep-chance: 0.01 #chance that upkeep will happen when the region is in use
+        output: #Items it will put in the chest during upkeep
+        - DIRT.1
+        money: 5000.00 #money required to create the region

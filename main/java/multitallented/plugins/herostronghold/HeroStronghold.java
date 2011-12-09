@@ -4,9 +4,10 @@ package main.java.multitallented.plugins.herostronghold;
  * @author Multitallented
  */
 import com.herocraftonline.dev.heroes.Heroes;
-import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import java.util.logging.Logger;
+import main.java.multitallented.plugins.herostronghold.listeners.*;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.event.Event.Type;
 import org.bukkit.plugin.Plugin;
@@ -15,34 +16,43 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class HeroStronghold extends JavaPlugin {
     private HeroStrongholdServerListener serverListener;
-    private HeroStrongholdCommandListener commandHandler;
+    private CommandListener commandHandler;
+    private Logger log;
+    protected FileConfiguration config;
     @Override
     public void onDisable() {
-        Logger log = Logger.getLogger("Minecraft");
+        log = Logger.getLogger("Minecraft");
         log.info("[HeroStronghold] is now disabled!");
     }
 
     @Override
     public void onEnable() {
+        //setup configs
+        config = getConfig();
+        config.options().copyDefaults(true);
+        saveConfig();
+        
+        
+        //Register Listeners Here
         serverListener = new HeroStrongholdServerListener(this);
-        commandHandler = new HeroStrongholdCommandListener();
+        commandHandler = new CommandListener();
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvent(Type.PLUGIN_ENABLE, serverListener, Priority.Low, this);
         pm.registerEvent(Type.PLUGIN_DISABLE, serverListener, Priority.Low, this);
         
-        Logger log = Logger.getLogger("Minecraft");
-        log.info("[HeroStronghold] is looking for Heroes and Worldguard...");
+        log = Logger.getLogger("Minecraft");
+        
+        //Check for Heroes
+        log.info("[HeroStronghold] is looking for Heroes...");
         Plugin currentPlugin = pm.getPlugin("Heroes");
         if (currentPlugin != null) {
             log.info("[HeroStronghold] found Heroes!");
             serverListener.setupHeroes((Heroes) currentPlugin);
+        } else {
+            log.info("[HeroStronghold] didnt find Heroes, waiting for Heroes to be enabled.");
         }
         
-        currentPlugin = pm.getPlugin("WorldGuard");
-        if (currentPlugin != null) {
-            log.info("[HeroStronghold] found WorldGuard!");
-            serverListener.setupWorldGuard((WorldGuardPlugin) currentPlugin);
-        }
+        //Setup repeating thread for checking regions
         
         log.info("[HeroStronghold] is now enabled!");
     }
@@ -56,11 +66,5 @@ public class HeroStronghold extends JavaPlugin {
         if (serverListener == null)
             return null;
         return serverListener.getHeroes();
-    }
-    
-    public WorldGuardPlugin getWorldGuard() {
-        if (serverListener == null)
-            return null;
-        return serverListener.getWorldGuard();
     }
 }
