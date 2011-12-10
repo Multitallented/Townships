@@ -7,3 +7,12 @@ main: main.java.multitallented.plugins.herostronghold.HeroStronghold
 name: HeroStronghold
 startup: postworld
 version: '0.1'
+commands:
+   herostrong:
+      description: Creates a HeroStronghold of the specified type if you have the necessary materials
+      permission: <plugin name>.create.*
+      usage: /<command> create
+permissions:
+   create.*:
+      description: Allows you to create a HeroStronghold of any type if you have the necessary materials
+      default: op

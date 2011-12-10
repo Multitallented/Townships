@@ -12,11 +12,11 @@ import org.bukkit.plugin.Plugin;
  *
  * @author Multitallented
  */
-public class HeroStrongholdServerListener extends ServerListener {
+public class PluginServerListener extends ServerListener {
     private HeroStronghold plugin;
     private Heroes heroes;
 
-    public HeroStrongholdServerListener(HeroStronghold p) {
+    public PluginServerListener(HeroStronghold p) {
         this.plugin = p;
     }
 

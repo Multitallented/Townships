@@ -1,3 +1,4 @@
+explode-on-destroy: false
 regions:
     magetower:
         friendly-classes: #Classes that will gain buffs while in the region

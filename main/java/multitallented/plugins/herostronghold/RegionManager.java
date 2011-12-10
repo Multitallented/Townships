@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -37,9 +38,21 @@ public class RegionManager {
                     processItemStackList(currentRegion.getStringList("reagents")),
                     processItemStackList(currentRegion.getStringList("upkeep")),
                     processItemStackList(currentRegion.getStringList("output")),
-                    currentRegion.getDouble("upkeepChance"),
-                    currentRegion.getDouble("moneyRequirement"),
-                    currentRegion.getDouble("moneyOutput")));
+                    currentRegion.getDouble("upkeep-chance"),
+                    currentRegion.getDouble("money-requirement"),
+                    currentRegion.getDouble("upkeep-money-output")));
+            System.out.println(key + ":" +
+                    (ArrayList<String>) currentRegion.getStringList("friendly-classes") + ":" +
+                    (ArrayList<String>) currentRegion.getStringList("enemy-classes") + ":" +
+                    (ArrayList<String>) currentRegion.getStringList("effects") + ":" +
+                    currentRegion.getInt("radius") + ":" +
+                    processItemStackList(currentRegion.getStringList("requirements")) + ":" +
+                    processItemStackList(currentRegion.getStringList("reagents")) + ":" +
+                    processItemStackList(currentRegion.getStringList("upkeep")) + ":" +
+                    processItemStackList(currentRegion.getStringList("output")) +":" +
+                    currentRegion.getDouble("upkeep-chance") + ":" +
+                    currentRegion.getDouble("money-requirement") +":" +
+                    currentRegion.getDouble("upkeep-money-output"));
         }
         File dataFile = new File(plugin.getDataFolder(), "data.yml");
         if (dataFile.exists()) {
@@ -62,7 +75,7 @@ public class RegionManager {
                         ArrayList<String> owners = (ArrayList<String>) currentSave.getStringList("owners");
                         ArrayList<String> members = (ArrayList<String>) currentSave.getStringList("members");
                         if (name != null && location != null && type != null && owners != null && members != null) {
-                            liveRegions.put(location, new Region(name, location, type, owners, members));
+                            liveRegions.put(location, new Region(location, type, owners, members));
                         }
                     }
                 }
@@ -91,12 +104,27 @@ public class RegionManager {
                 plugin.warning("[HeroStronghold] could not find item " + params[0]);
             }
         }
-        return null;
+        return returnList;
     }
     
-    public boolean isValidRegion(String name) {
-        //TODO write this function
-        return false;
+    public void addRegion(Region region) {
+        
+    }
+    
+    public Set<String> getRegionTypes() {
+        return regionTypes.keySet();
+    }
+    
+    public RegionType getRegionType(String name) {
+        return regionTypes.get(name);
+    }
+    
+    public Set<Location> getRegionLocations() {
+        return liveRegions.keySet();
+    }
+    
+    public Region getRegion(Location loc) {
+        return liveRegions.get(loc);
     }
     
     public boolean reloadConfig() {

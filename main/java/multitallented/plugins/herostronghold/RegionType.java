@@ -47,5 +47,17 @@ public class RegionType {
         return name;
     }
     
+    public ArrayList<ItemStack> getReagents() {
+        return reagents;
+    }
+    
+    public int getRadius() {
+        return radius;
+    }
+    
+    public ArrayList<ItemStack> getRequirements() {
+        return requirements;
+    }
+    
     //TODO write more methods here for retrieving info
 }
