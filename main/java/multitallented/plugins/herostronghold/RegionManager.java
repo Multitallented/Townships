@@ -12,6 +12,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -23,10 +24,12 @@ public class RegionManager {
     private Map<String, RegionType> regionTypes = new HashMap<String, RegionType>();
     private HeroStronghold plugin;
     private final FileConfiguration config;
+    private FileConfiguration dataConfig;
     
     public RegionManager(HeroStronghold plugin, FileConfiguration config) {
         this.plugin = plugin;
         this.config = config;
+        this.dataConfig = new YamlConfiguration();
         //Parse region config data
         ConfigurationSection regions = config.getConfigurationSection("regions");
         for (String key : regions.getKeys(false)) {
@@ -48,8 +51,8 @@ public class RegionManager {
         if (dataFile.exists()) {
             try {
                 //Load saved region data
-                config.load(dataFile);
-                ConfigurationSection saves = config.getConfigurationSection("saved-regions");
+                dataConfig.load(dataFile);
+                ConfigurationSection saves = dataConfig.getConfigurationSection("saved-regions");
                 if (saves != null) {
                     for (String key : saves.getKeys(false)) {
                         ConfigurationSection currentSave = saves.getConfigurationSection(key);
@@ -99,17 +102,20 @@ public class RegionManager {
     
     public void addRegion(Region region) {
         liveRegions.put(region.getLocation(), region);
-        Map<String, Object> currentRegion = new HashMap<String, Object>();
-        currentRegion.put("location", region.getLocation().getWorld().getName() + ":" + region.getLocation().getX()
+        String basePath = "saved-regions." + (dataConfig.getConfigurationSection("saved-regions").getKeys(false).size() + 1);
+        dataConfig.set(basePath + ".location", region.getLocation().getWorld().getName() + ":" + region.getLocation().getX()
                 + ":" + region.getLocation().getBlockY() + ":" + region.getLocation().getZ());
-        currentRegion.put("type", region.getType());
-        currentRegion.put("owners", region.getOwners());
-        currentRegion.put("members", new ArrayList<String>());
-        String path = "saved-regions." + (config.getConfigurationSection("saved-regions").getKeys(false).size() + 1);
-        System.out.println(path);
-        config.set(path, currentRegion);
+        //currentRegion.put("location", region.getLocation().getWorld().getName() + ":" + region.getLocation().getX()
+        //        + ":" + region.getLocation().getBlockY() + ":" + region.getLocation().getZ());
+        dataConfig.set(basePath + ".type", region.getType());
+        //currentRegion.put("type", region.getType());
+        dataConfig.set(basePath + ".owners", region.getOwners());
+        //currentRegion.put("owners", region.getOwners());
+        dataConfig.set(basePath + ".members", new ArrayList<String>());
+        //currentRegion.put("members", new ArrayList<String>());
         try {
-            config.save("data.yml");
+            File dataFile = new File(plugin.getDataFolder(), "data.yml");
+            dataConfig.save(dataFile);
         } catch (IOException ioe) {
             System.out.println("[HeroStronghold] unable to write new region to file data.yml");
             ioe.printStackTrace();
