@@ -8,8 +8,10 @@ import org.bukkit.Server;
  */
 public class CheckRegionTask implements Runnable {
     private final transient Server server;
-    public CheckRegionTask(Server server) {
+    private final boolean exploding;
+    public CheckRegionTask(Server server, boolean exploding) {
         this.server = server;
+        this.exploding = exploding;
     }
 
     @Override

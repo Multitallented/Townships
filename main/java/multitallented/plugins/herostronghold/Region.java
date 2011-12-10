@@ -27,4 +27,8 @@ public class Region {
     public String getType() {
         return type;
     }
+    
+    public ArrayList<String> getOwners() {
+        return owners;
+    }
 }

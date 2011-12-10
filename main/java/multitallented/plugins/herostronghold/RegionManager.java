@@ -22,9 +22,11 @@ public class RegionManager {
     private Map<Location, Region> liveRegions = new HashMap<Location, Region>();
     private Map<String, RegionType> regionTypes = new HashMap<String, RegionType>();
     private HeroStronghold plugin;
+    private final FileConfiguration config;
     
     public RegionManager(HeroStronghold plugin, FileConfiguration config) {
         this.plugin = plugin;
+        this.config = config;
         //Parse region config data
         ConfigurationSection regions = config.getConfigurationSection("regions");
         for (String key : regions.getKeys(false)) {
@@ -41,18 +43,6 @@ public class RegionManager {
                     currentRegion.getDouble("upkeep-chance"),
                     currentRegion.getDouble("money-requirement"),
                     currentRegion.getDouble("upkeep-money-output")));
-            System.out.println(key + ":" +
-                    (ArrayList<String>) currentRegion.getStringList("friendly-classes") + ":" +
-                    (ArrayList<String>) currentRegion.getStringList("enemy-classes") + ":" +
-                    (ArrayList<String>) currentRegion.getStringList("effects") + ":" +
-                    currentRegion.getInt("radius") + ":" +
-                    processItemStackList(currentRegion.getStringList("requirements")) + ":" +
-                    processItemStackList(currentRegion.getStringList("reagents")) + ":" +
-                    processItemStackList(currentRegion.getStringList("upkeep")) + ":" +
-                    processItemStackList(currentRegion.getStringList("output")) +":" +
-                    currentRegion.getDouble("upkeep-chance") + ":" +
-                    currentRegion.getDouble("money-requirement") +":" +
-                    currentRegion.getDouble("upkeep-money-output"));
         }
         File dataFile = new File(plugin.getDataFolder(), "data.yml");
         if (dataFile.exists()) {
@@ -108,7 +98,22 @@ public class RegionManager {
     }
     
     public void addRegion(Region region) {
-        
+        liveRegions.put(region.getLocation(), region);
+        Map<String, Object> currentRegion = new HashMap<String, Object>();
+        currentRegion.put("location", region.getLocation().getWorld().getName() + ":" + region.getLocation().getX()
+                + ":" + region.getLocation().getBlockY() + ":" + region.getLocation().getZ());
+        currentRegion.put("type", region.getType());
+        currentRegion.put("owners", region.getOwners());
+        currentRegion.put("members", new ArrayList<String>());
+        String path = "saved-regions." + (config.getConfigurationSection("saved-regions").getKeys(false).size() + 1);
+        System.out.println(path);
+        config.set(path, currentRegion);
+        try {
+            config.save("data.yml");
+        } catch (IOException ioe) {
+            System.out.println("[HeroStronghold] unable to write new region to file data.yml");
+            ioe.printStackTrace();
+        }
     }
     
     public Set<String> getRegionTypes() {
@@ -130,5 +135,9 @@ public class RegionManager {
     public boolean reloadConfig() {
         //TODO make the reload functionality
         return false;
+    }
+    
+    public boolean getExplodingRegions() {
+        return config.getBoolean("explode-on-destroy");
     }
 }

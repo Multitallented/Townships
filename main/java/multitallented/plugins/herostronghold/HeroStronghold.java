@@ -5,12 +5,13 @@ package main.java.multitallented.plugins.herostronghold;
  */
 import com.herocraftonline.dev.heroes.Heroes;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.logging.Logger;
 import main.java.multitallented.plugins.herostronghold.listeners.*;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.BlockState;
+import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -65,7 +66,7 @@ public class HeroStronghold extends JavaPlugin {
         }
         
         //Setup repeating sync task for checking regions
-        //CheckRegionTask theSender = new CheckRegionTask(getServer());
+        //CheckRegionTask theSender = new CheckRegionTask(getServer(), regionManager.getExplodingRegions());
         //long someInterval = 6000L;
         //getServer().getScheduler().scheduleSyncRepeatingTask(this, theSender, someInterval, someInterval);
         
@@ -75,11 +76,17 @@ public class HeroStronghold extends JavaPlugin {
     @Override
     public boolean onCommand(CommandSender sender, org.bukkit.command.Command command, String label, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage(ChatColor.GRAY + "[HeroStronghold]" + ChatColor.WHITE + " doesn't recognize non-player commands.");
+            sender.sendMessage("[HeroStronghold] doesn't recognize non-player commands.");
             return true;
         }
         Player player = (Player) sender;
-        System.out.println("[HeroStronghold] " + player.getDisplayName() + ": " + label);
+        
+        //TODO handle /herostrong
+        
+        //TODO handle /herostrong help
+        
+        //TODO handle /herostrong list
+        
         if (args.length > 1 && args[0].equalsIgnoreCase("create")) {
             String regionName = args[1];
             //Permission Check
@@ -92,8 +99,8 @@ public class HeroStronghold extends JavaPlugin {
             
             Location currentLocation = player.getLocation();
             //Check if player is standing someplace where a chest can be placed.
-            BlockState currentBlockState = currentLocation.getBlock().getState();
-            if (currentBlockState.getTypeId() != 0) {
+            Block currentBlock = currentLocation.getBlock();
+            if (currentBlock.getTypeId() != 0) {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] please stand someplace where a chest can be placed.");
                 return true;
             }
@@ -115,10 +122,11 @@ public class HeroStronghold extends JavaPlugin {
             outer: for (int x=((int) currentLocation.getX()-radius); x<Math.abs(radius + currentLocation.getY()); x++) {
                 for (int y = currentLocation.getY()- radius > -128 ? ((int) currentLocation.getY() - radius) : -128; y< Math.abs((radius) + currentLocation.getY()) && (y + currentLocation.getY() < 128); y++) {
                     for (int z = ((int) currentLocation.getZ() - radius); z<Math.abs(radius + currentLocation.getZ()); z++) {
-                        for (ItemStack is : requirements) {
+                        for (Iterator<ItemStack> iter = requirements.iterator(); iter.hasNext(); ) {
+                            ItemStack is = iter.next();
                             if (currentLocation.getWorld().getBlockAt(x, y, z).getType().equals(is.getType())) {
                                 if (is.getAmount() == 1) {
-                                    requirements.remove(is);
+                                    iter.remove();
                                     if (requirements.isEmpty())
                                         break outer;
                                 } else {
@@ -140,11 +148,13 @@ public class HeroStronghold extends JavaPlugin {
             }
             
             //Create chest at players feet for tracking reagents and removing upkeep items
-            currentBlockState.setType(Material.CHEST);
+            currentBlock.setType(Material.CHEST);
             
             ArrayList<String> owners = new ArrayList<String>();
             owners.add(player.getName());
             regionManager.addRegion(new Region(currentLocation, regionName, owners, new ArrayList<String>()));
+            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.WHITE + "You successfully create a " + ChatColor.RED + regionName);
+            return true;
         }
         
         /*if (args.length > 0 && args[0].equalsIgnoreCase("destroy")) {
