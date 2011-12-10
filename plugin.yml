@@ -3,7 +3,7 @@ database: false
 description: Allows you to create regions that can give buffs or debuffs to players
   with certain HeroClasses.
 generator: http://dinnerbone.com/minecraft/tools/pluginator/
-main: me.multitallented.plugins.herostronghold.HeroStronghold
+main: main.java.multitallented.plugins.herostronghold.HeroStronghold
 name: HeroStronghold
 startup: postworld
 version: '0.1'

@@ -19,6 +19,7 @@ public class HeroStronghold extends JavaPlugin {
     private CommandListener commandHandler;
     private Logger log;
     protected FileConfiguration config;
+    private RegionManager regionManager;
     @Override
     public void onDisable() {
         log = Logger.getLogger("Minecraft");
@@ -31,6 +32,9 @@ public class HeroStronghold extends JavaPlugin {
         config = getConfig();
         config.options().copyDefaults(true);
         saveConfig();
+        
+        //Setup RegionManager
+        regionManager = new RegionManager(this, config);
         
         
         //Register Listeners Here
@@ -53,6 +57,8 @@ public class HeroStronghold extends JavaPlugin {
         }
         
         //Setup repeating thread for checking regions
+        //MessageSender theSender = new MessageSender(this);
+        //getServer().getScheduler().scheduleSyncRepeatingTask(this, theSender, someInterval, someInterval);
         
         log.info("[HeroStronghold] is now enabled!");
     }
@@ -66,5 +72,9 @@ public class HeroStronghold extends JavaPlugin {
         if (serverListener == null)
             return null;
         return serverListener.getHeroes();
+    }
+    
+    public void warning(String s) {
+        Logger.getLogger("Minecraft").info(s);
     }
 }

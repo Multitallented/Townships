@@ -14,7 +14,7 @@ regions:
         - regenmanadebuff.1
         radius: 10 #Size of the region
         requirements: #Blocks that need to exist within the radius in order to construct the region
-        - ENCHANTING_TABLE.1
+        - ENCHANTMENT_TABLE.1
         - BOOKSHELF.12
         - OBSIDIAN.9
         - PUMPKIN.4
@@ -25,4 +25,5 @@ regions:
         upkeep-chance: 0.01 #chance that upkeep will happen when the region is in use
         output: #Items it will put in the chest during upkeep
         - DIRT.1
-        money: 5000.00 #money required to create the region
+        money-requirement: 5000.0 #money required to create the region
+        upkeep-money-output: 5.00 #money given or taken away if negative during upkeep
