@@ -1,6 +1,5 @@
 regions:
     magetower:
-        name: Mage Tower
         friendly-classes: #Classes that will gain buffs while in the region
         - Mystic
         - Tempest

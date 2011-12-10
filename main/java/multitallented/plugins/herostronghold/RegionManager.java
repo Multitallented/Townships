@@ -1,10 +1,14 @@
 package main.java.multitallented.plugins.herostronghold;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.ItemStack;
@@ -14,7 +18,8 @@ import org.bukkit.inventory.ItemStack;
  * @author Multitallented
  */
 public class RegionManager {
-    private Map<String, Region> regionMap = new HashMap<String, Region>();
+    private Map<Location, Region> liveRegions = new HashMap<Location, Region>();
+    private Map<String, RegionType> regionTypes = new HashMap<String, RegionType>();
     private HeroStronghold plugin;
     
     public RegionManager(HeroStronghold plugin, FileConfiguration config) {
@@ -23,7 +28,7 @@ public class RegionManager {
         ConfigurationSection regions = config.getConfigurationSection("regions");
         for (String key : regions.getKeys(false)) {
             ConfigurationSection currentRegion = regions.getConfigurationSection(key);
-            regionMap.put(currentRegion.getString("name"), new Region(currentRegion.getString("name"),
+            regionTypes.put(key, new RegionType(key,
                     (ArrayList<String>) currentRegion.getStringList("friendly-classes"),
                     (ArrayList<String>) currentRegion.getStringList("enemy-classes"),
                     (ArrayList<String>) currentRegion.getStringList("effects"),
@@ -36,7 +41,43 @@ public class RegionManager {
                     currentRegion.getDouble("moneyRequirement"),
                     currentRegion.getDouble("moneyOutput")));
         }
-        
+        File dataFile = new File(plugin.getDataFolder(), "data.yml");
+        if (dataFile.exists()) {
+            try {
+                //Load saved region data
+                config.load(dataFile);
+                ConfigurationSection saves = config.getConfigurationSection("saved-regions");
+                if (saves != null) {
+                    for (String key : saves.getKeys(false)) {
+                        ConfigurationSection currentSave = saves.getConfigurationSection(key);
+                        String name = currentSave.getString("name");
+                        String locationString = currentSave.getString("location");
+                        Location location = null;
+                        if (locationString != null) {
+                            String[] params = locationString.split(":");
+                            World world  = plugin.getServer().getWorld(params[0]);
+                            location = new Location(world, Double.parseDouble(params[1]),Double.parseDouble(params[2]),Double.parseDouble(params[3]));
+                        }
+                        String type = regionTypes.containsKey(currentSave.getString("type")) ? currentSave.getString("type") : null;
+                        ArrayList<String> owners = (ArrayList<String>) currentSave.getStringList("owners");
+                        ArrayList<String> members = (ArrayList<String>) currentSave.getStringList("members");
+                        if (name != null && location != null && type != null && owners != null && members != null) {
+                            liveRegions.put(location, new Region(name, location, type, owners, members));
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                System.out.println("[HeroStronghold] failed to load data.yml");
+                System.out.println(e.getStackTrace());
+            }
+        } else {
+            //Create new file for it
+            try {
+                dataFile.createNewFile();
+            } catch (IOException ioe) {
+                System.out.println("[HeroStronghold] failed to create a new data file");
+            }
+        }
         
     }
     

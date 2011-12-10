@@ -1,7 +1,7 @@
 package main.java.multitallented.plugins.herostronghold;
 
 import java.util.ArrayList;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.Location;
 
 /**
  *
@@ -9,43 +9,35 @@ import org.bukkit.inventory.ItemStack;
  */
 public class Region {
     private String name;
-    ArrayList<String> friendlyClasses = null;
-    ArrayList<String> enemyClasses = null;
-    ArrayList<String> effects = null;
-    int radius = 0;
-    ArrayList<ItemStack> requirements = null;
-    ArrayList<ItemStack> reagents = null;
-    ArrayList<ItemStack> upkeep = null;
-    ArrayList<ItemStack> output = null;
-    double upkeepChance = 0;
-    double moneyRequirement = 0;
-    double moneyOutput = 0;
+    private Location loc;
+    private String type;
+    private ArrayList<String> owners;
+    private ArrayList<String> members;
     
-    
-    public Region(String name, ArrayList<String> friendlyClasses,
-            ArrayList<String> enemyClasses, ArrayList<String> effects,
-            int radius, ArrayList<ItemStack> requirements,
-            ArrayList<ItemStack> reagents, ArrayList<ItemStack> upkeep,
-            ArrayList<ItemStack> output, double upkeepChance,
-            double moneyRequirement, double moneyOutput) {
+    public Region(String name, Location loc, String type, ArrayList<String> owners, ArrayList<String> members) {
         this.name = name;
-        this.friendlyClasses = friendlyClasses;
-        this.enemyClasses = enemyClasses;
-        this.effects = effects;
-        this.radius = radius;
-        this.requirements = requirements;
-        this.reagents = reagents;
-        this.upkeep = upkeep;
-        this.output = output;
-        this.upkeepChance = upkeepChance;
-        this.moneyRequirement = moneyRequirement;
-        this.moneyOutput = moneyOutput;
+        this.loc = loc;
+        this.type = type;
+        this.owners = owners;
+        this.members = members;
     }
-    
     
     public String getName() {
         return name;
     }
     
-    //TODO write more methods here for retrieving info
+    public Location getLocation() {
+        return loc;
+    }
+    
+    public String getType() {
+        return type;
+    }
+    public boolean ownersContains(String name) {
+        return owners.contains(name);
+    }
+     
+    public boolean membersContains(String name) {
+        return members.contains(name);
+    }
 }
