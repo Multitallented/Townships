@@ -70,11 +70,11 @@ public class HeroStronghold extends JavaPlugin {
             log.info("[HeroStronghold] didnt find Heroes, waiting for Heroes to be enabled.");
         }
         
-        EffectManager effectManager = new EffectManager();
+        EffectManager effectManager = new EffectManager(this);
         
         //Setup repeating sync task for checking regions
-        CheckRegionTask theSender = new CheckRegionTask(getServer(), effectManager, regionManager);
-        getServer().getScheduler().scheduleSyncRepeatingTask(this, theSender, 40L, 20L);
+        CheckRegionTask theSender = new CheckRegionTask(getServer(), regionManager);
+        getServer().getScheduler().scheduleSyncRepeatingTask(this, theSender, 40L, 40L);
         
         log.info("[HeroStronghold] is now enabled!");
     }

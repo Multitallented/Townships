@@ -12,11 +12,9 @@ import org.bukkit.entity.Player;
 public class CheckRegionTask implements Runnable {
     private final transient Server server;
     private final RegionManager regionManager;
-    private final EffectManager effectManager;
-    public CheckRegionTask(Server server, EffectManager effectManager, RegionManager regionManager) {
+    public CheckRegionTask(Server server, RegionManager regionManager) {
         this.server = server;
         this.regionManager = regionManager;
-        this.effectManager = effectManager;
     }
 
     @Override
@@ -31,11 +29,14 @@ public class CheckRegionTask implements Runnable {
             for (Player p : server.getOnlinePlayers()) {
                 Location loc = p.getLocation();
                 if (Math.sqrt(loc.distanceSquared(l)) < radius) {
-                    //TODO execute effects
+                    server.getPluginManager().callEvent(new PlayerInRegionEvent(currentRegion.getID()));
                 }
             }
             
-            //TODO check for upkeep
+            //Check for upkeep
+            if (Math.random() < currentRegionType.getUpkeepChance()) {
+                server.getPluginManager().callEvent(new UpkeepEvent(currentRegion.getID()));
+            }
         }
     }
 }

@@ -31,7 +31,6 @@ public class RegionBlockListener extends BlockListener {
         Location loc = event.getBlock().getLocation();
         for (Location currentLoc : regionManager.getRegionLocations()) {
             if (currentLoc.getBlock().equals(loc.getBlock())) {
-                //TODO check for deny build
                 regionManager.destroyRegion(currentLoc);
                 return;
             }
@@ -39,7 +38,6 @@ public class RegionBlockListener extends BlockListener {
             RegionType currentRegionType = regionManager.getRegionType(currentRegion.getType());
             int radius = currentRegionType.getRadius();
             if (Math.sqrt(loc.distanceSquared(currentRegion.getLocation())) < radius) {
-                //TODO check for deny build
                 ArrayList<ItemStack> requirements = currentRegionType.getRequirements();
                 boolean correctionNeeded = true;
                 for (int x=((int) currentLoc.getX()-radius); x<Math.abs(radius + currentLoc.getX()); x++) {
@@ -55,13 +53,11 @@ public class RegionBlockListener extends BlockListener {
                                         } else if (is.getAmount() <= 1) {
                                             iter.remove();
                                             if (requirements.isEmpty()) {
-                                                System.out.println("not a necessity");
                                                 return;
                                             }
                                         } else {
                                             is.setAmount(is.getAmount() -1 );
                                         }
-                                        System.out.println(is.getType().name() + "." + is.getAmount());
                                         
                                     }
                                 }
@@ -69,12 +65,10 @@ public class RegionBlockListener extends BlockListener {
                         }
                     }
                     if (x + 1 >= Math.abs(radius + currentLoc.getX())) {
-                        System.out.println("pre-destroy-region");
                         regionManager.destroyRegion(currentLoc);
                         return;
                     }
                 }
-                System.out.println("failed-to-destroy");
             }
         }
     }

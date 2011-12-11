@@ -63,5 +63,9 @@ public class RegionType {
         return moneyRequirement;
     }
     
+    public double getUpkeepChance() {
+        return upkeepChance;
+    }
+    
     //TODO write more methods here for retrieving info
 }
