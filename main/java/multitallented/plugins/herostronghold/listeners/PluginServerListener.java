@@ -30,6 +30,8 @@ public class PluginServerListener extends ServerListener {
             String message = "[HeroStronghold] is disabling itself because " + name + " has been disabled!";
             log.info(message);
             plugin.getServer().getPluginManager().disablePlugin(plugin);
+        } else if (name.equals("iConomy") || name.equals("BOSEconomy") || name.equals("Essentials")) {
+            Heroes.econ = null;
         }
     }
 
@@ -40,6 +42,10 @@ public class PluginServerListener extends ServerListener {
         
         if (name.equals("Heroes")) {
             heroes = (Heroes) currentPlugin;
+        } else if (name.equals("iConomy") || name.equals("BOSEconomy") || name.equals("Essentials")) {
+            if (Heroes.econ == null) {
+                this.plugin.setupEconomy();
+            }
         }
     }
     

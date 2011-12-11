@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.logging.Logger;
 import main.java.multitallented.plugins.herostronghold.listeners.*;
+import net.milkbowl.vault.economy.Economy;
+import net.milkbowl.vault.permission.Permission;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -20,6 +22,7 @@ import org.bukkit.event.Event.Type;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class HeroStronghold extends JavaPlugin {
@@ -28,6 +31,9 @@ public class HeroStronghold extends JavaPlugin {
     protected FileConfiguration config;
     private RegionManager regionManager;
     private RegionBlockListener blockListener;
+    public static Economy econ;
+    private Permission perms;
+    
     @Override
     public void onDisable() {
         log = Logger.getLogger("Minecraft");
@@ -47,12 +53,11 @@ public class HeroStronghold extends JavaPlugin {
         
         //Register Listeners Here
         serverListener = new PluginServerListener(this);
-        blockListener = new RegionBlockListener(this);
+        blockListener = new RegionBlockListener(this, regionManager);
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvent(Type.BLOCK_BREAK, blockListener, Priority.Low, this);
         pm.registerEvent(Type.PLUGIN_ENABLE, serverListener, Priority.Low, this);
         pm.registerEvent(Type.PLUGIN_DISABLE, serverListener, Priority.Low, this);
-        
         log = Logger.getLogger("Minecraft");
         
         //Check for Heroes
@@ -65,10 +70,11 @@ public class HeroStronghold extends JavaPlugin {
             log.info("[HeroStronghold] didnt find Heroes, waiting for Heroes to be enabled.");
         }
         
+        EffectManager effectManager = new EffectManager();
+        
         //Setup repeating sync task for checking regions
-        //CheckRegionTask theSender = new CheckRegionTask(getServer(), regionManager.getExplodingRegions());
-        //long someInterval = 6000L;
-        //getServer().getScheduler().scheduleSyncRepeatingTask(this, theSender, someInterval, someInterval);
+        CheckRegionTask theSender = new CheckRegionTask(getServer(), effectManager, regionManager);
+        getServer().getScheduler().scheduleSyncRepeatingTask(this, theSender, 40L, 20L);
         
         log.info("[HeroStronghold] is now enabled!");
     }
@@ -94,8 +100,6 @@ public class HeroStronghold extends JavaPlugin {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] you dont have permission to create a " + regionName);
                 return true;
             }
-            //TODO check player money?
-            
             
             Location currentLocation = player.getLocation();
             //Check if player is standing someplace where a chest can be placed.
@@ -116,21 +120,43 @@ public class HeroStronghold extends JavaPlugin {
                 return true;
             }
             
+            //Check if player can afford to create this herostronghold
+            if (econ != null) {
+                double cost = currentRegionType.getMoneyRequirement();
+                if (econ.getBalance(player.getName()) < cost) {
+                    player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You need $" + cost + " to make this type of structure.");
+                    return true;
+                } else {
+                    econ.withdrawPlayer(player.getName(), cost);
+                }
+                
+            }
+            
+            //Check if too close to other HeroStrongholds
+            for (Location loc : regionManager.getRegionLocations()) {
+                if (loc.distanceSquared(currentLocation) <= 2 * regionManager.getRegionType(regionManager.getRegion(loc).getType()).getRadius()) {
+                    player.sendMessage (ChatColor.GRAY + "[HeroStronghold] You are too close to another HeroStronghold");
+                    return true;
+                }
+            }
+            
             int radius = currentRegionType.getRadius();
             ArrayList<ItemStack> requirements = (ArrayList<ItemStack>) currentRegionType.getRequirements().clone();
             //Check the area for required blocks
-            outer: for (int x=((int) currentLocation.getX()-radius); x<Math.abs(radius + currentLocation.getY()); x++) {
-                for (int y = currentLocation.getY()- radius > -128 ? ((int) currentLocation.getY() - radius) : -128; y< Math.abs((radius) + currentLocation.getY()) && (y + currentLocation.getY() < 128); y++) {
+            outer: for (int x=((int) currentLocation.getX()-radius); x<Math.abs(radius + currentLocation.getX()); x++) {
+                for (int y = currentLocation.getY()- radius > 0 ? ((int) currentLocation.getY() - radius) : 0; y< Math.abs((radius) + currentLocation.getY()) && (y + currentLocation.getY() < 128); y++) {
                     for (int z = ((int) currentLocation.getZ() - radius); z<Math.abs(radius + currentLocation.getZ()); z++) {
-                        for (Iterator<ItemStack> iter = requirements.iterator(); iter.hasNext(); ) {
-                            ItemStack is = iter.next();
-                            if (currentLocation.getWorld().getBlockAt(x, y, z).getType().equals(is.getType())) {
-                                if (is.getAmount() == 1) {
-                                    iter.remove();
-                                    if (requirements.isEmpty())
-                                        break outer;
-                                } else {
-                                    is.setAmount(is.getAmount() -1 );
+                        if (currentLocation.getWorld().getBlockAt(x, y, z).getTypeId() != 0) {
+                            for (Iterator<ItemStack> iter = requirements.iterator(); iter.hasNext(); ) {
+                                ItemStack is = iter.next();
+                                if (currentLocation.getWorld().getBlockAt(x, y, z).getType().equals(is.getType())) {
+                                    if (is.getAmount() == 1) {
+                                        iter.remove();
+                                        if (requirements.isEmpty())
+                                            break outer;
+                                    } else {
+                                        is.setAmount(is.getAmount() - 1);
+                                    }
                                 }
                             }
                         }
@@ -152,7 +178,7 @@ public class HeroStronghold extends JavaPlugin {
             
             ArrayList<String> owners = new ArrayList<String>();
             owners.add(player.getName());
-            regionManager.addRegion(new Region(currentLocation, regionName, owners, new ArrayList<String>()));
+            regionManager.addRegion(currentLocation, regionName, owners);
             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.WHITE + "You successfully create a " + ChatColor.RED + regionName);
             return true;
         }
@@ -206,6 +232,20 @@ public class HeroStronghold extends JavaPlugin {
         //TODO handle herostrong remove
         
         return false;
+    }
+    
+    public boolean setupEconomy() {        
+        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+        if (rsp != null) {
+            econ = rsp.getProvider();
+        }
+        return econ != null;
+    }
+    
+    public void setupPermissions() {
+        RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
+        if (rsp != null)
+            perms = rsp.getProvider();
     }
     
     public Heroes getHeroes() {

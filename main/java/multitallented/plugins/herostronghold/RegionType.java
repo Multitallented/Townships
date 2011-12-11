@@ -59,5 +59,9 @@ public class RegionType {
         return requirements;
     }
     
+    public double getMoneyRequirement() {
+        return moneyRequirement;
+    }
+    
     //TODO write more methods here for retrieving info
 }
