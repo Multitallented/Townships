@@ -16,6 +16,6 @@ permissions:
    create.*:
       description: Allows you to create a HeroStronghold of any type if you have the necessary materials
       default: op
-   admin.delete:
-      description: Allows you to use /herostrong delete to delete the herostronghold you are standing in
+   admin:
+      description: Lets you use admin commands
       default: op

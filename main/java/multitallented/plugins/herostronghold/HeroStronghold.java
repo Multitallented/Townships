@@ -9,6 +9,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 import main.java.multitallented.plugins.herostronghold.listeners.*;
 import net.milkbowl.vault.economy.Economy;
@@ -196,7 +197,7 @@ public class HeroStronghold extends JavaPlugin {
             for (Location l : regionManager.getRegionLocations()) {
                 Region r = regionManager.getRegion(l);
                 if (Math.sqrt(l.distanceSquared(loc)) < regionManager.getRegionType(r.getType()).getRadius()) {
-                    if (r.isOwner(player.getName())) {
+                    if (r.isOwner(player.getName()) || player.hasPermission("herostronghold.admin")) {
                         if (r.isOwner(playername)) {
                             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + playername + " is already an owner of this region.");
                             return true;
@@ -220,7 +221,7 @@ public class HeroStronghold extends JavaPlugin {
             for (Location l : regionManager.getRegionLocations()) {
                 Region r = regionManager.getRegion(l);
                 if (Math.sqrt(l.distanceSquared(loc)) < regionManager.getRegionType(r.getType()).getRadius()) {
-                    if (r.isOwner(player.getName())) {
+                    if (r.isOwner(player.getName()) || player.hasPermission("herostronghold.admin")) {
                         if (r.isMember(playername)) {
                             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + playername + " is already a member of this region.");
                             return true;
@@ -244,7 +245,7 @@ public class HeroStronghold extends JavaPlugin {
             for (Location l : regionManager.getRegionLocations()) {
                 Region r = regionManager.getRegion(l);
                 if (Math.sqrt(l.distanceSquared(loc)) < regionManager.getRegionType(r.getType()).getRadius()) {
-                    if (r.isOwner(player.getName())) {
+                    if (r.isOwner(player.getName()) || player.hasPermission("herostronghold.admin")) {
                         if (!r.isMember(playername) || !r.isOwner(playername)) {
                             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + playername + " doesn't belong to this region");
                             return true;
@@ -252,6 +253,26 @@ public class HeroStronghold extends JavaPlugin {
                         r.remove(playername);
                         player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.WHITE + "Removed " + playername + " from the region.");
                         return true;
+                    } else {
+                        player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You don't own this region.");
+                        return true;
+                    }
+                }
+            }
+            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You're not standing in a region.");
+            return true;
+        } else if (args.length > 0 && args[0].equalsIgnoreCase("destroy")) {
+            Location loc = player.getLocation();
+            Set<Location> locations = regionManager.getRegionLocations();
+            for (Iterator<Location> iter = locations.iterator(); iter.hasNext();) {
+                Location l = iter.next();
+                Region r = regionManager.getRegion(l);
+                if (Math.sqrt(l.distanceSquared(loc)) < regionManager.getRegionType(r.getType()).getRadius()) {
+                    if (r.isOwner(player.getName()) || player.hasPermission("herostronghold.admin")) {
+                        
+                        regionManager.destroyRegion(l);
+                        iter.remove();
+                        
                     } else {
                         player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You don't own this region.");
                         return true;
