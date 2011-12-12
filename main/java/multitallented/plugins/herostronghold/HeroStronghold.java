@@ -254,6 +254,10 @@ public class HeroStronghold extends JavaPlugin {
         return serverListener.getHeroes();
     }
     
+    public RegionManager getRegionManager() {
+        return regionManager;
+    }
+    
     public void warning(String s) {
         Logger.getLogger("Minecraft").info(s);
     }

@@ -75,7 +75,7 @@ public class EffectManager {
             String mainClass = null;
             while (entries.hasMoreElements()) {
                 JarEntry element = entries.nextElement();
-                if (element.getName().equalsIgnoreCase("skill.info")) {
+                if (element.getName().equalsIgnoreCase("effect.info")) {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(jarFile.getInputStream(element)));
                     mainClass = reader.readLine().substring(12);
                     break;
@@ -94,7 +94,7 @@ public class EffectManager {
             } else
                 throw new Exception();
         } catch (Exception e) {
-            plugin.warning("The skill " + file.getName() + " failed to load");
+            plugin.warning("The effect " + file.getName() + " failed to load");
             e.printStackTrace();
             return null;
         }

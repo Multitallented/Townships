@@ -37,4 +37,9 @@ public class Region {
     public ArrayList<String> getOwners() {
         return owners;
     }
+    
+    public ArrayList<String> getMembers() {
+        return members;
+    }
 }
+

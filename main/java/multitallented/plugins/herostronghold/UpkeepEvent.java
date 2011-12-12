@@ -1,5 +1,6 @@
 package main.java.multitallented.plugins.herostronghold;
 
+import org.bukkit.Location;
 import org.bukkit.event.Event;
 
 /**
@@ -7,14 +8,14 @@ import org.bukkit.event.Event;
  * @author Multitallented
  */
 public class UpkeepEvent extends Event {
-    private final int regionID;
-    public UpkeepEvent(int regionID) {
+    private final Location loc;
+    public UpkeepEvent(Location loc) {
         super(Type.CUSTOM_EVENT);
         
-        this.regionID = regionID;
+        this.loc = loc;
     }
     
-    public int getRegionID() {
-        return regionID;
+    public Location getRegionLocation() {
+        return loc;
     }
 }

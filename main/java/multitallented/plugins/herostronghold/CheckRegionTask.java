@@ -29,13 +29,13 @@ public class CheckRegionTask implements Runnable {
             for (Player p : server.getOnlinePlayers()) {
                 Location loc = p.getLocation();
                 if (Math.sqrt(loc.distanceSquared(l)) < radius) {
-                    server.getPluginManager().callEvent(new PlayerInRegionEvent(currentRegion.getID()));
+                    server.getPluginManager().callEvent(new PlayerInRegionEvent(currentRegion.getLocation(), p, currentRegionType.getEffects()));
                 }
             }
             
             //Check for upkeep
             if (Math.random() < currentRegionType.getUpkeepChance()) {
-                server.getPluginManager().callEvent(new UpkeepEvent(currentRegion.getID()));
+                server.getPluginManager().callEvent(new UpkeepEvent(currentRegion.getLocation()));
             }
         }
     }

@@ -67,5 +67,9 @@ public class RegionType {
         return upkeepChance;
     }
     
+    public ArrayList<String> getEffects() {
+        return effects;
+    }
+    
     //TODO write more methods here for retrieving info
 }
