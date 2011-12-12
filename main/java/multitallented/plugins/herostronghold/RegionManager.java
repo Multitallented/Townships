@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -32,7 +34,6 @@ public class RegionManager {
     public RegionManager(HeroStronghold plugin, FileConfiguration config) {
         this.plugin = plugin;
         this.config = config;
-        this.dataConfig = new YamlConfiguration();
         //Parse region config data
         ConfigurationSection regions = config.getConfigurationSection("regions");
         for (String key : regions.getKeys(false)) {
@@ -50,47 +51,34 @@ public class RegionManager {
                     currentRegion.getDouble("money-requirement"),
                     currentRegion.getDouble("upkeep-money-output")));
         }
-        File dataFile = new File(plugin.getDataFolder(), "data.yml");
-        if (dataFile.exists()) {
+        int i = 0;
+        File dataFile = new File(plugin.getDataFolder() + "/data", i + ".yml");
+        while (dataFile.exists()) {
             try {
                 //Load saved region data
+                dataConfig = new YamlConfiguration();
                 dataConfig.load(dataFile);
-                ConfigurationSection saves = dataConfig.getConfigurationSection("saved-regions");
-                if (saves != null) {
-                    for (String key : saves.getKeys(false)) {
-                        ConfigurationSection currentSave = saves.getConfigurationSection(key);
-                        String locationString = currentSave.getString("location");
-                        if (locationString != null) {
-                            int id = Integer.parseInt(key.replace("saved-regions.", ""));
-                            Location location = null;
-                            if (locationString != null) {
-                                String[] params = locationString.split(":");
-                                World world  = plugin.getServer().getWorld(params[0]);
-                                location = new Location(world, Double.parseDouble(params[1]),Double.parseDouble(params[2]),Double.parseDouble(params[3]));
-                            }
-                            String type = regionTypes.containsKey(currentSave.getString("type")) ? currentSave.getString("type") : null;
-                            ArrayList<String> owners = (ArrayList<String>) currentSave.getStringList("owners");
-                            ArrayList<String> members = (ArrayList<String>) currentSave.getStringList("members");
-                            if (location != null && type != null && owners != null && members != null) {
-                                liveRegions.put(location, new Region(id, location, type, owners, members));
-                            }
-                        }
+                String locationString = dataConfig.getString("location");
+                if (locationString != null) {
+                    Location location = null;
+                    if (locationString != null) {
+                        String[] params = locationString.split(":");
+                        World world  = plugin.getServer().getWorld(params[0]);
+                        location = new Location(world, Double.parseDouble(params[1]),Double.parseDouble(params[2]),Double.parseDouble(params[3]));
+                    }
+                    String type = regionTypes.containsKey(dataConfig.getString("type")) ? dataConfig.getString("type") : null;
+                    ArrayList<String> owners = (ArrayList<String>) dataConfig.getStringList("owners");
+                    ArrayList<String> members = (ArrayList<String>) dataConfig.getStringList("members");
+                    if (location != null && type != null && owners != null && members != null) {
+                        liveRegions.put(location, new Region(i, location, type, owners, members));
                     }
                 }
             } catch (Exception e) {
-                System.out.println("[HeroStronghold] failed to load data.yml");
+                System.out.println("[HeroStronghold] failed to load data from " + i + ".yml");
                 System.out.println(e.getStackTrace());
             }
-        } else {
-            //Create new file for it
-            try {
-                dataFile.createNewFile();
-                dataConfig.load(dataFile);
-            } catch (IOException ioe) {
-                System.out.println("[HeroStronghold] failed to create a new data file");
-            } catch (Exception e) {
-                System.out.println("[HeroStronghold] failed to load the data file");
-            }
+            i++;
+            dataFile = new File(plugin.getDataFolder() + "/data", i + ".yml");
         }
         
     }
@@ -109,32 +97,42 @@ public class RegionManager {
     }
     
     public void addRegion(Location loc, String type, ArrayList<String> owners) {
-        String basePath = "saved-regions." + (dataConfig.getConfigurationSection("saved-regions").getKeys(false).size() + 1);
-        liveRegions.put(loc, new Region(dataConfig.getConfigurationSection("saved-regions").getKeys(false).size(),
-                loc, type, owners, new ArrayList<String>()));
-        dataConfig.set(basePath + ".location", loc.getWorld().getName() + ":" + loc.getX()
-                + ":" + loc.getBlockY() + ":" + loc.getZ());
-        dataConfig.set(basePath + ".type", type);
-        dataConfig.set(basePath + ".owners", owners);
-        dataConfig.set(basePath + ".members", new ArrayList<String>());
+        int i = 0;
+        File dataFile = new File(plugin.getDataFolder() + "/data", i + ".yml");
+        while (dataFile.exists()) {
+            i++;
+            dataFile = new File(plugin.getDataFolder() + "/data", i + ".yml");
+        }
         try {
-            File dataFile = new File(plugin.getDataFolder(), "data.yml");
+            dataFile.createNewFile();
+            dataConfig = new YamlConfiguration();
+            System.out.println("[HeroStronghold] saving new region to " + i + ".yml");
+            //dataConfig.load(dataFile);
+            liveRegions.put(loc, new Region(i, loc, type, owners, new ArrayList<String>()));
+            dataConfig.set("location", loc.getWorld().getName() + ":" + loc.getX()
+                    + ":" + loc.getBlockY() + ":" + loc.getZ());
+            dataConfig.set("type", type);
+            dataConfig.set("owners", owners);
+            dataConfig.set("members", new ArrayList<String>());
             dataConfig.save(dataFile);
-        } catch (IOException ioe) {
-            System.out.println("[HeroStronghold] unable to write new region to file data.yml");
+        } catch (Exception ioe) {
+            System.out.println("[HeroStronghold] unable to write new region to file " + i + ".yml");
             ioe.printStackTrace();
         }
     }
     
     public void destroyRegion(Location l) {
         Region currentRegion = liveRegions.get(l);
-        liveRegions.remove(l);
-        dataConfig.createSection("saved-regions." + currentRegion.getID(), new HashMap<String, Object>());
-        try {
-        dataConfig.save(new File(plugin.getDataFolder(), "data.yml"));
-        } catch (IOException ioe) {
-            System.out.println("[HeroStronghold] unable to remove region " + currentRegion.getID() + " from file data.yml");
-            ioe.printStackTrace();
+        File dataFile = new File(plugin.getDataFolder() + "/data", currentRegion.getID() + ".yml");
+        if (!dataFile.exists()) {
+            System.out.println("[Herostronghold] Unable to destroy non-existent region " + currentRegion.getID() + ".yml");
+            return;
+        }
+        if (!dataFile.delete()) {
+            System.out.println("[Herostronghold] Unable to destroy non-existent region " + currentRegion.getID() + ".yml");
+            return;
+        } else {
+            System.out.println("[HeroStronghold] Successfully destroyed region " + currentRegion.getID() + ".yml");
         }
         boolean explode = config.getBoolean("explode-on-destroy");
         for (Player p : plugin.getServer().getOnlinePlayers()) {
@@ -150,6 +148,8 @@ public class RegionManager {
             if (l.getY()- 1 > 0) {
                 l.getBlock().getRelative(BlockFace.DOWN).setType(Material.REDSTONE_TORCH_ON);
             } 
+        } else {
+            l.getBlock().setTypeId(0);
         }
     }
     

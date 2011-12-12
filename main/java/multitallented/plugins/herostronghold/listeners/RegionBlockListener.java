@@ -18,10 +18,8 @@ import org.bukkit.inventory.ItemStack;
  * @author Multitallented
  */
 public class RegionBlockListener extends BlockListener {
-    private final HeroStronghold plugin;
     private final RegionManager regionManager;
-    public RegionBlockListener(HeroStronghold plugin, RegionManager regionManager) {
-        this.plugin = plugin;
+    public RegionBlockListener(RegionManager regionManager) {
         this.regionManager = regionManager;
     }
     
@@ -43,35 +41,33 @@ public class RegionBlockListener extends BlockListener {
             if (Math.sqrt(loc.distanceSquared(currentLoc)) < radius) {
                 
                 int amountRequired = 0;
-                System.out.println(currentRegionType.getRequirements().size());
+                int i = 0;
                 for (ItemStack currentStack : currentRegionType.getRequirements()) {
-                    System.out.println(currentStack.getType().name() + "." + currentStack.getAmount());
                     if (currentStack.getTypeId() == event.getBlock().getTypeId()) {
                         amountRequired = currentStack.getAmount();
                         break;
                     }
                 }
-                System.out.println(amountRequired);
                 if (amountRequired == 0)
                     return;
                 
-                amountRequired++;
                 for (int x= (int) (currentLoc.getX()-radius); x<radius + currentLoc.getX(); x++) {
                     for (int y = currentLoc.getY()- radius > 1 ? (int) (currentLoc.getY() - radius) : 1; y< radius + currentLoc.getY() && y < 128; y++) {
                         for (int z = (int) (currentLoc.getZ() - radius); z<radius + currentLoc.getZ(); z++) {
                             Block tempBlock = currentLoc.getWorld().getBlockAt(x, y, z);
                             if (tempBlock.getTypeId() == event.getBlock().getTypeId()) {
-                                if (amountRequired <= 1) {
+                                if (i >= amountRequired) {
                                     return;
                                 } else {
-                                    amountRequired--;
+                                    i++;
                                 }
-                                System.out.println(amountRequired);
                             }
                         }
                     }
                 }
                 regionManager.destroyRegion(currentLoc);
+                iter.remove();
+                return;
             }
         }
     }

@@ -5,7 +5,10 @@ package main.java.multitallented.plugins.herostronghold;
  */
 import com.herocraftonline.dev.heroes.Heroes;
 import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.logging.Logger;
 import main.java.multitallented.plugins.herostronghold.listeners.*;
 import net.milkbowl.vault.economy.Economy;
@@ -53,7 +56,7 @@ public class HeroStronghold extends JavaPlugin {
         
         //Register Listeners Here
         serverListener = new PluginServerListener(this);
-        blockListener = new RegionBlockListener(this, regionManager);
+        blockListener = new RegionBlockListener(regionManager);
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvent(Type.BLOCK_BREAK, blockListener, Priority.Low, this);
         pm.registerEvent(Type.PLUGIN_ENABLE, serverListener, Priority.Low, this);
@@ -70,7 +73,7 @@ public class HeroStronghold extends JavaPlugin {
             log.info("[HeroStronghold] didnt find Heroes, waiting for Heroes to be enabled.");
         }
         
-        EffectManager effectManager = new EffectManager(this);
+        new EffectManager(this);
         
         //Setup repeating sync task for checking regions
         CheckRegionTask theSender = new CheckRegionTask(getServer(), regionManager);
@@ -121,10 +124,8 @@ public class HeroStronghold extends JavaPlugin {
             }
             
             //Check if player can afford to create this herostronghold
-            System.out.println(econ != null);
             if (econ != null) {
                 double cost = currentRegionType.getMoneyRequirement();
-                System.out.println(player.getName() + ":" + cost + ":" + econ.getBalance(player.getName()));
                 if (econ.getBalance(player.getName()) < cost) {
                     player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You need $" + cost + " to make this type of structure.");
                     return true;
@@ -143,22 +144,26 @@ public class HeroStronghold extends JavaPlugin {
             }
             
             int radius = currentRegionType.getRadius();
-            ArrayList<ItemStack> requirements = (ArrayList<ItemStack>) currentRegionType.getRequirements().clone();
+            ArrayList<ItemStack> requirements = (ArrayList<ItemStack>) currentRegionType.getRequirements();
+            Map<Material, Integer> reqMap = new EnumMap<Material, Integer>(Material.class);
+            for (ItemStack currentIS : requirements) {
+                reqMap.put(currentIS.getType(), currentIS.getAmount());
+            }
             //Check the area for required blocks
             if (!requirements.isEmpty()) {
                 outer: for (int x= (int) (currentLocation.getX()-radius); x< radius + currentLocation.getX(); x++) {
                     for (int y = currentLocation.getY() - radius > 1 ? (int) (currentLocation.getY() - radius) : 1; y < radius + currentLocation.getY() && y < 128; y++) {
                         for (int z = ((int) currentLocation.getZ() - radius); z<Math.abs(radius + currentLocation.getZ()); z++) {
                             if (currentLocation.getWorld().getBlockAt(x, y, z).getTypeId() != 0) {
-                                for (Iterator<ItemStack> iter = requirements.iterator(); iter.hasNext(); ) {
-                                    ItemStack is = iter.next();
-                                    if (currentLocation.getWorld().getBlockAt(x, y, z).getType().equals(is.getType())) {
-                                        if (is.getAmount() == 1) {
-                                            iter.remove();
+                                for (Iterator<Material> iter = reqMap.keySet().iterator(); iter.hasNext(); ) {
+                                    Material mat = iter.next();
+                                    if (currentLocation.getWorld().getBlockAt(x, y, z).getType().equals(mat)) {
+                                        if (reqMap.get(mat) <= 1) {
+                                            reqMap.remove(mat);
                                             if (requirements.isEmpty())
                                                 break outer;
                                         } else {
-                                            is.setAmount(is.getAmount() - 1);
+                                            reqMap.put(mat, reqMap.get(mat) - 1);
                                         }
                                     }
                                 }
@@ -167,11 +172,11 @@ public class HeroStronghold extends JavaPlugin {
                     }
                 }
             }
-            if (!requirements.isEmpty()) {
+            if (!reqMap.isEmpty()) {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] you don't have all of the required blocks in this structure.");
                 String message = ChatColor.GRAY + "[HeroStronghold] ";
-                for (ItemStack is : requirements) {
-                    message += is.getType().name() + ", ";
+                for (Material mat : reqMap.keySet()) {
+                    message += reqMap.get(mat) + " " + mat.name() + ", ";
                 }
                 player.sendMessage(message.substring(0, message.length() - 2));
                 return true;
@@ -198,7 +203,6 @@ public class HeroStronghold extends JavaPlugin {
     
     public boolean setupEconomy() {
         RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
-        System.out.println(rsp != null);
         if (rsp != null) {
             econ = rsp.getProvider();
         }
