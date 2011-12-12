@@ -7,6 +7,7 @@ import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.event.server.ServerListener;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginManager;
 
 /**
  *
@@ -31,7 +32,7 @@ public class PluginServerListener extends ServerListener {
             log.info(message);
             plugin.getServer().getPluginManager().disablePlugin(plugin);
         } else if (name.equals("iConomy") || name.equals("BOSEconomy") || name.equals("Essentials")) {
-            Heroes.econ = null;
+            HeroStronghold.econ = null;
         }
     }
 
@@ -39,13 +40,17 @@ public class PluginServerListener extends ServerListener {
     public void onPluginEnable(PluginEnableEvent event) {
         Plugin currentPlugin = event.getPlugin();
         String name = currentPlugin.getDescription().getName();
+        PluginManager pm = this.plugin.getServer().getPluginManager();
         
         if (name.equals("Heroes")) {
             heroes = (Heroes) currentPlugin;
-        } else if (name.equals("iConomy") || name.equals("BOSEconomy") || name.equals("Essentials")) {
-            if (Heroes.econ == null) {
-                this.plugin.setupEconomy();
-            }
+        } else if (name.equals("Vault") && (pm.isPluginEnabled("iConomy") || pm.isPluginEnabled("BOSEconomy") || pm.isPluginEnabled("Essentials"))
+                && HeroStronghold.econ == null) {
+            this.plugin.setupEconomy();
+        } else if ((name.equals("iConomy") || name.equals("BOSEconomy") || name.equals("Essentials")) && pm.isPluginEnabled("Vault")
+                && HeroStronghold.econ == null) {
+            this.plugin.setupEconomy();
+            
         }
     }
     

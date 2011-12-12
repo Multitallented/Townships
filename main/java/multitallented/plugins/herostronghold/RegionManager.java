@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -14,6 +15,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -125,7 +127,6 @@ public class RegionManager {
     }
     
     public void destroyRegion(Location l) {
-        System.out.println("destroyRegion");
         Region currentRegion = liveRegions.get(l);
         liveRegions.remove(l);
         dataConfig.createSection("saved-regions." + currentRegion.getID(), new HashMap<String, Object>());
@@ -135,7 +136,16 @@ public class RegionManager {
             System.out.println("[HeroStronghold] unable to remove region " + currentRegion.getID() + " from file data.yml");
             ioe.printStackTrace();
         }
-        if (config.getBoolean("explode-on-destroy")) {
+        boolean explode = config.getBoolean("explode-on-destroy");
+        for (Player p : plugin.getServer().getOnlinePlayers()) {
+            if (Math.sqrt(p.getLocation().distanceSquared(l)) < 20) {
+                p.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.WHITE + currentRegion.getType() + " was disabled!");
+                if (explode) {
+                    p.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.RED + "look out it's going to explode!");
+                }
+            }
+        }
+        if (explode) {
             l.getBlock().setTypeId(46);
             if (l.getY()- 1 > 0) {
                 l.getBlock().getRelative(BlockFace.DOWN).setType(Material.REDSTONE_TORCH_ON);

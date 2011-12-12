@@ -121,8 +121,10 @@ public class HeroStronghold extends JavaPlugin {
             }
             
             //Check if player can afford to create this herostronghold
+            System.out.println(econ != null);
             if (econ != null) {
                 double cost = currentRegionType.getMoneyRequirement();
+                System.out.println(player.getName() + ":" + cost + ":" + econ.getBalance(player.getName()));
                 if (econ.getBalance(player.getName()) < cost) {
                     player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You need $" + cost + " to make this type of structure.");
                     return true;
@@ -143,19 +145,21 @@ public class HeroStronghold extends JavaPlugin {
             int radius = currentRegionType.getRadius();
             ArrayList<ItemStack> requirements = (ArrayList<ItemStack>) currentRegionType.getRequirements().clone();
             //Check the area for required blocks
-            outer: for (int x=((int) currentLocation.getX()-radius); x<Math.abs(radius + currentLocation.getX()); x++) {
-                for (int y = currentLocation.getY()- radius > 0 ? ((int) currentLocation.getY() - radius) : 0; y< Math.abs((radius) + currentLocation.getY()) && (y + currentLocation.getY() < 128); y++) {
-                    for (int z = ((int) currentLocation.getZ() - radius); z<Math.abs(radius + currentLocation.getZ()); z++) {
-                        if (currentLocation.getWorld().getBlockAt(x, y, z).getTypeId() != 0) {
-                            for (Iterator<ItemStack> iter = requirements.iterator(); iter.hasNext(); ) {
-                                ItemStack is = iter.next();
-                                if (currentLocation.getWorld().getBlockAt(x, y, z).getType().equals(is.getType())) {
-                                    if (is.getAmount() == 1) {
-                                        iter.remove();
-                                        if (requirements.isEmpty())
-                                            break outer;
-                                    } else {
-                                        is.setAmount(is.getAmount() - 1);
+            if (!requirements.isEmpty()) {
+                outer: for (int x= (int) (currentLocation.getX()-radius); x< radius + currentLocation.getX(); x++) {
+                    for (int y = currentLocation.getY() - radius > 1 ? (int) (currentLocation.getY() - radius) : 1; y < radius + currentLocation.getY() && y < 128; y++) {
+                        for (int z = ((int) currentLocation.getZ() - radius); z<Math.abs(radius + currentLocation.getZ()); z++) {
+                            if (currentLocation.getWorld().getBlockAt(x, y, z).getTypeId() != 0) {
+                                for (Iterator<ItemStack> iter = requirements.iterator(); iter.hasNext(); ) {
+                                    ItemStack is = iter.next();
+                                    if (currentLocation.getWorld().getBlockAt(x, y, z).getType().equals(is.getType())) {
+                                        if (is.getAmount() == 1) {
+                                            iter.remove();
+                                            if (requirements.isEmpty())
+                                                break outer;
+                                        } else {
+                                            is.setAmount(is.getAmount() - 1);
+                                        }
                                     }
                                 }
                             }
@@ -183,48 +187,6 @@ public class HeroStronghold extends JavaPlugin {
             return true;
         }
         
-        /*if (args.length > 0 && args[0].equalsIgnoreCase("destroy")) {
-            if (!player.hasPermission("herostronghold.destroy")) {
-                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] you don't have permission to destroy this structure");
-                return true;
-            }
-            Location currentLoc = player.getLocation();
-            Location location;
-            boolean destroy = false;
-            exit: for (Location loc : regionManager.getRegionLocations()) {
-                location = loc;
-                RegionType currentRegionType = regionManager.getRegionType(regionManager.getRegion(loc).getType());
-                int radius = currentRegionType.getRadius();
-                if (Math.sqrt(currentLoc.distanceSquared(loc)) < radius) {
-                    ArrayList<ItemStack> requirements = currentRegionType.getRequirements();
-                    for (int x=((int) currentLoc.getX()-radius); x<Math.abs(radius + currentLoc.getY()); x++) {
-                        for (int y = currentLoc.getY()- radius > -128 ? ((int) currentLoc.getY() - radius) : -128; y< Math.abs((radius) + currentLoc.getY()) && (y + currentLoc.getY() < 128); y++) {
-                            for (int z = ((int) currentLoc.getZ() - radius); z<Math.abs(radius + currentLoc.getZ()); z++) {
-                                for (ItemStack is : requirements) {
-                                    if (currentLoc.getWorld().getBlockAt(x, y, z).getType().equals(is.getType())) {
-                                        if (is.getAmount() == 1) {
-                                            requirements.remove(is);
-                                            if (requirements.isEmpty()) {
-                                                destroy = true;
-                                                break exit;
-                                            }
-                                        } else {
-                                            is.setAmount(is.getAmount() -1 );
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            
-            //Destroy the structure
-            
-            
-            //TODO handle herostrong destroy
-        }*/
-        
         //TODO handle herostrong addowner
         
         //TODO handle herostrong addmember
@@ -234,8 +196,9 @@ public class HeroStronghold extends JavaPlugin {
         return false;
     }
     
-    public boolean setupEconomy() {        
+    public boolean setupEconomy() {
         RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+        System.out.println(rsp != null);
         if (rsp != null) {
             econ = rsp.getProvider();
         }
