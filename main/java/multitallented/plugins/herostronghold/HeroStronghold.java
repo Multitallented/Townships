@@ -190,13 +190,77 @@ public class HeroStronghold extends JavaPlugin {
             regionManager.addRegion(currentLocation, regionName, owners);
             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.WHITE + "You successfully create a " + ChatColor.RED + regionName);
             return true;
+        } else if (args.length > 1 && args[0].equalsIgnoreCase("addowner")) {
+            String playername = args[1];
+            Location loc = player.getLocation();
+            for (Location l : regionManager.getRegionLocations()) {
+                Region r = regionManager.getRegion(l);
+                if (Math.sqrt(l.distanceSquared(loc)) < regionManager.getRegionType(r.getType()).getRadius()) {
+                    if (r.isOwner(player.getName())) {
+                        if (r.isOwner(playername)) {
+                            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + playername + " is already an owner of this region.");
+                            return true;
+                        }
+                        if (r.isMember(playername))
+                            r.remove(playername);
+                        r.addOwner(playername);
+                        player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.WHITE + "Added " + playername + " to the region.");
+                        return true;
+                    } else {
+                        player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You don't own this region.");
+                        return true;
+                    }
+                }
+            }
+            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You're not standing in a region.");
+            return true;
+        } else if (args.length > 1 && args[0].equalsIgnoreCase("addmember")) {
+            String playername = args[1];
+            Location loc = player.getLocation();
+            for (Location l : regionManager.getRegionLocations()) {
+                Region r = regionManager.getRegion(l);
+                if (Math.sqrt(l.distanceSquared(loc)) < regionManager.getRegionType(r.getType()).getRadius()) {
+                    if (r.isOwner(player.getName())) {
+                        if (r.isMember(playername)) {
+                            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + playername + " is already a member of this region.");
+                            return true;
+                        }
+                        if (r.isOwner(playername))
+                            r.remove(playername);
+                        r.addMember(playername);
+                        player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.WHITE + "Added " + playername + " to the region.");
+                        return true;
+                    } else {
+                        player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You don't own this region.");
+                        return true;
+                    }
+                }
+            }
+            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You're not standing in a region.");
+            return true;
+        } else if (args.length > 1 && args[0].equalsIgnoreCase("remove")) {
+            String playername = args[1];
+            Location loc = player.getLocation();
+            for (Location l : regionManager.getRegionLocations()) {
+                Region r = regionManager.getRegion(l);
+                if (Math.sqrt(l.distanceSquared(loc)) < regionManager.getRegionType(r.getType()).getRadius()) {
+                    if (r.isOwner(player.getName())) {
+                        if (!r.isMember(playername) || !r.isOwner(playername)) {
+                            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + playername + " doesn't belong to this region");
+                            return true;
+                        }
+                        r.remove(playername);
+                        player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.WHITE + "Removed " + playername + " from the region.");
+                        return true;
+                    } else {
+                        player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You don't own this region.");
+                        return true;
+                    }
+                }
+            }
+            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You're not standing in a region.");
+            return true;
         }
-        
-        //TODO handle herostrong addowner
-        
-        //TODO handle herostrong addmember
-        
-        //TODO handle herostrong remove
         
         return false;
     }
