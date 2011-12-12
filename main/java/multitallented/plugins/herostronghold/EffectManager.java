@@ -19,7 +19,9 @@ import java.util.jar.JarFile;
 /**
  *
  * @author Multitallented
- * This code was mostly borrowed from the Heroes dev team with permission (Kainzo, Sleaker, DThielke, Rigby, RightLegRed) Thanks Kainzo ^_^
+ * This code was mostly borrowed from the Heroes dev team with
+ * permission (Kainzo, Sleaker, DThielke, Rigby, RightLegRed, Multitallented) Thanks Kainzo ^_^
+ * I am part of the Herocraft Coding Team
  */
 public class EffectManager {
     private final LinkedHashMap<String, Effect> effects;
@@ -87,8 +89,8 @@ public class EffectManager {
                 for (Class<?> subclazz : clazz.getClasses()) {
                     Class.forName(subclazz.getName(), true, classLoader);
                 }
-                Class<? extends Effect> skillClass = clazz.asSubclass(Effect.class);
-                Constructor<? extends Effect> ctor = skillClass.getConstructor(plugin.getClass());
+                Class<? extends Effect> effectClass = clazz.asSubclass(Effect.class);
+                Constructor<? extends Effect> ctor = effectClass.getConstructor(plugin.getClass());
                 Effect effect = ctor.newInstance(plugin);
                 return effect;
             } else

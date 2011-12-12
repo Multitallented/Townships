@@ -10,7 +10,7 @@ import org.bukkit.event.Event;
 public class UpkeepEvent extends Event {
     private final Location loc;
     public UpkeepEvent(Location loc) {
-        super(Type.CUSTOM_EVENT);
+        super("UpkeepEvent");
         
         this.loc = loc;
     }

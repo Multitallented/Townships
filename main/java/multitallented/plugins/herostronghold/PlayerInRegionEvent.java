@@ -15,7 +15,7 @@ public class PlayerInRegionEvent extends Event {
     private final ArrayList<String> effects;
 
     public PlayerInRegionEvent(Location loc, Player player, ArrayList<String> effects) {
-        super(Type.CUSTOM_EVENT);
+        super("PlayerInRegionEvent");
         this.loc = loc;
         this.player = player;
         this.effects = effects;

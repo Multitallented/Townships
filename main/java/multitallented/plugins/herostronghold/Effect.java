@@ -11,17 +11,11 @@ import org.bukkit.event.Listener;
  *
  * @author Multitallented
  */
-public abstract class Effect {
-    private final HeroStronghold plugin;
-    private final String name;
+public class Effect {
+    private HeroStronghold plugin;
     
-    public Effect(HeroStronghold plugin, String name) {
+    public Effect(HeroStronghold plugin) {
         this.plugin = plugin;
-        this.name = name;
-    }
-    
-    public String getName() {
-        return name;
     }
     
     public HeroStronghold getPlugin() {
@@ -53,5 +47,7 @@ public abstract class Effect {
         return getPlugin().getRegionManager().getRegion(l).getMembers().contains(p.getName());
     }
     
-    public abstract void init();
+    public void init(HeroStronghold plugin) {
+        this.plugin = plugin;
+    }
 }
