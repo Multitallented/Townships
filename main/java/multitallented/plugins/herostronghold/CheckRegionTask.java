@@ -36,7 +36,6 @@ public class CheckRegionTask implements Runnable {
             //Check for upkeep
             if (Math.random() < currentRegionType.getUpkeepChance()) {
                 //Dispatch event to be caught by effects of the region
-                System.out.println(currentRegion.getType() + ": upkeep");
                 server.getPluginManager().callEvent(new UpkeepEvent(l));
             }
         }

@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.event.Event.Type;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -92,14 +93,12 @@ public class Effect {
         RegionType rt = rm.getRegionType(r.getType());
         
         //Check and remove money from the player
-        System.out.println("Money: " + rt.getMoneyOutput() + ":" + (HeroStronghold.econ != null));
         if (rt.getMoneyOutput() != 0 && HeroStronghold.econ != null) {
             Economy econ = HeroStronghold.econ;
             double output = rt.getMoneyOutput();
             if (r.getOwners().isEmpty())
                 return;
             String playername = r.getOwners().get(0);
-            System.out.println(playername + ": " + econ.getBalance(playername));
             if (output < 0  && econ.getBalance(playername) < Math.abs(output)) {
                 return;
             } else if (output < 0) {
@@ -108,11 +107,9 @@ public class Effect {
                 econ.depositPlayer(playername, output);
             }
         }
-        System.out.println(rt.getReagents().isEmpty() + ":" + rt.getOutput().isEmpty());
         if (rt.getReagents().isEmpty() && rt.getOutput().isEmpty())
             return;
         BlockState bs = l.getBlock().getState();
-        System.out.println("Chest: " + (bs instanceof Chest));
         if (!(bs instanceof Chest))
             return;
         Chest chest = (Chest) bs;
@@ -135,24 +132,32 @@ public class Effect {
             Material mat = Material.AIR;
             if (realIS[i] != null)
                 mat = realIS[i].getType();
-            System.out.println(mat.name() + ":" + upkeepMap.containsKey(mat) + ":" + outputMap.isEmpty());
+            
+            //chest has an item and item is in upkeep
             if (!mat.equals(Material.AIR) && upkeepMap.containsKey(mat)) {
-                if (realIS[i].getAmount() >= upkeepMap.get(mat)) {
-                    is[i] = new ItemStack(Material.AIR, 0);
+                //chest amount is <= upkeep amount
+                if (realIS[i].getAmount() <= upkeepMap.get(mat)) {
+                    upkeepMap.put(mat, upkeepMap.get(mat) - realIS[i].getAmount());
+                    is[i] = null;
+                //chest amount is > upkeep amount
                 } else {
-                    int amount = upkeepMap.get(mat) - realIS[i].getAmount();
-                    upkeepMap.put(mat, amount);
+                    int amount = realIS[i].getAmount() - upkeepMap.get(mat);
+                    upkeepMap.remove(mat);
                     is[i].setAmount(amount);
                 }
-            } else if (!mat.equals(Material.AIR) && outputMap.containsKey(mat)) {
+            //chest has an item and its an item in output
+            } else if (!mat.equals(Material.AIR) && outputMap.containsKey(mat) && realIS[i].getAmount() < 64) {
+                //chest amount + output amount is <= 64
                 if (realIS[i].getAmount() + outputMap.get(mat) <= 64) {
                     is[i].setAmount(is[i].getAmount() + outputMap.get(mat));
                     outputMap.remove(mat);
+                //chest amount + output amount is > 64
                 } else {
                     int excess = is[i].getAmount() + outputMap.get(mat) - 64;
                     is[i].setAmount(64);
                     outputMap.put(mat, excess);
                 }
+            //chest slot is empty and output isn't empty
             } else if (mat.equals(Material.AIR) && !outputMap.isEmpty()) {
                 for (Material currentMat : outputMap.keySet()) {
                     if (outputMap.get(currentMat) <= 64) {
@@ -166,7 +171,8 @@ public class Effect {
                 }
             }
         }
-        chest.update();
+        chest.getInventory().setContents(is);
+        chest.update(true);
     }
     
     public boolean upkeep(Location l) {
@@ -218,15 +224,19 @@ public class Effect {
             Material mat = Material.AIR;
             if (realIS[i] != null)
                 mat = realIS[i].getType();
+            //chest has an item and item is in upkeep
             if (!mat.equals(Material.AIR) && upkeepMap.containsKey(mat)) {
-                if (realIS[i].getAmount() >= upkeepMap.get(mat)) {
-                    is[i] = new ItemStack(Material.AIR, 0);
+                //chest amount is <= upkeep amount
+                if (realIS[i].getAmount() <= upkeepMap.get(mat)) {
+                    upkeepMap.put(mat, upkeepMap.get(mat) - realIS[i].getAmount());
+                    is[i] = null;
+                //chest amount is > upkeep amount
                 } else {
-                    int amount = upkeepMap.get(mat) - realIS[i].getAmount();
-                    upkeepMap.put(mat, amount);
+                    int amount = realIS[i].getAmount() - upkeepMap.get(mat);
+                    upkeepMap.remove(mat);
                     is[i].setAmount(amount);
                 }
-            } else if (!mat.equals(Material.AIR) && outputMap.containsKey(mat)) {
+            } else if (!mat.equals(Material.AIR) && outputMap.containsKey(mat) && realIS[i].getAmount() < 64) {
                 if (realIS[i].getAmount() + outputMap.get(mat) <= 64) {
                     is[i].setAmount(is[i].getAmount() + outputMap.get(mat));
                     outputMap.remove(mat);
@@ -248,7 +258,8 @@ public class Effect {
                 }
             }
         }
-        chest.update();
+        chest.getInventory().setContents(is);
+        chest.update(true);
         return true;
     }
     
