@@ -272,7 +272,7 @@ public class HeroStronghold extends JavaPlugin {
                         
                         regionManager.destroyRegion(l);
                         iter.remove();
-                        
+                        return true;
                     } else {
                         player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You don't own this region.");
                         return true;

@@ -71,5 +71,17 @@ public class RegionType {
         return effects;
     }
     
+    public ArrayList<ItemStack> getUpkeep() {
+        return upkeep;
+    }
+    
+    public double getMoneyOutput() {
+        return moneyOutput;
+    }
+    
+    public ArrayList<ItemStack> getOutput() {
+        return output;
+    }
+    
     //TODO write more methods here for retrieving info
 }

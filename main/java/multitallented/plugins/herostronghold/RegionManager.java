@@ -51,6 +51,8 @@ public class RegionManager {
                     currentRegion.getDouble("money-requirement"),
                     currentRegion.getDouble("upkeep-money-output")));
         }
+        File playerFolder = new File(plugin.getDataFolder(), "data"); // Setup the Data Folder if it doesn't already exist
+        playerFolder.mkdirs();
         int i = 0;
         File dataFile = new File(plugin.getDataFolder() + "/data", i + ".yml");
         while (dataFile.exists()) {
