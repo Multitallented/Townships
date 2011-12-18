@@ -1,5 +1,6 @@
 package main.java.multitallented.plugins.herostronghold;
 
+import java.util.Iterator;
 import java.util.Map;
 import org.bukkit.Location;
 import org.bukkit.Server;
@@ -12,6 +13,7 @@ import org.bukkit.entity.Player;
 public class CheckRegionTask implements Runnable {
     private final transient Server server;
     private final RegionManager regionManager;
+    
     public CheckRegionTask(Server server, RegionManager regionManager) {
         this.server = server;
         this.regionManager = regionManager;
@@ -20,7 +22,8 @@ public class CheckRegionTask implements Runnable {
     @Override
     public void run() {
         Map<Location, Region> liveRegions = regionManager.getRegions();
-        for (Location l : liveRegions.keySet()) {
+        for (Iterator<Location> locations = liveRegions.keySet().iterator(); locations.hasNext();) {
+            Location l = locations.next();
             Region currentRegion = liveRegions.get(l);
             RegionType currentRegionType = regionManager.getRegionType(currentRegion.getType());
             int radius = currentRegionType.getRadius();

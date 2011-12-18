@@ -1,29 +1,74 @@
 explode-on-destroy: false
 regions:
-    magetower:
-        friendly-classes: #Classes that will gain buffs while in the region
-        - Mystic
-        - Tempest
-        - Summoner
-        - Apothecary
-        enemy-classes: #Classes that will gain debuffs while in the region
-        - Maceman
-        - Heretic
+    arrowturret:
+        friendly-classes: [] #Classes that will gain buffs from effects while in the region
+        enemy-classes: [] #Classes that will gain debuffs from effects while in the region
         effects: #Effects the region bestows on players in the region every 5 seconds
-        - regenmanabuff.1
-        - regenmanadebuff.1
+        - shootarrow.10
         radius: 10 #Size of the region
         requirements: #Blocks that need to exist within the radius in order to construct the region
-        - ENCHANTMENT_TABLE.1
-        - BOOKSHELF.12
-        - OBSIDIAN.9
-        - PUMPKIN.4
+        - DISPENSER.1
+        - FENCE.5
+        - WOOD.9
+        - REDSTONE_TORCH_ON.4
         reagents: #Items needed in a chest in order for the region to exist
-        - REDSTONE.16
+        - ARROW.1
         upkeep: #Items to be depleted during upkeep
-        - REDSTONE.1
-        upkeep-chance: 0.01 #chance that upkeep will happen when the region is in use
-        output: #Items it will put in the chest during upkeep
-        - DIRT.1
-        money-requirement: 5000.0 #money required to create the region
-        upkeep-money-output: 5.00 #money given or taken away if negative during upkeep
+        - ARROW.1
+        upkeep-chance: 1.0 #chance that upkeep will happen when the region is in use
+        output: [] #Items it will put in the chest during upkeep
+        money-requirement: 1500.0 #money required to create the region
+        upkeep-money-output: 0.0 #money given or taken away if negative during upkeep
+    bank:
+        friendly-classes: []
+        enemy-classes: []
+        effects:
+        - periodicupkeep.0
+        radius: 6
+        requirements:
+        - GOLD_BLOCK.2
+        - BOOKSHELF.4
+        - WOOD.16
+        - LOG.8
+        - CHEST.4
+        - IRON_FENCE.6
+        - IRON_DOOR.1
+        reagents:
+        - DIAMOND.1
+        - GOLD_INGOT.4
+        - PAPER.16
+        upkeep:
+        - GOLD_INGOT.1
+        - PAPER.4
+        upkeep-chance: 0.0001
+        output: []
+        money-requirement: 1000.0
+        upkeep-money-output: 150.0
+    arrowfactory:
+        friendly-classes: []
+        enemy-classes: []
+        effects:
+        - periodicupkeep.0
+        radius: 5
+        requirements:
+        - FENCE.8
+        - FENCE_GATE.1
+        - FURNACE.4
+        - GRAVEL.2
+        - WOOL.2
+        - WOOD.2
+        reagents:
+        - GRAVEL.4
+        - BED.1
+        - WOOD.4
+        - COAL.1
+        upkeep:
+        - COAL.1
+        - BED.1
+        - WOOD.2
+        - GRAVEL.2
+        upkeep-chance: 0.01
+        output:
+        - ARROW.12
+        money-requirement: 200.0
+        upkeep-money-output: 0.0

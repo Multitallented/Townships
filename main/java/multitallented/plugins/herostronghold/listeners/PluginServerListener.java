@@ -28,9 +28,9 @@ public class PluginServerListener extends ServerListener {
 
         if (name.equals("Heroes")) {
             Logger log = Logger.getLogger("Minecraft");
-            String message = "[HeroStronghold] is disabling itself because " + name + " has been disabled!";
+            String message = "[HeroStronghold] " + name + " has been disabled!";
             log.info(message);
-            plugin.getServer().getPluginManager().disablePlugin(plugin);
+            heroes = null;
         } else if (name.equals("iConomy") || name.equals("BOSEconomy") || name.equals("Essentials")) {
             HeroStronghold.econ = null;
         }
@@ -50,7 +50,6 @@ public class PluginServerListener extends ServerListener {
         } else if ((name.equals("iConomy") || name.equals("BOSEconomy") || name.equals("Essentials")) && pm.isPluginEnabled("Vault")
                 && HeroStronghold.econ == null) {
             this.plugin.setupEconomy();
-            
         }
     }
     

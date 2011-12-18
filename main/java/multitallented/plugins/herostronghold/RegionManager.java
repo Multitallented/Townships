@@ -1,14 +1,11 @@
 package main.java.multitallented.plugins.herostronghold;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -30,11 +27,13 @@ public class RegionManager {
     private HeroStronghold plugin;
     private final FileConfiguration config;
     private FileConfiguration dataConfig;
+    private boolean explode;
     
     public RegionManager(HeroStronghold plugin, FileConfiguration config) {
         this.plugin = plugin;
         this.config = config;
         //Parse region config data
+        explode = config.getBoolean("explode-on-destroy");
         ConfigurationSection regions = config.getConfigurationSection("regions");
         for (String key : regions.getKeys(false)) {
             ConfigurationSection currentRegion = regions.getConfigurationSection(key);
@@ -136,7 +135,6 @@ public class RegionManager {
         } else {
             System.out.println("[HeroStronghold] Successfully destroyed region " + currentRegion.getID() + ".yml");
         }
-        boolean explode = config.getBoolean("explode-on-destroy");
         for (Player p : plugin.getServer().getOnlinePlayers()) {
             if (Math.sqrt(p.getLocation().distanceSquared(l)) < 20) {
                 p.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.WHITE + currentRegion.getType() + " was disabled!");
@@ -153,6 +151,16 @@ public class RegionManager {
         } else {
             l.getBlock().setTypeId(0);
         }
+    }
+    
+    public void removeRegion(Location l) {
+        if (liveRegions.containsKey(l)) {
+            liveRegions.remove(l);
+        }
+    }
+    
+    public boolean hasExplode() {
+        return explode;
     }
     
     public Set<String> getRegionTypes() {

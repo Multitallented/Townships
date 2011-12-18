@@ -6,14 +6,12 @@ package main.java.multitallented.plugins.herostronghold;
 import com.herocraftonline.dev.heroes.Heroes;
 import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 import main.java.multitallented.plugins.herostronghold.listeners.*;
 import net.milkbowl.vault.economy.Economy;
-import net.milkbowl.vault.permission.Permission;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -36,7 +34,7 @@ public class HeroStronghold extends JavaPlugin {
     private RegionManager regionManager;
     private RegionBlockListener blockListener;
     public static Economy econ;
-    private Permission perms;
+    //public static Permission perms;
     
     @Override
     public void onDisable() {
@@ -59,9 +57,9 @@ public class HeroStronghold extends JavaPlugin {
         serverListener = new PluginServerListener(this);
         blockListener = new RegionBlockListener(regionManager);
         PluginManager pm = getServer().getPluginManager();
-        pm.registerEvent(Type.BLOCK_BREAK, blockListener, Priority.Low, this);
-        pm.registerEvent(Type.PLUGIN_ENABLE, serverListener, Priority.Low, this);
-        pm.registerEvent(Type.PLUGIN_DISABLE, serverListener, Priority.Low, this);
+        pm.registerEvent(Type.BLOCK_BREAK, blockListener, Priority.Monitor, this);
+        pm.registerEvent(Type.PLUGIN_ENABLE, serverListener, Priority.Monitor, this);
+        pm.registerEvent(Type.PLUGIN_DISABLE, serverListener, Priority.Monitor, this);
         log = Logger.getLogger("Minecraft");
         
         //Check for Heroes
@@ -100,7 +98,7 @@ public class HeroStronghold extends JavaPlugin {
         if (args.length > 1 && args[0].equalsIgnoreCase("create")) {
             String regionName = args[1];
             //Permission Check
-            if (!player.hasPermission("herostronghold.create." + regionName)) {
+            if (!player.hasPermission("herostronghold.create.all") || !player.hasPermission("herostronghold.create." + regionName)) {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] you dont have permission to create a " + regionName);
                 return true;
             }
@@ -246,7 +244,7 @@ public class HeroStronghold extends JavaPlugin {
                 Region r = regionManager.getRegion(l);
                 if (Math.sqrt(l.distanceSquared(loc)) < regionManager.getRegionType(r.getType()).getRadius()) {
                     if (r.isOwner(player.getName()) || player.hasPermission("herostronghold.admin")) {
-                        if (!r.isMember(playername) || !r.isOwner(playername)) {
+                        if (!r.isMember(playername) && !r.isOwner(playername)) {
                             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + playername + " doesn't belong to this region");
                             return true;
                         }
@@ -294,11 +292,11 @@ public class HeroStronghold extends JavaPlugin {
         return econ != null;
     }
     
-    public void setupPermissions() {
+    /*public void setupPermissions() {
         RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
         if (rsp != null)
             perms = rsp.getProvider();
-    }
+    }*/
     
     public Heroes getHeroes() {
         if (serverListener == null)

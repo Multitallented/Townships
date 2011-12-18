@@ -12,7 +12,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.event.Event.Type;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -70,8 +69,9 @@ public class Effect {
             return false;
         }
         for (ItemStack is : ((Chest) bs).getInventory().getContents()) {
+            Material mat = Material.AIR;
             if (is != null) {
-                Material mat = is.getType();
+                mat = is.getType();
                 if (!mat.equals(Material.AIR) && reagentMap.containsKey(mat)) {
                     if (reagentMap.get(mat) <= is.getAmount()) {
                         reagentMap.remove(mat);

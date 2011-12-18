@@ -1,9 +1,7 @@
 package main.java.multitallented.plugins.herostronghold.listeners;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
-import main.java.multitallented.plugins.herostronghold.HeroStronghold;
 import main.java.multitallented.plugins.herostronghold.Region;
 import main.java.multitallented.plugins.herostronghold.RegionManager;
 import main.java.multitallented.plugins.herostronghold.RegionType;
@@ -28,12 +26,14 @@ public class RegionBlockListener extends BlockListener {
         if (event.isCancelled())
             return;
         Location loc = event.getBlock().getLocation();
+        Location currentLoc = null;
+        boolean delete = false;
         Set<Location> locations = regionManager.getRegionLocations();
-        for (Iterator<Location> iter = locations.iterator(); iter.hasNext();) {
-            Location currentLoc = iter.next();
+        outer: for (Iterator<Location> iter = locations.iterator(); iter.hasNext();) {
+            currentLoc = iter.next();
             if (currentLoc.getBlock().equals(loc.getBlock())) {
                 regionManager.destroyRegion(currentLoc);
-                return;
+                break outer;
             }
             Region currentRegion = regionManager.getRegion(currentLoc);
             RegionType currentRegionType = regionManager.getRegionType(currentRegion.getType());
@@ -67,8 +67,12 @@ public class RegionBlockListener extends BlockListener {
                 }
                 regionManager.destroyRegion(currentLoc);
                 iter.remove();
-                return;
+                delete = true;
+                break outer;
             }
+        }
+        if (delete && currentLoc != null) {
+            regionManager.removeRegion(currentLoc);
         }
     }
 }
