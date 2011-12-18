@@ -12,6 +12,7 @@ import org.bukkit.event.Event;
 public class PlayerInRegionEvent extends Event {
     private final Location loc;
     private final Player player;
+    private ArrayList<Location> destroyRegions;
     private final ArrayList<String> effects;
 
     public PlayerInRegionEvent(Location loc, Player player, ArrayList<String> effects) {
@@ -32,6 +33,14 @@ public class PlayerInRegionEvent extends Event {
     
     public ArrayList<String> getEffects() {
         return effects;
+    }
+    
+    public ArrayList<Location> getRegionsToDestroy() {
+        return destroyRegions;
+    }
+    
+    public void setRegionsToDestroy(ArrayList<Location> r) {
+        this.destroyRegions = r;
     }
     
 }

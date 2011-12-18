@@ -1,5 +1,6 @@
 package main.java.multitallented.plugins.herostronghold;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import org.bukkit.Location;
@@ -21,6 +22,7 @@ public class CheckRegionTask implements Runnable {
 
     @Override
     public void run() {
+        ArrayList<Location> regionsToDestroy = null;
         Map<Location, Region> liveRegions = regionManager.getRegions();
         for (Iterator<Location> locations = liveRegions.keySet().iterator(); locations.hasNext();) {
             Location l = locations.next();
@@ -32,14 +34,46 @@ public class CheckRegionTask implements Runnable {
             for (Player p : server.getOnlinePlayers()) {
                 Location loc = p.getLocation();
                 if (Math.sqrt(loc.distanceSquared(l)) < radius) {
-                    server.getPluginManager().callEvent(new PlayerInRegionEvent(currentRegion.getLocation(), p, currentRegionType.getEffects()));
+                    PlayerInRegionEvent pIREvent = new PlayerInRegionEvent(currentRegion.getLocation(), p, currentRegionType.getEffects());
+                    server.getPluginManager().callEvent(pIREvent);
+                    
+                    //Add any regions that need to be destroyed to the list
+                    ArrayList<Location> localRegions = pIREvent.getRegionsToDestroy();
+                    if (localRegions != null && !localRegions.isEmpty()) {
+                        if (regionsToDestroy == null) {
+                            regionsToDestroy = localRegions;
+                        } else {
+                            for (Location lo : localRegions) {
+                                regionsToDestroy.add(lo);
+                            }
+                        }
+                    }
                 }
             }
             
             //Check for upkeep
             if (Math.random() < currentRegionType.getUpkeepChance()) {
                 //Dispatch event to be caught by effects of the region
-                server.getPluginManager().callEvent(new UpkeepEvent(l));
+                UpkeepEvent uEvent = new UpkeepEvent(l);
+                server.getPluginManager().callEvent(uEvent);
+                
+                //Add any regions that need to be destroyed to the list
+                ArrayList<Location> localRegions = uEvent.getRegionsToDestroy();
+                if (localRegions != null && !localRegions.isEmpty()) {
+                    if (regionsToDestroy == null) {
+                        regionsToDestroy = localRegions;
+                    } else {
+                        for (Location lo : localRegions) {
+                            regionsToDestroy.add(lo);
+                        }
+                    }
+                }
+            }
+        }
+        //Destroy all regions that need to be destroyed
+        if (regionsToDestroy != null) {
+            for (Location lo : regionsToDestroy) {
+                regionManager.removeRegion(lo);
             }
         }
     }

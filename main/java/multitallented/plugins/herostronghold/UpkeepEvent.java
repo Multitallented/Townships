@@ -1,5 +1,6 @@
 package main.java.multitallented.plugins.herostronghold;
 
+import java.util.ArrayList;
 import org.bukkit.Location;
 import org.bukkit.event.Event;
 
@@ -9,6 +10,7 @@ import org.bukkit.event.Event;
  */
 public class UpkeepEvent extends Event {
     private final Location loc;
+    private ArrayList<Location> destroyRegions;
     public UpkeepEvent(Location loc) {
         super("UpkeepEvent");
         
@@ -17,5 +19,13 @@ public class UpkeepEvent extends Event {
     
     public Location getRegionLocation() {
         return loc;
+    }
+    
+    public ArrayList<Location> getRegionsToDestroy() {
+        return destroyRegions;
+    }
+    
+    public void setRegionsToDestroy(ArrayList<Location> r) {
+        this.destroyRegions = r;
     }
 }
