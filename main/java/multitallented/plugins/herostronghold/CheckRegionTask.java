@@ -33,7 +33,7 @@ public class CheckRegionTask implements Runnable {
             //Check for players in regions
             for (Player p : server.getOnlinePlayers()) {
                 Location loc = p.getLocation();
-                if (Math.sqrt(loc.distanceSquared(l)) < radius) {
+                if (loc.getWorld().getName().equals(l.getWorld().getName()) && Math.sqrt(loc.distanceSquared(l)) < radius) {
                     PlayerInRegionEvent pIREvent = new PlayerInRegionEvent(currentRegion.getLocation(), p, currentRegionType.getEffects());
                     server.getPluginManager().callEvent(pIREvent);
                     

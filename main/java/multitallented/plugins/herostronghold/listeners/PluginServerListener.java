@@ -31,26 +31,27 @@ public class PluginServerListener extends ServerListener {
             String message = "[HeroStronghold] " + name + " has been disabled!";
             log.info(message);
             heroes = null;
-        } else if (name.equals("iConomy") || name.equals("BOSEconomy") || name.equals("Essentials")) {
-            HeroStronghold.econ = null;
         }
+        /*else if (name.equals("iConomy") || name.equals("BOSEconomy") || name.equals("Essentials")) {
+            HeroStronghold.econ = null;
+        }*/
     }
 
     @Override
     public void onPluginEnable(PluginEnableEvent event) {
         Plugin currentPlugin = event.getPlugin();
         String name = currentPlugin.getDescription().getName();
-        PluginManager pm = this.plugin.getServer().getPluginManager();
         
         if (name.equals("Heroes")) {
             heroes = (Heroes) currentPlugin;
-        } else if (name.equals("Vault") && (pm.isPluginEnabled("iConomy") || pm.isPluginEnabled("BOSEconomy") || pm.isPluginEnabled("Essentials"))
+        }
+        /*else if (name.equals("Vault") && (pm.isPluginEnabled("iConomy") || pm.isPluginEnabled("BOSEconomy") || pm.isPluginEnabled("Essentials"))
                 && HeroStronghold.econ == null) {
             this.plugin.setupEconomy();
         } else if ((name.equals("iConomy") || name.equals("BOSEconomy") || name.equals("Essentials")) && pm.isPluginEnabled("Vault")
                 && HeroStronghold.econ == null) {
             this.plugin.setupEconomy();
-        }
+        }*/
     }
     
     public void setupHeroes(Heroes heroes) {

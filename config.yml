@@ -15,7 +15,7 @@ regions:
     - ARROW.1
     upkeep:
     - ARROW.1
-    upkeep-chance: 1.0
+    upkeep-chance: 0.0
     output: []
     money-requirement: 5000.0
     upkeep-money-output: 0.0
@@ -84,7 +84,7 @@ regions:
     - ENDER_PEARL.1
     upkeep:
     - ENDER_PEARL.1
-    upkeep-chance: 1.0
+    upkeep-chance: 0.0
     output:
     - DIRT.1
     money-requirements: 2000.0
@@ -102,7 +102,7 @@ regions:
     reagents:
     - DIAMOND.1
     upkeep: []
-    upkeep-chance: 1.0
+    upkeep-chance: 0.0
     output: []
     money-requirements: 2000.0
     upkeep-money-output: 0.0
@@ -124,7 +124,7 @@ regions:
     - WHEAT.1
     upkeep:
     - WHEAT.1
-    upkeep-chance: 1.0
+    upkeep-chance: 0.0
     output:
     - STICK.1
     money-requirements: 500.0
@@ -140,7 +140,7 @@ regions:
     reagents:
     - REDSTONE.1
     upkeep: []
-    upkeep-chance: 1.0
+    upkeep-chance: 0.0
     output: []
     money-requirements: 0.0
     upkeep-money-output: 0.0
@@ -157,7 +157,7 @@ regions:
     - REDSTONE.16
     upkeep:
     - REDSTONE.1
-    upkeep-chance: 1.0
+    upkeep-chance: 0.0
     output: []
     money-requirements: 100.0
     upkeep-money-output: 0.0
