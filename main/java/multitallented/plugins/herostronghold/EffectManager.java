@@ -37,6 +37,9 @@ public class EffectManager {
         dir.mkdir();
 
         List<URL> urls = new ArrayList<URL>();
+        if (dir.list().length == 0) {
+            plugin.warning("No effects found in the effects folder!");
+        }
         for (String effectFile : dir.list()) {
             if (effectFile.contains(".jar")) {
                 File file = new File(dir, effectFile);

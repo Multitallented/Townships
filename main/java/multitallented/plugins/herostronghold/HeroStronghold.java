@@ -92,12 +92,6 @@ public class HeroStronghold extends JavaPlugin {
         }
         Player player = (Player) sender;
         
-        //TODO handle /herostrong
-        
-        //TODO handle /herostrong help
-        
-        //TODO handle /herostrong list
-        
         if (args.length > 1 && args[0].equalsIgnoreCase("create")) {
             String regionName = args[1];
             //Permission Check
@@ -123,7 +117,9 @@ public class HeroStronghold extends JavaPlugin {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + regionName + " isnt a valid region type");
                 String message = ChatColor.GRAY + "[HeroStronghold] ";
                 for (String s : regionManager.getRegionTypes()) {
-                    message += s + ", ";
+                    if (perms == null || (perms.has(player.getWorld(),player.getName(), "herostronghold.create.all") ||
+                            perms.has(player.getWorld(), player.getName(), "herostronghold.create." + s)))
+                        message += s + ", ";
                 }
                 message = message.substring(0, message.length() - 2);
                 player.sendMessage(message);
@@ -196,6 +192,18 @@ public class HeroStronghold extends JavaPlugin {
             owners.add(player.getName());
             regionManager.addRegion(currentLocation, regionName, owners);
             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.WHITE + "You successfully create a " + ChatColor.RED + regionName);
+            //Tell the player what reagents are required for it to work
+            String message = ChatColor.GOLD + "[HeroStronghold] Reagents: ";
+            for (ItemStack is : currentRegionType.getReagents()) {
+                message += is.getAmount() + ":" + is.getType().name() + ", ";
+            }
+            if (currentRegionType.getReagents().isEmpty()) {
+                message += "None";
+            } else {
+                message = message.substring(0, message.length()-3);
+            }
+            player.sendMessage(message);
+            
             return true;
         } else if (args.length > 1 && args[0].equalsIgnoreCase("addowner")) {
             String playername = args[1];
@@ -296,6 +304,23 @@ public class HeroStronghold extends JavaPlugin {
             }
             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You're not standing in a region.");
             return true;
+        } else if (args.length > 1 && args[0].equalsIgnoreCase("list")) {
+            String message = ChatColor.GRAY + "[HeroStronghold] ";
+            for (String s : regionManager.getRegionTypes()) {
+                if (perms == null || (perms.has(player.getWorld(),player.getName(), "herostronghold.create.all") ||
+                        perms.has(player.getWorld(), player.getName(), "herostronghold.create." + s)))
+                    message += s + ", ";
+            }
+            message = message.substring(0, message.length() - 2);
+            player.sendMessage(message);
+            return true;
+        } else if ((args.length > 1 && args[0].equalsIgnoreCase("help")) || args.length == 1) {
+            sender.sendMessage(ChatColor.GRAY + "[HeroStronghold] by Multitallented");
+            sender.sendMessage(ChatColor.GRAY + "/herostrong list (lists all HSs you can make)");
+            sender.sendMessage(ChatColor.GRAY + "/herostrong create <regiontype> (create a HS)");
+            sender.sendMessage(ChatColor.GRAY + "/herostrong addowner|addmember|remove <playername> (manage members)");
+            sender.sendMessage(ChatColor.GRAY + "/herostrong destroy (destroy your HS)");
+            sender.sendMessage(ChatColor.GRAY + "Google 'HeroStronghold bukkit' for more info");
         }
         
         return false;
@@ -332,7 +357,7 @@ public class HeroStronghold extends JavaPlugin {
     }
     
     public void warning(String s) {
-        Logger.getLogger("Minecraft").info(s);
+        Logger.getLogger("Minecraft").warning("[HeroStronghold] " + s);
     }
     
     
