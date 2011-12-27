@@ -11,7 +11,7 @@ depend: [Vault]
 softdepend: [Heroes]
 commands:
    herostrong:
-      aliases: ['herostronghold']
+      aliases: ['herostronghold', 'hs']
       description: HeroStronghold commands
       usage: /<command>
 permissions:

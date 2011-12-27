@@ -1,11 +1,11 @@
 package main.java.multitallented.plugins.herostronghold;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.PluginManager;
 
 /**
  *
@@ -14,67 +14,52 @@ import org.bukkit.entity.Player;
 public class CheckRegionTask implements Runnable {
     private final transient Server server;
     private final RegionManager regionManager;
+    private final Set<Location> regionsToDestroy = new HashSet<Location>();
+    private int i= 0;
     
     public CheckRegionTask(Server server, RegionManager regionManager) {
         this.server = server;
         this.regionManager = regionManager;
     }
+    
+    public synchronized void addOrDestroyRegionToDestroy(Location l) {
+        if (!regionsToDestroy.remove(l)) {
+            regionsToDestroy.add(l);
+        }
+    }
+    
+    public boolean containsRegionToDestory(Location l) {
+        return regionsToDestroy.contains(l);
+    }
 
     @Override
     public void run() {
-        ArrayList<Location> regionsToDestroy = null;
-        Map<Location, Region> liveRegions = regionManager.getRegions();
-        for (Iterator<Location> locations = liveRegions.keySet().iterator(); locations.hasNext();) {
-            Location l = locations.next();
-            Region currentRegion = liveRegions.get(l);
-            RegionType currentRegionType = regionManager.getRegionType(currentRegion.getType());
-            int radius = currentRegionType.getRadius();
-            
-            //Check for players in regions
-            for (Player p : server.getOnlinePlayers()) {
-                Location loc = p.getLocation();
-                if (loc.getWorld().getName().equals(l.getWorld().getName()) && Math.sqrt(loc.distanceSquared(l)) < radius) {
-                    PlayerInRegionEvent pIREvent = new PlayerInRegionEvent(currentRegion.getLocation(), p, currentRegionType.getEffects());
-                    server.getPluginManager().callEvent(pIREvent);
-                    
-                    //Add any regions that need to be destroyed to the list
-                    ArrayList<Location> localRegions = pIREvent.getRegionsToDestroy();
-                    if (localRegions != null && !localRegions.isEmpty()) {
-                        if (regionsToDestroy == null) {
-                            regionsToDestroy = localRegions;
-                        } else {
-                            for (Location lo : localRegions) {
-                                regionsToDestroy.add(lo);
-                            }
-                        }
-                    }
-                }
-            }
-            
-            //Check for upkeep
-            if (Math.random() < currentRegionType.getUpkeepChance()) {
-                //Dispatch event to be caught by effects of the region
-                UpkeepEvent uEvent = new UpkeepEvent(l);
-                server.getPluginManager().callEvent(uEvent);
+        Player[] players = server.getOnlinePlayers();
+        int chunk = players.length / 4;
+        PluginManager pm = server.getPluginManager();
+        for (int j=chunk * i; j<(i==3 ? players.length : chunk * (i+1)); j++) {
+            CheckPlayerInRegionThread thread = new CheckPlayerInRegionThread(this, pm, regionManager, players[j]);
+            try {
+                thread.run();
+            } catch (Exception e) {
                 
-                //Add any regions that need to be destroyed to the list
-                ArrayList<Location> localRegions = uEvent.getRegionsToDestroy();
-                if (localRegions != null && !localRegions.isEmpty()) {
-                    if (regionsToDestroy == null) {
-                        regionsToDestroy = localRegions;
-                    } else {
-                        for (Location lo : localRegions) {
-                            regionsToDestroy.add(lo);
-                        }
-                    }
-                }
             }
         }
-        //Destroy all regions that need to be destroyed
-        if (regionsToDestroy != null) {
-            for (Location lo : regionsToDestroy) {
-                regionManager.removeRegion(lo);
+        if (i == 3) {
+            i=-1;
+            for (Location l : regionManager.getRegionLocations()) {
+                CheckUpkeepThread thread = new CheckUpkeepThread(this, pm, regionManager, l);
+                try {
+                    thread.run();
+                } catch (Exception e) {
+
+                }
             }
+        } else
+            i++;
+        
+        for (Location l : regionsToDestroy) {
+            addOrDestroyRegionToDestroy(l);
         }
     }
 }
