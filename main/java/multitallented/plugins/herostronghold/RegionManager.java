@@ -23,7 +23,7 @@ import org.bukkit.inventory.ItemStack;
  */
 public class RegionManager {
     private Map<Location, Region> liveRegions = new HashMap<Location, Region>();
-    private Map<Location, SuperRegion> liveSuperRegions = new HashMap<Location, SuperRegion>();
+    private Map<String, SuperRegion> liveSuperRegions = new HashMap<String, SuperRegion>();
     private Map<String, RegionType> regionTypes = new HashMap<String, RegionType>();
     private Map<String, SuperRegionType> superRegionTypes = new HashMap<String, SuperRegionType>();
     private HeroStronghold plugin;
@@ -71,7 +71,8 @@ public class RegionManager {
                         processRegionTypeMap(currentRegion.getStringList("requirements")),
                         currentRegion.getDouble("money-requirement"),
                         currentRegion.getDouble("daily-money-output"),
-                        currentRegion.getStringList("children")));
+                        currentRegion.getStringList("children"),
+                        currentRegion.getInt("max-power")));
             }
         } catch (Exception e) {
             
@@ -136,7 +137,7 @@ public class RegionManager {
                     }
                     int power = sRegionDataConfig.getInt("power");
                     if (location != null && type != null && owners != null) {
-                        liveSuperRegions.put(location, new SuperRegion(name, location, type, owners, members, power));
+                        liveSuperRegions.put(name, new SuperRegion(name, location, type, owners, members, power));
                     }
                 }
             } catch (Exception e) {
@@ -196,7 +197,7 @@ public class RegionManager {
         }
     }
     
-    public boolean addSuperRegion(String name, Location loc, String type, List<String> owners, Map<String, List<String>> members) {
+    public boolean addSuperRegion(String name, Location loc, String type, List<String> owners, Map<String, List<String>> members, int maxpower) {
         File superRegionFolder = new File(plugin.getDataFolder() + "/superregions");
         File dataFile = new File(superRegionFolder, name + ".yml");
         if (dataFile.exists()) {
@@ -206,7 +207,7 @@ public class RegionManager {
             dataFile.createNewFile();
             dataConfig = new YamlConfiguration();
             System.out.println("[HeroStronghold] saving new superregion to " + name + ".yml");
-            liveSuperRegions.put(loc, new SuperRegion(name, loc, type, owners, new HashMap<String, List<String>>(), 100));
+            liveSuperRegions.put(name, new SuperRegion(name, loc, type, owners, new HashMap<String, List<String>>(), maxpower));
             dataConfig.set("location", loc.getWorld().getName() + ":" + loc.getX()
                     + ":" + loc.getBlockY() + ":" + loc.getZ());
             dataConfig.set("type", type);
@@ -215,7 +216,7 @@ public class RegionManager {
             for (String s : members.keySet()) {
                 dataConfig.set("members." + s, members.get(s));
             }
-            dataConfig.set("power", 100);
+            dataConfig.set("power", maxpower);
             dataConfig.save(dataFile);
             return true;
         } catch (Exception ioe) {
@@ -260,25 +261,29 @@ public class RegionManager {
         }
     }
     
-    public void destroySuperRegion(Location l, boolean sendMessage) {
-        SuperRegion currentRegion = liveSuperRegions.get(l);
-        File dataFile = new File(plugin.getDataFolder() + "/superregions", currentRegion.getName() + ".yml");
+    public void destroySuperRegion(String name, boolean sendMessage) {
+        SuperRegion currentRegion = liveSuperRegions.get(name);
+        File dataFile = new File(plugin.getDataFolder() + "/superregions", name + ".yml");
         if (!dataFile.exists()) {
-            System.out.println("[Herostronghold] Unable to destroy non-existent superregion " + currentRegion.getName() + ".yml");
+            System.out.println("[Herostronghold] Unable to destroy non-existent superregion " + name + ".yml");
             return;
         }
         if (!dataFile.delete()) {
-            System.out.println("[Herostronghold] Unable to destroy non-existent superregion " + currentRegion.getName() + ".yml");
+            System.out.println("[Herostronghold] Unable to destroy non-existent superregion " + name + ".yml");
             return;
         } else {
-            System.out.println("[HeroStronghold] Successfully destroyed superregion " + currentRegion.getName() + ".yml");
+            System.out.println("[HeroStronghold] Successfully destroyed superregion " + name + ".yml");
         }
         if (sendMessage) {
             for (Player p : plugin.getServer().getOnlinePlayers()) {
-                p.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.WHITE + currentRegion.getName() + " was destroyed!");
+                p.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.WHITE + name + " was destroyed!");
             }
         }
-        l.getBlock().setTypeId(0);
+        currentRegion.getLocation().getBlock().setTypeId(0);
+        if (sendMessage) {
+            plugin.getServer().broadcastMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.RED + name + "was destroyed!");
+        }
+        liveSuperRegions.remove(name);
     }
     
     public boolean shouldTakeAction(Location loc, Player player, int modifier, String effectName) {
@@ -331,7 +336,7 @@ public class RegionManager {
         return liveRegions.keySet();
     }
     
-    public Set<Location> getSuperRegionLocations() {
+    public Set<String> getSuperRegionNames() {
         return liveSuperRegions.keySet();
     }
     
@@ -339,8 +344,8 @@ public class RegionManager {
         return liveRegions.get(loc);
     }
     
-    public SuperRegion getSuperRegion(Location loc) {
-        return liveSuperRegions.get(loc);
+    public SuperRegion getSuperRegion(String name) {
+        return liveSuperRegions.get(name);
     }
     
     public Map<Location, Region> getRegions() {

@@ -15,7 +15,8 @@ public class SuperRegionType {
     private final double output;
     private final String name;
     private final List<String> children;
-    public SuperRegionType(String name, List<String> effects, int radius, Map<String, Integer> requirements, double moneyRequirement, double output, List<String> children) {
+    private final int maxPower;
+    public SuperRegionType(String name, List<String> effects, int radius, Map<String, Integer> requirements, double moneyRequirement, double output, List<String> children, int maxPower) {
         this.name=name;
         this.effects = effects;
         this.radius = radius;
@@ -23,6 +24,7 @@ public class SuperRegionType {
         this.moneyRequirement = moneyRequirement;
         this.output = output;
         this.children = children;
+        this.maxPower = maxPower;
     }
     
     public String getName() {
@@ -51,6 +53,10 @@ public class SuperRegionType {
     
     public List<String> getChildren() {
         return children;
+    }
+    
+    public int getMaxPower() {
+        return maxPower;
     }
     
     //TODO finish adding SuperRegionType get and set

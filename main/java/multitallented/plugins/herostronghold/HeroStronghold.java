@@ -18,6 +18,7 @@ import net.milkbowl.vault.permission.Permission;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -40,6 +41,7 @@ public class HeroStronghold extends JavaPlugin {
     public static Permission perms;
     private RegionEntityListener regionEntityListener;
     private RegionPlayerInteractListener dpeListener;
+    private Map<String, String> pendingInvites = new HashMap<String, String>();
     
     @Override
     public void onDisable() {
@@ -90,6 +92,8 @@ public class HeroStronghold extends JavaPlugin {
         pm.registerEvent(Type.PLAYER_BED_ENTER, dpeListener, Priority.High, this);
         pm.registerEvent(Type.PLAYER_BUCKET_FILL, dpeListener, Priority.High, this);
         pm.registerEvent(Type.PLAYER_BUCKET_EMPTY, dpeListener, Priority.High, this);
+        
+        //TODO add a chat Listener for chat channels with player titles
         log = Logger.getLogger("Minecraft");
         
         //Check for Heroes
@@ -121,16 +125,14 @@ public class HeroStronghold extends JavaPlugin {
         
         if (args.length == 2 && args[0].equalsIgnoreCase("create")) {
             String regionName = args[1];
+            
             //Permission Check
-            if (perms != null && !perms.has(player.getWorld(), player.getName(), "herostronghold.create.all") &&
-                    !perms.has(player.getWorld(), player.getName(), "herostronghold.create." + regionName)) {
+            boolean nullPerms = perms == null;
+            boolean createAll = nullPerms || perms.has(player.getWorld(), player.getName(), "herostronghold.create.all");
+            if (!(nullPerms || createAll || perms.has(player.getWorld(), player.getName(), "herostronghold.create." + regionName))) {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] you dont have permission to create a " + regionName);
                 return true;
             }
-            /*if (!player.hasPermission("herostronghold.create.all") || !player.hasPermission("herostronghold.create." + regionName)) {
-                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] you dont have permission to create a " + regionName);
-                return true;
-            }*/
             
             Location currentLocation = player.getLocation();
             //Check if player is standing someplace where a chest can be placed.
@@ -142,14 +144,22 @@ public class HeroStronghold extends JavaPlugin {
             RegionType currentRegionType = regionManager.getRegionType(regionName);
             if (currentRegionType == null) {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + regionName + " isnt a valid region type");
-                String message = ChatColor.GRAY + "[HeroStronghold] ";
+                int j=0;
+                String message = ChatColor.GOLD + "";
                 for (String s : regionManager.getRegionTypes()) {
                     if (perms == null || (perms.has(player.getWorld(),player.getName(), "herostronghold.create.all") ||
-                            perms.has(player.getWorld(), player.getName(), "herostronghold.create." + s)))
+                            perms.has(player.getWorld(), player.getName(), "herostronghold.create." + s))) {
                         message += s + ", ";
+                        if (j >= 2) {
+                            player.sendMessage(message.substring(0, message.length() - 3));
+                            message = ChatColor.GOLD + "";
+                            j=-1;
+                        }
+                        j++;
+                    }
                 }
-                message = message.substring(0, message.length() - 2);
-                player.sendMessage(message);
+                if (j!=0)
+                    player.sendMessage(message.substring(0, message.length() - 3));
                 return true;
             }
             
@@ -167,12 +177,38 @@ public class HeroStronghold extends JavaPlugin {
             
             //Check if too close to other HeroStrongholds
             for (Location loc : regionManager.getRegionLocations()) {
-                if (loc.distanceSquared(currentLocation) <= 2 * regionManager.getRegionType(regionManager.getRegion(loc).getType()).getRadius()) {
-                    player.sendMessage (ChatColor.GRAY + "[HeroStronghold] You are too close to another HeroStronghold");
-                    return true;
+                try {
+                    if (loc.distanceSquared(currentLocation) <= 2 * regionManager.getRegionType(regionManager.getRegion(loc).getType()).getRadius()) {
+                        player.sendMessage (ChatColor.GRAY + "[HeroStronghold] You are too close to another HeroStronghold");
+                        return true;
+                    }
+                } catch (IllegalArgumentException iae) {
+
                 }
             }
             
+            //Check if in a super region and if has permission to make that region
+            String playername = player.getName();
+            String currentRegionName = currentRegionType.getName();
+            for (String s : regionManager.getSuperRegionNames()) {
+                SuperRegion sr = regionManager.getSuperRegion(s);
+                SuperRegionType srt = regionManager.getSuperRegionType(sr.getType());
+                Location l = sr.getLocation();
+                try {
+                    if (Math.sqrt(l.distanceSquared(player.getLocation())) < srt.getRadius()) {
+                        if (!sr.hasOwner(playername)) {
+                            if (!sr.hasMember(playername) || !sr.getMember(playername).contains(currentRegionName)) {
+                                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You dont have permission to create a " + currentRegionName + " in " + s);
+                                return true;
+                            }
+                        }
+                    }
+                } catch (IllegalArgumentException iae) {
+                    
+                }
+            }
+            
+            //Prepare a requirements checklist
             int radius = currentRegionType.getRadius();
             ArrayList<ItemStack> requirements = (ArrayList<ItemStack>) currentRegionType.getRequirements();
             Map<Material, Integer> reqMap = new EnumMap<Material, Integer>(Material.class);
@@ -203,13 +239,20 @@ public class HeroStronghold extends JavaPlugin {
                 }
             }
             if (!reqMap.isEmpty()) {
-                //TODO fix this message
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] you don't have all of the required blocks in this structure.");
-                String message = ChatColor.GRAY + "[HeroStronghold] ";
+                String message = ChatColor.GOLD + "";
+                int j=0;
                 for (Material mat : reqMap.keySet()) {
                     message += reqMap.get(mat) + " " + mat.name() + ", ";
+                    if (j >= 2) {
+                        player.sendMessage(message.substring(0, message.length() - 3));
+                        message = ChatColor.GOLD + "";
+                        j=-1;
+                    }
+                    j++;
                 }
-                player.sendMessage(message.substring(0, message.length() - 2));
+                if (j!=0)
+                    player.sendMessage(message.substring(0, message.length() - 3));
                 return true;
             }
             
@@ -221,18 +264,23 @@ public class HeroStronghold extends JavaPlugin {
             regionManager.addRegion(currentLocation, regionName, owners);
             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.WHITE + "You successfully create a " + ChatColor.RED + regionName);
             
-            //TODO fix this message
             //Tell the player what reagents are required for it to work
-            String message = ChatColor.GOLD + "[HeroStronghold] Reagents: ";
+            String message = ChatColor.GOLD + "Reagents: ";
+            int j=0;
             for (ItemStack is : currentRegionType.getReagents()) {
                 message += is.getAmount() + ":" + is.getType().name() + ", ";
+                if (j >= 2) {
+                    player.sendMessage(message.substring(0, message.length()-3));
+                    message = ChatColor.GOLD + "";
+                    j=-1;
+                }
+                j++;
             }
             if (currentRegionType.getReagents().isEmpty()) {
                 message += "None";
-            } else {
-                message = message.substring(0, message.length()-3);
-            }
-            player.sendMessage(message);
+                player.sendMessage(message);
+            } else if (j!= 0)
+                player.sendMessage(message.substring(0, message.length()-3));
             
             return true;
         } else if (args.length > 2 && args[0].equalsIgnoreCase("create")) {
@@ -248,19 +296,27 @@ public class HeroStronghold extends JavaPlugin {
                 return true;
             }
             
+            //Check if valid super region
             Location currentLocation = player.getLocation();
             SuperRegionType currentRegionType = regionManager.getSuperRegionType(regionTypeName);
             if (currentRegionType == null) {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + regionTypeName + " isnt a valid region type");
-                //TODO fix this message
-                String message = ChatColor.GRAY + "[HeroStronghold] ";
+                int j=0;
+                String message = ChatColor.GOLD + "";
                 for (String s : regionManager.getRegionTypes()) {
                     if (perms == null || (perms.has(player.getWorld(),player.getName(), "herostronghold.create.all") ||
-                            perms.has(player.getWorld(), player.getName(), "herostronghold.create." + s)))
+                            perms.has(player.getWorld(), player.getName(), "herostronghold.create." + s))) {
                         message += s + ", ";
+                        if (j >= 2) {
+                            player.sendMessage(message.substring(0, message.length() - 3));
+                            message = ChatColor.GOLD + "";
+                            j=-1;
+                        }
+                        j++;
+                    }
                 }
-                message = message.substring(0, message.length() - 2);
-                player.sendMessage(message);
+                if (j!= 0)
+                    player.sendMessage(message.substring(0, message.length() - 3));
                 return true;
             }
             
@@ -268,7 +324,7 @@ public class HeroStronghold extends JavaPlugin {
             if (econ != null) {
                 double cost = currentRegionType.getMoneyRequirement();
                 if (econ.getBalance(player.getName()) < cost) {
-                    player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You need $" + cost + " to make this type of HeroStronghold.");
+                    player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You need $" + cost + " to make this type of region.");
                     return true;
                 } else {
                     econ.withdrawPlayer(player.getName(), cost);
@@ -280,12 +336,21 @@ public class HeroStronghold extends JavaPlugin {
             Map<String, Integer> requirements = currentRegionType.getRequirements();
             
             //Check for required regions
-            
+            List<String> children = currentRegionType.getChildren();
+            for (String s : children) {
+                if (!requirements.containsKey(s))
+                    requirements.put(s, 1);
+            }
+            List<String> quietDestroy = new ArrayList<String>();
             if (!requirements.isEmpty()) {
-                for (Location l : regionManager.getSuperRegionLocations()) {
+                for (String s : regionManager.getSuperRegionNames()) {
+                    SuperRegion sr = regionManager.getSuperRegion(s);
+                    Location l = sr.getLocation();
                     try {
                         if (Math.sqrt(l.distanceSquared(currentLocation)) < radius) {
-                            SuperRegion sr = regionManager.getSuperRegion(l);
+                            if (children.contains(sr.getType()) && sr.hasOwner(player.getName())) {
+                                quietDestroy.add(s);
+                            }
                             String rType = sr.getType();
                             if (requirements.containsKey(rType)) {
                                 int amount = requirements.get(rType);
@@ -321,54 +386,104 @@ public class HeroStronghold extends JavaPlugin {
                     }
                 }
             }
-            
             if (!requirements.isEmpty()) {
-                //TODO fix this message
-                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] you don't have all of the required blocks in this structure.");
-                String message = ChatColor.GRAY + "[HeroStronghold] ";
+                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] you don't have all of the required regions in this structure.");
+                int j=0;
+                String message = ChatColor.GOLD + "";
                 for (String s : requirements.keySet()) {
                     message += requirements.get(s) + " " + s + ", ";
+                    if (j>=2) {
+                        player.sendMessage(message.substring(0, message.length() -3));
+                        message = ChatColor.GOLD + "";
+                        j=-1;
+                    }
+                    j++;
                 }
-                player.sendMessage(message.substring(0, message.length() - 2));
+                if (j!=0)
+                    player.sendMessage(message.substring(0, message.length() -3));
                 return true;
             }
             
-            List<String> children = currentRegionType.getChildren();
+            //Assimulate any child super regions
             List<String> owners = new ArrayList<String>();
             Map<String, List<String>> members = new HashMap<String, List<String>>();
-            List<Location> quietDestroy = new ArrayList<Location>();
-            for (Location l : regionManager.getSuperRegionLocations()) {
-                try {
-                    if (Math.sqrt(l.distanceSquared(currentLocation)) < radius) {
-                        SuperRegion sr = regionManager.getSuperRegion(l);
-                        if (children.contains(sr.getType()) && sr.hasOwner(player.getName())) {
-                            for (String s : sr.getOwners()) {
-                                if (!owners.contains(s))
-                                    owners.add(s);
-                            }
-                            for (String s : sr.getMembers().keySet()) {
-                                if (!members.containsKey(s))
-                                    members.put(s, sr.getMember(s));
-                            }
-                            quietDestroy.add(l);
-                        }
-                    }
-                } catch (IllegalArgumentException e) {
-
+            for (String s : quietDestroy) {
+                SuperRegion sr = regionManager.getSuperRegion(s);
+                for (String so : sr.getOwners()) {
+                    if (!owners.contains(so))
+                        owners.add(so);
                 }
-            }
-            for (Location l : quietDestroy) {
-                regionManager.destroySuperRegion(l, false);
+                for (String sm : sr.getMembers().keySet()) {
+                    if (!members.containsKey(sm))
+                        members.put(sm, sr.getMember(sm));
+                }
+                regionManager.destroySuperRegion(s, false);
             }
             String playername = player.getName();
             if (!owners.contains(playername))
                 owners.add(playername);
-            regionManager.addSuperRegion(args[2], currentLocation, regionTypeName, owners, members);
+            regionManager.addSuperRegion(args[2], currentLocation, regionTypeName, owners, members, currentRegionType.getMaxPower());
+        } else if (args.length > 2 && args[0].equalsIgnoreCase("listjobs")) {
+            //Get target player
+            String playername = "";
+            if (args.length > 3) {
+                Player currentPlayer = getServer().getPlayer(args[2]);
+                if (currentPlayer == null) {
+                    OfflinePlayer op = getServer().getOfflinePlayer(args[2]);
+                    if (op != null)
+                        playername = op.getName();
+                    else {
+                        player.sendMessage(ChatColor.GOLD + "[HeroStronghold] Could not find " + args[2]);
+                        return true;
+                    }
+                } else {
+                    playername = currentPlayer.getName();
+                }
+            } else {
+                playername = player.getName();
+            }
             
-            //TODO create listjobs command
-            //TODO create an invite command and confirm command
-            //TODO create a kick command
-            //TODO create a chat system
+            String message = ChatColor.GRAY + "[HeroStronghold] " + playername + " perms for " + args[3] + ":";
+            String message2 = ChatColor.GOLD + "";
+            //Check if the player is a owner or member of the super region
+            for (String st : regionManager.getSuperRegionNames()) {
+                SuperRegion sr = regionManager.getSuperRegion(st);
+                if (sr.getName().equalsIgnoreCase(args[3])) {
+                    if (sr.hasOwner(playername)) {
+                        player.sendMessage(message);
+                        player.sendMessage(message2 + "All Permissions");
+                        return true;
+                    } else if (sr.hasMember(playername)) {
+                        player.sendMessage(message);
+                        int j=0;
+                        for (String s : sr.getMember(label)) {
+                            message2 += s + ", ";
+                            if (j >= 3) {
+                                player.sendMessage(message2.substring(0, message2.length() - 3));
+                                message2 = ChatColor.GOLD + "";
+                                j = -1;
+                            }
+                            j++;
+                        }
+                        if (j != 0)
+                            player.sendMessage(message2.substring(0, message2.length() - 3));
+                    }
+                }
+            }
+            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + playername + " doesn't belong to that region.");
+            return true;
+        } else if (args.length > 1 && args[0].equalsIgnoreCase("ch")) {
+            //TODO create channel switching command
+        } else if (args.length > 2 && args[0].equalsIgnoreCase("addmember")) {
+            //TODO create an addmember superperm command
+        } else if (args.length > 1 && args[0].equalsIgnoreCase("accept")) {
+            //TODO create accept command
+        } else if (args.length > 2 && args[0].equalsIgnoreCase("addowner")) {
+            //TODO create addowner for super region
+        } else if (args.length > 2 && args[0].equalsIgnoreCase("remove")) {
+            //TODO create remove from super region command
+        } else if (args.length > 3 && args[0].equalsIgnoreCase("toggleperm")) {
+            //TODO create toggleperm command
         } else if (args.length > 1 && args[0].equalsIgnoreCase("addowner")) {
             String playername = args[1];
             Player aPlayer = getServer().getPlayer(playername);
@@ -448,7 +563,7 @@ public class HeroStronghold extends JavaPlugin {
             }
             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You're not standing in a region.");
             return true;
-        } else if (args.length > 0 && args[0].equalsIgnoreCase("destroy")) {
+        } else if (args.length == 1 && args[0].equalsIgnoreCase("destroy")) {
             Location loc = player.getLocation();
             Set<Location> locations = regionManager.getRegionLocations();
             for (Iterator<Location> iter = locations.iterator(); iter.hasNext();) {
@@ -468,16 +583,41 @@ public class HeroStronghold extends JavaPlugin {
             }
             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You're not standing in a region.");
             return true;
-        } else if (args.length > 1 && args[0].equalsIgnoreCase("list")) {
-            //TODO fix this message
-            String message = ChatColor.GRAY + "[HeroStronghold] ";
-            for (String s : regionManager.getRegionTypes()) {
-                if (perms == null || (perms.has(player.getWorld(),player.getName(), "herostronghold.create.all") ||
-                        perms.has(player.getWorld(), player.getName(), "herostronghold.create." + s)))
-                    message += s + ", ";
+        } else if (args.length > 1 && args[0].equalsIgnoreCase("destroy")) {
+            //Check if valid region
+            SuperRegion sr = regionManager.getSuperRegion(args[1]);
+            if (sr == null) {
+                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] There is no region named " + args[1]);
+                return true;
             }
-            message = message.substring(0, message.length() - 2);
-            player.sendMessage(message);
+            
+            //Check if owner or admin of that region
+            if (!(perms != null && perms.has(player.getWorld(), player.getName(), "herostronghold.admin") &&
+                    !sr.getOwners().get(0).equalsIgnoreCase(player.getName()))) {
+                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You are not the owner of that region.");
+                return true;
+            }
+            
+            regionManager.destroySuperRegion(args[1], true);
+        } else if (args.length > 1 && args[0].equalsIgnoreCase("list")) {
+            int j=0;
+            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] list of Region Types");
+            String message = ChatColor.GOLD + "";
+            boolean permNull = perms == null;
+            boolean createAll = permNull || perms.has(player.getWorld(),player.getName(), "herostronghold.create.all");
+            for (String s : regionManager.getRegionTypes()) {
+                if (createAll || permNull || perms.has(player.getWorld(), player.getName(), "herostronghold.create." + s)) {
+                    message += s + ", ";
+                    if (j>=2) {
+                        player.sendMessage(message.substring(0, message.length() - 3));
+                        message = ChatColor.GOLD + "";
+                        j=-1;
+                    }
+                    j++;
+                }
+            }
+            if (j!=0)
+                player.sendMessage(message.substring(0, message.length() - 3));
             return true;
         } else if ((args.length > 1 && args[0].equalsIgnoreCase("help")) || args.length == 1) {
             sender.sendMessage(ChatColor.GRAY + "[HeroStronghold] by Multitallented");
