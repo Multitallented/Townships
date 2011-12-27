@@ -23,7 +23,9 @@ import org.bukkit.inventory.ItemStack;
  */
 public class RegionManager {
     private Map<Location, Region> liveRegions = new HashMap<Location, Region>();
+    private Map<Location, SuperRegion> liveSuperRegions = new HashMap<Location, SuperRegion>();
     private Map<String, RegionType> regionTypes = new HashMap<String, RegionType>();
+    private Map<String, SuperRegionType> superRegionTypes = new HashMap<String, SuperRegionType>();
     private HeroStronghold plugin;
     private final FileConfiguration config;
     private FileConfiguration dataConfig;
@@ -34,22 +36,47 @@ public class RegionManager {
         this.config = config;
         //Parse region config data
         explode = config.getBoolean("explode-on-destroy");
-        ConfigurationSection regions = config.getConfigurationSection("regions");
-        for (String key : regions.getKeys(false)) {
-            ConfigurationSection currentRegion = regions.getConfigurationSection(key);
-            regionTypes.put(key, new RegionType(key,
-                    (ArrayList<String>) currentRegion.getStringList("friendly-classes"),
-                    (ArrayList<String>) currentRegion.getStringList("enemy-classes"),
-                    (ArrayList<String>) currentRegion.getStringList("effects"),
-                    currentRegion.getInt("radius"),
-                    processItemStackList(currentRegion.getStringList("requirements")),
-                    processItemStackList(currentRegion.getStringList("reagents")),
-                    processItemStackList(currentRegion.getStringList("upkeep")),
-                    processItemStackList(currentRegion.getStringList("output")),
-                    currentRegion.getDouble("upkeep-chance"),
-                    currentRegion.getDouble("money-requirement"),
-                    currentRegion.getDouble("upkeep-money-output")));
+        //TODO implement the rest of the global config options
+        
+        
+        FileConfiguration regionConfig = new YamlConfiguration();
+        try {
+            regionConfig.load(new File(plugin.getDataFolder(), "regions.yml"));
+            for (String key : regionConfig.getKeys(false)) {
+                ConfigurationSection currentRegion = regionConfig.getConfigurationSection(key);
+                regionTypes.put(key, new RegionType(key,
+                        (ArrayList<String>) currentRegion.getStringList("friendly-classes"),
+                        (ArrayList<String>) currentRegion.getStringList("enemy-classes"),
+                        (ArrayList<String>) currentRegion.getStringList("effects"),
+                        currentRegion.getInt("radius"),
+                        processItemStackList(currentRegion.getStringList("requirements")),
+                        processItemStackList(currentRegion.getStringList("reagents")),
+                        processItemStackList(currentRegion.getStringList("upkeep")),
+                        processItemStackList(currentRegion.getStringList("output")),
+                        currentRegion.getDouble("upkeep-chance"),
+                        currentRegion.getDouble("money-requirement"),
+                        currentRegion.getDouble("upkeep-money-output")));
+            }
+        } catch (Exception ex) {
+            plugin.warning("Unable to load regions.yml");
+            plugin.getServer().getPluginManager().disablePlugin(plugin);
         }
+        FileConfiguration sRegionConfig = new YamlConfiguration();
+        try {
+            sRegionConfig.load(new File(plugin.getDataFolder(), "super-regions.yml"));
+            for (String key : regionConfig.getKeys(false)) {
+                ConfigurationSection currentRegion = regionConfig.getConfigurationSection(key);
+                superRegionTypes.put(key, new SuperRegionType(key, currentRegion.getStringList("effects"),
+                        currentRegion.getInt("radius"),
+                        processRegionTypeMap(currentRegion.getStringList("requirements")),
+                        currentRegion.getDouble("money-requirement"),
+                        currentRegion.getDouble("daily-money-output"),
+                        currentRegion.getStringList("children")));
+            }
+        } catch (Exception e) {
+            
+        }
+
         File playerFolder = new File(plugin.getDataFolder(), "data"); // Setup the Data Folder if it doesn't already exist
         playerFolder.mkdirs();
         int i = 0;
@@ -67,7 +94,7 @@ public class RegionManager {
                         World world  = plugin.getServer().getWorld(params[0]);
                         location = new Location(world, Double.parseDouble(params[1]),Double.parseDouble(params[2]),Double.parseDouble(params[3]));
                     }
-                    String type = regionTypes.containsKey(dataConfig.getString("type")) ? dataConfig.getString("type") : null;
+                    String type = dataConfig.getString("type");
                     ArrayList<String> owners = (ArrayList<String>) dataConfig.getStringList("owners");
                     ArrayList<String> members = (ArrayList<String>) dataConfig.getStringList("members");
                     if (location != null && type != null && owners != null && members != null) {
@@ -82,6 +109,53 @@ public class RegionManager {
             dataFile = new File(plugin.getDataFolder() + "/data", i + ".yml");
         }
         
+        //Load super regions
+        File sRegionFolder = new File(plugin.getDataFolder(), "superregions"); // Setup the Data Folder if it doesn't already exist
+        sRegionFolder.mkdirs();
+        
+        for (File sRegionFile : sRegionFolder.listFiles()) {
+            try {
+                //Load saved region data
+                FileConfiguration sRegionDataConfig = new YamlConfiguration();
+                sRegionDataConfig.load(sRegionFile);
+                String name = sRegionFile.getName().replace(".yml", "");
+                String locationString = sRegionDataConfig.getString("location");
+                if (locationString != null) {
+                    Location location = null;
+                    if (locationString != null) {
+                        String[] params = locationString.split(":");
+                        World world  = plugin.getServer().getWorld(params[0]);
+                        location = new Location(world, Double.parseDouble(params[1]),Double.parseDouble(params[2]),Double.parseDouble(params[3]));
+                    }
+                    String type = sRegionDataConfig.getString("type");
+                    ArrayList<String> owners = (ArrayList<String>) sRegionDataConfig.getStringList("owners");
+                    ConfigurationSection configMembers = sRegionDataConfig.getConfigurationSection("members");
+                    Map<String, List<String>> members = new HashMap<String, List<String>>();
+                    for (String s : configMembers.getKeys(false)) {
+                        members.put(s, members.get(s));
+                    }
+                    int power = sRegionDataConfig.getInt("power");
+                    if (location != null && type != null && owners != null) {
+                        liveSuperRegions.put(location, new SuperRegion(name, location, type, owners, members, power));
+                    }
+                }
+            } catch (Exception e) {
+                System.out.println("[HeroStronghold] failed to load superregions from " + sRegionFile.getName());
+                System.out.println(e.getStackTrace());
+            }
+        }
+        
+    }
+    
+    private Map<String, Integer> processRegionTypeMap(List<String> input) {
+        Map<String, Integer> tempMap = new HashMap<String, Integer>();
+        for (String s : input) {
+            String[] args = s.split("\\.");
+            RegionType currentRegionType = getRegionType(args[0]);
+            if (currentRegionType != null)
+                tempMap.put(currentRegionType.getName(), Integer.parseInt(args[1]));
+        }
+        return tempMap;
     }
     
     private ArrayList<ItemStack> processItemStackList(List<String> input) {
@@ -122,6 +196,35 @@ public class RegionManager {
         }
     }
     
+    public boolean addSuperRegion(String name, Location loc, String type, List<String> owners, Map<String, List<String>> members) {
+        File superRegionFolder = new File(plugin.getDataFolder() + "/superregions");
+        File dataFile = new File(superRegionFolder, name + ".yml");
+        if (dataFile.exists()) {
+            return false;
+        }
+        try {
+            dataFile.createNewFile();
+            dataConfig = new YamlConfiguration();
+            System.out.println("[HeroStronghold] saving new superregion to " + name + ".yml");
+            liveSuperRegions.put(loc, new SuperRegion(name, loc, type, owners, new HashMap<String, List<String>>(), 100));
+            dataConfig.set("location", loc.getWorld().getName() + ":" + loc.getX()
+                    + ":" + loc.getBlockY() + ":" + loc.getZ());
+            dataConfig.set("type", type);
+            dataConfig.set("owners", owners);
+            dataConfig.createSection("members");
+            for (String s : members.keySet()) {
+                dataConfig.set("members." + s, members.get(s));
+            }
+            dataConfig.set("power", 100);
+            dataConfig.save(dataFile);
+            return true;
+        } catch (Exception ioe) {
+            System.out.println("[HeroStronghold] unable to write new superregion to file " + name + ".yml");
+            ioe.printStackTrace();
+            return false;
+        }
+    }
+    
     public void destroyRegion(Location l) {
         Region currentRegion = liveRegions.get(l);
         File dataFile = new File(plugin.getDataFolder() + "/data", currentRegion.getID() + ".yml");
@@ -136,11 +239,15 @@ public class RegionManager {
             System.out.println("[HeroStronghold] Successfully destroyed region " + currentRegion.getID() + ".yml");
         }
         for (Player p : plugin.getServer().getOnlinePlayers()) {
-            if (Math.sqrt(p.getLocation().distanceSquared(l)) < 20) {
-                p.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.WHITE + currentRegion.getType() + " was disabled!");
-                if (explode) {
-                    p.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.RED + "look out it's going to explode!");
+            try {
+                if (Math.sqrt(p.getLocation().distanceSquared(l)) < 20) {
+                    p.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.WHITE + currentRegion.getType() + " was disabled!");
+                    if (explode) {
+                        p.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.RED + "look out it's going to explode!");
+                    }
                 }
+            } catch (IllegalArgumentException e) {
+                
             }
         }
         if (explode) {
@@ -152,6 +259,47 @@ public class RegionManager {
             l.getBlock().setTypeId(0);
         }
     }
+    
+    public void destroySuperRegion(Location l, boolean sendMessage) {
+        SuperRegion currentRegion = liveSuperRegions.get(l);
+        File dataFile = new File(plugin.getDataFolder() + "/superregions", currentRegion.getName() + ".yml");
+        if (!dataFile.exists()) {
+            System.out.println("[Herostronghold] Unable to destroy non-existent superregion " + currentRegion.getName() + ".yml");
+            return;
+        }
+        if (!dataFile.delete()) {
+            System.out.println("[Herostronghold] Unable to destroy non-existent superregion " + currentRegion.getName() + ".yml");
+            return;
+        } else {
+            System.out.println("[HeroStronghold] Successfully destroyed superregion " + currentRegion.getName() + ".yml");
+        }
+        if (sendMessage) {
+            for (Player p : plugin.getServer().getOnlinePlayers()) {
+                p.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.WHITE + currentRegion.getName() + " was destroyed!");
+            }
+        }
+        l.getBlock().setTypeId(0);
+    }
+    
+    public boolean shouldTakeAction(Location loc, Player player, int modifier, String effectName) {
+        Effect effect = new Effect(plugin);
+        for (Location l : getRegionLocations()) {
+            try {
+                Region r = getRegion(l);
+                RegionType rt = getRegionType(r.getType());
+                if (rt.getRadius() >= Math.sqrt(l.distanceSquared(loc))) {
+                    if ((r.isOwner(player.getName()) || r.isMember(player.getName())) || effect.regionHasEffect(rt.getEffects(), effectName) == 0 ||
+                            !effect.hasReagents(l))
+                        return false;
+                    return true;
+                }
+            } catch (IllegalArgumentException iae) {
+            
+            }
+        }
+        return false;
+    }
+
     
     public void removeRegion(Location l) {
         if (liveRegions.containsKey(l)) {
@@ -167,16 +315,32 @@ public class RegionManager {
         return regionTypes.keySet();
     }
     
+    public Set<String> getSuperRegionTypes() {
+        return superRegionTypes.keySet();
+    }
+    
     public RegionType getRegionType(String name) {
         return regionTypes.get(name);
+    }
+    
+    public SuperRegionType getSuperRegionType(String name) {
+        return superRegionTypes.get(name);
     }
     
     public Set<Location> getRegionLocations() {
         return liveRegions.keySet();
     }
     
+    public Set<Location> getSuperRegionLocations() {
+        return liveSuperRegions.keySet();
+    }
+    
     public Region getRegion(Location loc) {
         return liveRegions.get(loc);
+    }
+    
+    public SuperRegion getSuperRegion(Location loc) {
+        return liveSuperRegions.get(loc);
     }
     
     public Map<Location, Region> getRegions() {

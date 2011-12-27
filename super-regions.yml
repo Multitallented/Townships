@@ -1,0 +1,36 @@
+village:
+  effects:
+  - denyblockbuild.1
+  - denyblockbreak.1
+  - denyplayerinteract.1
+  radius: 50
+  requirements:
+  - house.5
+  - farm.1
+  - townhall.1
+  - inn.1
+  money-requirement: 10000.0
+  money-output-daily: -25.0
+  max-power: 50
+  daily-power-increase: 25
+  child-super-regions: []
+town:
+  effects:
+  - denyblockbuild.1
+  - denyblockbreak.1
+  - denyplayerinteract.1
+  radius: 100
+  requirements:
+  - house.10
+  - farm.2
+  - townhall.1
+  - marketplace.1
+  - inn.1
+  - hospital.1
+  - village.1
+  money-requirement: 20000.0
+  money-output-daily: -50.0
+  max-power: 100
+  daily-power-increase: 25
+  child-regions:
+  - village

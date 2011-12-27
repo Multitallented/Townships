@@ -86,6 +86,4 @@ public class RegionType {
     public boolean containsFriendlyClass(String name) {
         return this.friendlyClasses.contains(name);
     }
-    
-    //TODO write more methods here for retrieving info
 }

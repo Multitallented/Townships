@@ -69,7 +69,5 @@ public class Region {
     public boolean isMember(String name) {
         return members.contains(name);
     }
-    
-    //TODO add more functions here
 }
 
