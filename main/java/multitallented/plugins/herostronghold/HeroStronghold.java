@@ -3,6 +3,13 @@ package main.java.multitallented.plugins.herostronghold;
  *
  * @author Multitallented
  */
+import main.java.multitallented.plugins.herostronghold.checkregiontask.CheckRegionTask;
+import main.java.multitallented.plugins.herostronghold.region.RegionManager;
+import main.java.multitallented.plugins.herostronghold.region.Region;
+import main.java.multitallented.plugins.herostronghold.region.RegionType;
+import main.java.multitallented.plugins.herostronghold.region.SuperRegionType;
+import main.java.multitallented.plugins.herostronghold.region.SuperRegion;
+import main.java.multitallented.plugins.herostronghold.effect.EffectManager;
 import com.herocraftonline.dev.heroes.Heroes;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -93,6 +100,7 @@ public class HeroStronghold extends JavaPlugin {
         pm.registerEvent(Type.PLAYER_BUCKET_FILL, dpeListener, Priority.High, this);
         pm.registerEvent(Type.PLAYER_BUCKET_EMPTY, dpeListener, Priority.High, this);
         
+        pm.registerEvent(Type.CUSTOM_EVENT, new CustomListener(regionManager), Priority.Normal, this);
         //TODO add a chat Listener for chat channels with player titles
         log = Logger.getLogger("Minecraft");
         

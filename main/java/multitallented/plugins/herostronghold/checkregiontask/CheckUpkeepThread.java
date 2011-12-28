@@ -1,9 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-package main.java.multitallented.plugins.herostronghold;
+package main.java.multitallented.plugins.herostronghold.checkregiontask;
 
+import main.java.multitallented.plugins.herostronghold.events.UpkeepEvent;
+import main.java.multitallented.plugins.herostronghold.region.RegionManager;
 import org.bukkit.Location;
 import org.bukkit.plugin.PluginManager;
 

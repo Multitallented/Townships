@@ -1,4 +1,4 @@
-package main.java.multitallented.plugins.herostronghold;
+package main.java.multitallented.plugins.herostronghold.region;
 
 import java.util.List;
 import java.util.Map;
@@ -45,6 +45,11 @@ public class SuperRegionType {
     
     public int getRadius() {
         return radius;
+    }
+    
+    
+    public Integer getRequirement(String name) {
+        return requirements.get(name);
     }
     
     public Map<String, Integer> getRequirements() {

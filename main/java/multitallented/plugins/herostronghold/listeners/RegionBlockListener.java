@@ -2,11 +2,11 @@ package main.java.multitallented.plugins.herostronghold.listeners;
 
 import java.util.Iterator;
 import java.util.Set;
-import main.java.multitallented.plugins.herostronghold.Effect;
+import main.java.multitallented.plugins.herostronghold.effect.Effect;
 import main.java.multitallented.plugins.herostronghold.HeroStronghold;
-import main.java.multitallented.plugins.herostronghold.Region;
-import main.java.multitallented.plugins.herostronghold.RegionManager;
-import main.java.multitallented.plugins.herostronghold.RegionType;
+import main.java.multitallented.plugins.herostronghold.region.Region;
+import main.java.multitallented.plugins.herostronghold.region.RegionManager;
+import main.java.multitallented.plugins.herostronghold.region.RegionType;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;

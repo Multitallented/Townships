@@ -1,5 +1,6 @@
-package main.java.multitallented.plugins.herostronghold;
+package main.java.multitallented.plugins.herostronghold.checkregiontask;
 
+import main.java.multitallented.plugins.herostronghold.region.RegionManager;
 import java.util.HashSet;
 import java.util.Set;
 import org.bukkit.Location;

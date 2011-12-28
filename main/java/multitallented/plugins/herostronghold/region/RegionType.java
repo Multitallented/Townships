@@ -1,4 +1,4 @@
-package main.java.multitallented.plugins.herostronghold;
+package main.java.multitallented.plugins.herostronghold.region;
 
 import java.util.ArrayList;
 import org.bukkit.inventory.ItemStack;

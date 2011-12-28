@@ -1,8 +1,12 @@
-package main.java.multitallented.plugins.herostronghold;
+package main.java.multitallented.plugins.herostronghold.effect;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Map;
+import main.java.multitallented.plugins.herostronghold.HeroStronghold;
+import main.java.multitallented.plugins.herostronghold.region.Region;
+import main.java.multitallented.plugins.herostronghold.region.RegionManager;
+import main.java.multitallented.plugins.herostronghold.region.RegionType;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Location;
 import org.bukkit.Material;

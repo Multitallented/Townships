@@ -1,4 +1,4 @@
-package main.java.multitallented.plugins.herostronghold;
+package main.java.multitallented.plugins.herostronghold.region;
 
 import java.util.List;
 import java.util.Map;

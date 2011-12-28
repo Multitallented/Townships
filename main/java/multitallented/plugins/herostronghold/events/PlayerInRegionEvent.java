@@ -1,4 +1,4 @@
-package main.java.multitallented.plugins.herostronghold;
+package main.java.multitallented.plugins.herostronghold.events;
 
 import java.util.ArrayList;
 import org.bukkit.Location;

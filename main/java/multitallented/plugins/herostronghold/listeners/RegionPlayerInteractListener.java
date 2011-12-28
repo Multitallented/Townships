@@ -1,6 +1,6 @@
 package main.java.multitallented.plugins.herostronghold.listeners;
 
-import main.java.multitallented.plugins.herostronghold.RegionManager;
+import main.java.multitallented.plugins.herostronghold.region.RegionManager;
 import org.bukkit.ChatColor;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;

@@ -1,11 +1,14 @@
-package main.java.multitallented.plugins.herostronghold;
+package main.java.multitallented.plugins.herostronghold.region;
 
+import main.java.multitallented.plugins.herostronghold.effect.Effect;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import main.java.multitallented.plugins.herostronghold.HeroStronghold;
+import main.java.multitallented.plugins.herostronghold.events.RegionDestroyedEvent;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -251,6 +254,7 @@ public class RegionManager {
                 
             }
         }
+        plugin.getServer().getPluginManager().callEvent(new RegionDestroyedEvent(l));
         if (explode) {
             l.getBlock().setTypeId(46);
             if (l.getY()- 1 > 0) {
@@ -284,6 +288,38 @@ public class RegionManager {
             plugin.getServer().broadcastMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.RED + name + "was destroyed!");
         }
         liveSuperRegions.remove(name);
+    }
+    
+    public void checkIfDestroyedSuperRegion(Location l) {
+        for (String s : getSuperRegionNames()) {
+            SuperRegion sr = getSuperRegion(s);
+            Location loc = sr.getLocation();
+            SuperRegionType srt = getSuperRegionType(sr.getType());
+            String rt = getRegionType(getRegion(l).getType()).getName();
+            int radius = srt.getRadius();
+            try {
+                int required = srt.getRequirement(rt);
+                if (required != 0 && Math.sqrt(loc.distanceSquared(l)) < radius) {
+                    
+                    outer: for (Location rl : getRegionLocations()) {
+                        try {
+                            if (getRegion(rl).getType().equals(rt) && Math.sqrt(rl.distanceSquared(loc)) < radius) {
+                                required--;
+                                if (required <= 0)
+                                    break outer;
+                            }
+                        } catch (IllegalArgumentException iae) {
+                            
+                        }
+                    }
+                    if (required > 0) {
+                        //TODO destroy the super-region
+                    }
+                }
+            } catch (IllegalArgumentException iae) {
+                
+            }
+        }
     }
     
     public boolean shouldTakeAction(Location loc, Player player, int modifier, String effectName) {
