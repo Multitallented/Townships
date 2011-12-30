@@ -4,6 +4,7 @@ import main.java.multitallented.plugins.herostronghold.effect.Effect;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -113,7 +114,7 @@ public class RegionManager {
                     ArrayList<String> owners = (ArrayList<String>) dataConfig.getStringList("owners");
                     ArrayList<String> members = (ArrayList<String>) dataConfig.getStringList("members");
                     if (location != null && type != null && owners != null && members != null) {
-                        liveRegions.put(location, new Region(this, i, location, type, owners, members));
+                        liveRegions.put(location, new Region(i, location, type, owners, members));
                         /*int sort = (int) location.getX() + regionTypes.get(type).getRadius();
                         float k = sortedRegions.size() / 2;
                         int j = (int) k;
@@ -132,7 +133,15 @@ public class RegionManager {
             dataFile = new File(plugin.getDataFolder() + "/data", i + ".yml");
         }
         if (sortedRegions.size() > 1) {
-            Collections.sort(sortedRegions);
+            if (sortedRegions.size() > 1) {
+                Collections.sort(sortedRegions, new Comparator<Region>() {
+
+                    @Override
+                    public int compare(Region o1, Region o2) {
+                        return (int) (-1 *(o1.getLocation().getX() + getRegionType(o1.getType()).getRadius() - (o2.getLocation().getX() + getRegionType(o2.getType()).getRadius())));
+                    }
+                });
+            }
         }
         
         //Load super regions
@@ -163,7 +172,7 @@ public class RegionManager {
                     int power = sRegionDataConfig.getInt("power", 10);
                     double taxes = sRegionDataConfig.getDouble("taxes", 0.0);
                     if (location != null && type != null && owners != null) {
-                        liveSuperRegions.put(name, new SuperRegion(this, name, location, type, owners, members, power, taxes));
+                        liveSuperRegions.put(name, new SuperRegion(name, location, type, owners, members, power, taxes));
                         /*int sort = (int) location.getX() + superRegionTypes.get(type).getRadius();
                         float k = sortedSuperRegions.size() / 2;
                         int j = (int) k;
@@ -180,7 +189,15 @@ public class RegionManager {
             }
         }
         if (sortedSuperRegions.size() > 1) {
-            Collections.sort(sortedSuperRegions);
+            if (sortedSuperRegions.size() > 1) {
+                Collections.sort(sortedSuperRegions, new Comparator<SuperRegion>() {
+
+                    @Override
+                    public int compare(SuperRegion o1, SuperRegion o2) {
+                        return (int) (-1 *(o1.getLocation().getX() + getSuperRegionType(o1.getType()).getRadius() - (o2.getLocation().getX() + getSuperRegionType(o2.getType()).getRadius())));
+                    }
+                });
+            }
         }
         
     }
@@ -221,7 +238,7 @@ public class RegionManager {
             dataConfig = new YamlConfiguration();
             System.out.println("[HeroStronghold] saving new region to " + i + ".yml");
             //dataConfig.load(dataFile);
-            liveRegions.put(loc, new Region(this, i, loc, type, owners, new ArrayList<String>()));
+            liveRegions.put(loc, new Region(i, loc, type, owners, new ArrayList<String>()));
             /*int sort = (int) loc.getX() + getRegionType(type).getRadius();
             float k = sortedRegions.size() / 2;
             int j = (int) k;
@@ -231,7 +248,13 @@ public class RegionManager {
             }*/
             sortedRegions.add(liveRegions.get(loc));
             if (sortedRegions.size() > 1) {
-                Collections.sort(sortedRegions);
+                Collections.sort(sortedRegions, new Comparator<Region>() {
+
+                    @Override
+                    public int compare(Region o1, Region o2) {
+                        return (int) (-1 *(o1.getLocation().getX() + getRegionType(o1.getType()).getRadius() - (o2.getLocation().getX() + getRegionType(o2.getType()).getRadius())));
+                    }
+                });
             }
             dataConfig.set("location", loc.getWorld().getName() + ":" + loc.getX()
                     + ":" + loc.getBlockY() + ":" + loc.getZ());
@@ -255,7 +278,7 @@ public class RegionManager {
             dataFile.createNewFile();
             dataConfig = new YamlConfiguration();
             System.out.println("[HeroStronghold] saving new superregion to " + name + ".yml");
-            liveSuperRegions.put(name, new SuperRegion(this, name, loc, type, owners, new HashMap<String, List<String>>(), maxpower));
+            liveSuperRegions.put(name, new SuperRegion(name, loc, type, owners, new HashMap<String, List<String>>(), maxpower));
             /*int sort = (int) loc.getX() + superRegionTypes.get(type).getRadius();
             float k = sortedSuperRegions.size() / 2;
             int j = (int) k;
@@ -266,7 +289,15 @@ public class RegionManager {
             sortedSuperRegions.add(liveSuperRegions.get(name));
             
             if (sortedSuperRegions.size() > 1) {
-                Collections.sort(sortedSuperRegions);
+                if (sortedSuperRegions.size() > 1) {
+                    Collections.sort(sortedSuperRegions, new Comparator<SuperRegion>() {
+
+                        @Override
+                        public int compare(SuperRegion o1, SuperRegion o2) {
+                            return (int) (-1 *(o1.getLocation().getX() + getSuperRegionType(o1.getType()).getRadius() - (o2.getLocation().getX() + getSuperRegionType(o2.getType()).getRadius())));
+                        }
+                    });
+                }
             }
             dataConfig.set("location", loc.getWorld().getName() + ":" + loc.getX()
                     + ":" + loc.getBlockY() + ":" + loc.getZ());

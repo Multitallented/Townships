@@ -121,6 +121,7 @@ public class HeroStronghold extends JavaPlugin {
         //TODO create permission herostronghold.join for joining a super-region
         //TODO create settaxes command
         //TODO create stats command
+        //TODO create deposite and withdraw commands
         
         new EffectManager(this);
         
@@ -390,7 +391,7 @@ public class HeroStronghold extends JavaPlugin {
             
             return true;
         } else if (args.length > 2 && args[0].equalsIgnoreCase("create")) {
-            if (args[2].length() > 50) {
+            if (args[2].length() > 25) {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] That name is too long.");
                 return true;
             }
@@ -457,7 +458,6 @@ public class HeroStronghold extends JavaPlugin {
                 warning("Possible failure to find correct charter for " + args[2]);
             }
             
-            int radius = currentRegionType.getRadius();
             Map<String, Integer> requirements = (HashMap<String, Integer>) ((HashMap<String, Integer>) currentRegionType.getRequirements()).clone();
             
             //Check for required regions
@@ -601,6 +601,9 @@ public class HeroStronghold extends JavaPlugin {
                 pendingCharters.remove(args[2]);
             }
             String playername = player.getName();
+            if (econ != null) {
+                econ.createBank(args[2], playername);
+            }
             if (!owners.contains(playername))
                 owners.add(playername);
             regionManager.addSuperRegion(args[2], currentLocation, regionTypeName, owners, members, currentRegionType.getMaxPower());

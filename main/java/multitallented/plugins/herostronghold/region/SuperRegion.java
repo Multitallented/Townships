@@ -8,7 +8,7 @@ import org.bukkit.Location;
  *
  * @author Multitallented
  */
-public class SuperRegion implements Comparable {
+public class SuperRegion {
     private String name;
     private final Location l;
     private final String type;
@@ -16,11 +16,9 @@ public class SuperRegion implements Comparable {
     private final List<String> owners;
     private int power;
     private double taxes = 0; //TODO implement daily member taxes
-    private final RegionManager rm;
     
-    public SuperRegion(RegionManager rm, String name, Location l, String type, List<String> owner, Map<String, List<String>> members, int power, double taxes) {
+    public SuperRegion(String name, Location l, String type, List<String> owner, Map<String, List<String>> members, int power, double taxes) {
         this.name = name;
-        this.rm = rm;
         this.l = l;
         this.type=type;
         this.owners = owner;
@@ -29,8 +27,7 @@ public class SuperRegion implements Comparable {
         this.taxes = taxes;
     }
     
-    public SuperRegion(RegionManager rm, String name, Location l, String type, List<String> owner, Map<String, List<String>> members, int power) {
-        this.rm = rm;
+    public SuperRegion(String name, Location l, String type, List<String> owner, Map<String, List<String>> members, int power) {
         this.name = name;
         this.l = l;
         this.type=type;
@@ -113,13 +110,5 @@ public class SuperRegion implements Comparable {
     
     public void setPower(int i) {
         power = i;
-    }
-
-    @Override
-    public int compareTo(Object o) {
-        if (!(o instanceof SuperRegion))
-            return 0;
-        SuperRegion r = (SuperRegion) o;
-        return (int) (r.getLocation().getX() - rm.getSuperRegionType(r.getType()).getRadius() - (l.getX() - rm.getSuperRegionType(type).getRadius()));
     }
 }

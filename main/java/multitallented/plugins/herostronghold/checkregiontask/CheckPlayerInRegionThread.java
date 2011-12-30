@@ -39,7 +39,7 @@ public class CheckPlayerInRegionThread implements Runnable {
                 return;
             }
             try {
-                if (l.getX() - radius > x && l.distanceSquared(loc) < radius) {
+                if (!(l.getX() - radius > x) && l.distanceSquared(loc) < radius) {
                     PlayerInRegionEvent pIREvent = new PlayerInRegionEvent(l, p);
                     pm.callEvent(pIREvent);
                     try {
