@@ -12,6 +12,7 @@ import main.java.multitallented.plugins.herostronghold.region.SuperRegion;
 import main.java.multitallented.plugins.herostronghold.effect.EffectManager;
 import com.herocraftonline.dev.heroes.Heroes;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -118,6 +119,8 @@ public class HeroStronghold extends JavaPlugin {
         }
         
         //TODO create permission herostronghold.join for joining a super-region
+        //TODO create settaxes command
+        //TODO create stats command
         
         new EffectManager(this);
         
@@ -125,9 +128,15 @@ public class HeroStronghold extends JavaPlugin {
         CheckRegionTask theSender = new CheckRegionTask(getServer(), regionManager);
         getServer().getScheduler().scheduleSyncRepeatingTask(this, theSender, 10L, 10L);
         
-        //TODO Setup Daily task
-        DailyTimerTask dtt = new DailyTimerTask();
-        getServer().getScheduler().scheduleSyncRepeatingTask(this, dtt, l, l1);
+        System.currentTimeMillis();
+        Date date = new Date();
+        date.setSeconds(0);
+        date.setMinutes(0);
+        date.setHours(0);
+        long timeUntilDay = (86400000 + date.getTime() - System.currentTimeMillis()) / 50;
+        System.out.println("[HeroStronghold] " + timeUntilDay + " ticks until 00:00");
+        DailyTimerTask dtt = new DailyTimerTask(regionManager);
+        getServer().getScheduler().scheduleSyncRepeatingTask(this, dtt, timeUntilDay, 1728000);
         
         log.info("[HeroStronghold] is now enabled!");
     }

@@ -7,14 +7,16 @@ import org.bukkit.Location;
  *
  * @author Multitallented
  */
-public class Region {
+public class Region implements Comparable {
     private int id;
     private Location loc;
     private String type;
     private ArrayList<String> owners;
     private ArrayList<String> members;
+    private final RegionManager rm;
     
-    public Region(int id, Location loc, String type, ArrayList<String> owners, ArrayList<String> members) {
+    public Region(RegionManager rm, int id, Location loc, String type, ArrayList<String> owners, ArrayList<String> members) {
+        this.rm = rm;
         this.id = id;
         this.loc = loc;
         this.type = type;
@@ -68,6 +70,14 @@ public class Region {
     
     public boolean isMember(String name) {
         return members.contains(name);
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        if (!(o instanceof Region))
+            return 0;
+        Region r = (Region) o;
+        return (int) (r.getLocation().getX() - rm.getRegionType(r.getType()).getRadius() - (loc.getX() - rm.getRegionType(type).getRadius()));
     }
 }
 
