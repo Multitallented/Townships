@@ -1,10 +1,14 @@
 package main.java.multitallented.plugins.herostronghold.listeners;
 
+import java.util.HashMap;
+import java.util.Map;
 import main.java.multitallented.plugins.herostronghold.region.RegionManager;
 import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
+import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerListener;
 
@@ -14,8 +18,34 @@ import org.bukkit.event.player.PlayerListener;
  */
 public class RegionPlayerInteractListener extends PlayerListener {
     private final RegionManager rm;
+    private final Map<Player, String> channels = new HashMap<Player, String>();
     public RegionPlayerInteractListener(RegionManager rm) {
         this.rm = rm;
+    }
+    
+    @Override
+    public void onPlayerChat(PlayerChatEvent event) {
+        Player player = event.getPlayer();
+        String channel = channels.get(player);
+        if (channel == null)
+            return;
+        event.setCancelled(true);
+        SendMessageThread smt = new SendMessageThread(channel, channels, player, event.getMessage());
+        try {
+            smt.run();
+        } catch (Exception e) {
+            
+        }
+    }
+    
+    public void setPlayerChannel(Player p, String s) {
+        channels.put(p, s);
+        SendMessageThread smt = new SendMessageThread(s, channels, p, p.getDisplayName() + " has joined channel " + s);
+        try {
+            smt.run();
+        } catch (Exception e) {
+            
+        }
     }
     
     @Override

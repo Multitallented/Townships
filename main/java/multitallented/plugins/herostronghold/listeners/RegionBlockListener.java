@@ -44,7 +44,67 @@ public class RegionBlockListener extends BlockListener {
         Location loc = event.getBlock().getLocation();
         Location currentLoc = null;
         boolean delete = false;
-        Set<Location> locations = regionManager.getRegionLocations();
+        
+        double x1 = loc.getX();
+        for (Region r : regionManager.getSortedRegions()) {
+            if (currentLoc.getBlock().equals(loc.getBlock())) {
+                regionManager.destroyRegion(currentLoc);
+                break;
+            }
+            
+            int radius = regionManager.getRegionType(r.getType()).getRadius();
+            Location l = r.getLocation();
+            if (l.getX() + radius < x1) {
+                return;
+            }
+            try {
+                if (l.getX() - radius > x1 && l.distanceSquared(loc) < radius) {
+                    Region currentRegion = regionManager.getRegion(currentLoc);
+                    RegionType currentRegionType = regionManager.getRegionType(currentRegion.getType());
+                    Player player = event.getPlayer();
+                    Effect effect = new Effect(plugin);
+                    if ((player == null || (!currentRegion.isOwner(player.getName()) && !currentRegion.isMember(player.getName())))
+                            && effect.regionHasEffect(currentRegionType.getEffects(), "denyblockbreak") != 0 && effect.hasReagents(currentLoc)) {
+                        event.setCancelled(true);
+                        if (player != null)
+                            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
+                    }
+                    
+                    int amountRequired = 0;
+                    int i = 0;
+                    for (ItemStack currentStack : currentRegionType.getRequirements()) {
+                        if (currentStack.getTypeId() == event.getBlock().getTypeId()) {
+                            amountRequired = currentStack.getAmount();
+                            break;
+                        }
+                    }
+                    if (amountRequired == 0)
+                        return;
+
+                    for (int x= (int) (currentLoc.getX()-radius); x<radius + currentLoc.getX(); x++) {
+                        for (int y = currentLoc.getY()- radius > 1 ? (int) (currentLoc.getY() - radius) : 1; y< radius + currentLoc.getY() && y < 128; y++) {
+                            for (int z = (int) (currentLoc.getZ() - radius); z<radius + currentLoc.getZ(); z++) {
+                                Block tempBlock = currentLoc.getWorld().getBlockAt(x, y, z);
+                                if (tempBlock.getTypeId() == event.getBlock().getTypeId()) {
+                                    if (i >= amountRequired) {
+                                        return;
+                                    } else {
+                                        i++;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    regionManager.destroyRegion(currentLoc);
+                    delete = true;
+                    break;
+                }
+            } catch (IllegalArgumentException iae) {
+
+            }
+        }
+        
+        /*Set<Location> locations = regionManager.getRegionLocations();
         outer: for (Iterator<Location> iter = locations.iterator(); iter.hasNext();) {
             currentLoc = iter.next();
             try {
@@ -98,7 +158,7 @@ public class RegionBlockListener extends BlockListener {
             } catch (IllegalArgumentException iae) {
             
             }
-        }
+        }*/
         if (delete && currentLoc != null) {
             regionManager.removeRegion(currentLoc);
         } 

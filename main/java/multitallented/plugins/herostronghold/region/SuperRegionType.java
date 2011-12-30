@@ -12,11 +12,13 @@ public class SuperRegionType {
     private final int radius;
     private final Map<String, Integer> requirements;
     private final double moneyRequirement;
-    private final double output;
+    private final double output; //TODO implement output daily
     private final String name;
     private final List<String> children;
     private final int maxPower;
-    public SuperRegionType(String name, List<String> effects, int radius, Map<String, Integer> requirements, double moneyRequirement, double output, List<String> children, int maxPower) {
+    private final int charter;
+    public SuperRegionType(String name, List<String> effects, int radius, Map<String, Integer> requirements, double moneyRequirement, double output,
+            List<String> children, int maxPower, int charter) {
         this.name=name;
         this.effects = effects;
         this.radius = radius;
@@ -25,6 +27,11 @@ public class SuperRegionType {
         this.output = output;
         this.children = children;
         this.maxPower = maxPower;
+        this.charter = charter;
+    }
+    
+    public double getOutput() {
+        return output;
     }
     
     public String getName() {
@@ -64,5 +71,7 @@ public class SuperRegionType {
         return maxPower;
     }
     
-    //TODO finish adding SuperRegionType get and set
+    public int getCharter() {
+        return charter;
+    }
 }

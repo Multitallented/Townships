@@ -53,6 +53,19 @@ public class SuperRegion {
         return members;
     }
     
+    public boolean togglePerm(String name, String perm) {
+        boolean removed = false;
+        try {
+            if (!members.get(name).remove(perm))
+                members.get(name).add(perm);
+            else
+                removed = true;
+        } catch (NullPointerException npe) {
+            
+        }
+        return removed;
+    }
+    
     public boolean hasOwner(String name) {
         return owners.contains(name);
     }

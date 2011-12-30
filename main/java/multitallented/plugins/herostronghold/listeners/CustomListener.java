@@ -19,7 +19,7 @@ public class CustomListener extends CustomEventListener {
     public void onCustomEvent(Event event) {
         if (!(event instanceof RegionDestroyedEvent))
             return;
-        
+        //Check if a super region needs to fall if a required region was destroyed
         rm.checkIfDestroyedSuperRegion(((RegionDestroyedEvent) event).getLocation());
     }
 }

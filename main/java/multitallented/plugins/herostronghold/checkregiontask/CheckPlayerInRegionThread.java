@@ -5,7 +5,7 @@
 package main.java.multitallented.plugins.herostronghold.checkregiontask;
 
 import main.java.multitallented.plugins.herostronghold.events.PlayerInRegionEvent;
-import main.java.multitallented.plugins.herostronghold.checkregiontask.CheckRegionTask;
+import main.java.multitallented.plugins.herostronghold.region.Region;
 import main.java.multitallented.plugins.herostronghold.region.RegionManager;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -31,7 +31,34 @@ public class CheckPlayerInRegionThread implements Runnable {
 
     @Override
     public void run() {
-        for (Location l : rm.getRegionLocations()) {
+        double x = loc.getX();
+        for (Region r : rm.getSortedRegions()) {
+            int radius = rm.getRegionType(r.getType()).getRadius();
+            Location l = r.getLocation();
+            if (l.getX() + radius < x) {
+                return;
+            }
+            try {
+                if (l.getX() - radius > x && l.distanceSquared(loc) < radius) {
+                    PlayerInRegionEvent pIREvent = new PlayerInRegionEvent(l, p);
+                    pm.callEvent(pIREvent);
+                    try {
+                        for (Location dl : pIREvent.getRegionsToDestroy()) {
+                            if (!crt.containsRegionToDestory(dl)) {
+                                crt.addOrDestroyRegionToDestroy(dl);
+                            }
+                        }
+                    } catch (NullPointerException npe) {
+
+                    }
+                    return;
+                }
+            } catch (IllegalArgumentException iae) {
+                
+            }
+        }
+        
+        /*for (Location l : rm.getRegionLocations()) {
             int radius = rm.getRegionType(rm.getRegion(l).getType()).getRadius();
             try {
                 if (Math.sqrt(loc.distanceSquared(l)) < radius) {
@@ -51,7 +78,7 @@ public class CheckPlayerInRegionThread implements Runnable {
             } catch (IllegalArgumentException iae) {
                 
             }
-        }
+        }*/
     }
     
 }

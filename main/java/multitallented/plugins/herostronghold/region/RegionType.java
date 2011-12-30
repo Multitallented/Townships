@@ -12,7 +12,7 @@ public class RegionType {
     ArrayList<String> friendlyClasses = null;
     ArrayList<String> enemyClasses = null;
     ArrayList<String> effects = null;
-    int radius = 0;
+    final int radius; //TODO change this to radius squared
     ArrayList<ItemStack> requirements = null;
     ArrayList<ItemStack> reagents = null;
     ArrayList<ItemStack> upkeep = null;

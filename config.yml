@@ -7,7 +7,7 @@ block-notify-on-place: []
 block-notify-on-break: []
 deny-tnt-block-damage: false
 deny-tnt-damage: false
-deny-flint-steel: false
+deny-flint-steel-use: true
 deny-firespread: true
 disable-lavaspread: false
 disable-waterspread: false
@@ -23,14 +23,14 @@ player-damage:
   deny-suffocation-damage: false
   deny-contact-damage: false
   deny-lightning-damage: false
+  deny-friendly-fire: false
+  deny-pvp: false
 creatures:
   creepers:
-    deny-block-destruction: false
-    deny-damage: false
+    deny-block-destruction: true
     deny-spawn: false
   ghast:
     deny-block-destruction: false
-    deny-damage: false
     deny-spawn: false
   enderman:
     deny-block-take-and-place: true
@@ -67,5 +67,8 @@ creatures:
     deny-spawn: false
   silverfish:
     deny-spawn: false
+  wolf:
+    deny-spawn: false
+    deny-tame: false
   enderdragon:
     deny-spawn: false
