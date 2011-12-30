@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -83,11 +84,12 @@ public class RegionManager {
                 superRegionTypes.put(key, new SuperRegionType(key, currentRegion.getStringList("effects"),
                         (int) Math.pow(currentRegion.getInt("radius"), 2),
                         processRegionTypeMap(currentRegion.getStringList("requirements")),
-                        currentRegion.getDouble("money-requirement"),
-                        currentRegion.getDouble("daily-money-output"),
+                        currentRegion.getDouble("money-requirement", 0),
+                        currentRegion.getDouble("daily-money-output", 0),
                         currentRegion.getStringList("children"),
-                        currentRegion.getInt("max-power"),
-                        currentRegion.getInt("charter")));
+                        currentRegion.getInt("max-power", 100),
+                        currentRegion.getInt("daily-power-increase", 10),
+                        currentRegion.getInt("charter", 0)));
             }
         } catch (Exception e) {
             
@@ -171,8 +173,14 @@ public class RegionManager {
                     }
                     int power = sRegionDataConfig.getInt("power", 10);
                     double taxes = sRegionDataConfig.getDouble("taxes", 0.0);
+                    double balance = sRegionDataConfig.getDouble("balance", 0.0);
+                    List<Double> taxRevenue1 = sRegionDataConfig.getDoubleList("tax-revenue");
+                    LinkedList<Double> taxRevenue = new LinkedList<Double>();
+                    for (double d : taxRevenue1) {
+                        taxRevenue.add(d);
+                    }
                     if (location != null && type != null && owners != null) {
-                        liveSuperRegions.put(name, new SuperRegion(name, location, type, owners, members, power, taxes));
+                        liveSuperRegions.put(name, new SuperRegion(name, location, type, owners, members, power, taxes, balance, taxRevenue));
                         /*int sort = (int) location.getX() + superRegionTypes.get(type).getRadius();
                         float k = sortedSuperRegions.size() / 2;
                         int j = (int) k;
@@ -278,7 +286,7 @@ public class RegionManager {
             dataFile.createNewFile();
             dataConfig = new YamlConfiguration();
             System.out.println("[HeroStronghold] saving new superregion to " + name + ".yml");
-            liveSuperRegions.put(name, new SuperRegion(name, loc, type, owners, new HashMap<String, List<String>>(), maxpower));
+            liveSuperRegions.put(name, new SuperRegion(name, loc, type, owners, new HashMap<String, List<String>>(), maxpower, 0.0, 0.0, new LinkedList<Double>()));
             /*int sort = (int) loc.getX() + superRegionTypes.get(type).getRadius();
             float k = sortedSuperRegions.size() / 2;
             int j = (int) k;
@@ -476,39 +484,132 @@ public class RegionManager {
         }
     }
     
-    public synchronized void reduceRegion(Set<String> input) {
-        for (String s : input) {
-            SuperRegion sr = getSuperRegion(s);
-            int currentPower = sr.getPower();
-            sr.setPower(currentPower - 1);
-            final String st = s;
-            if (currentPower == 25) {
-                new Runnable() {
-                      @Override
-                      public void run()
-                      {
-                        plugin.getServer().broadcastMessage(ChatColor.RED + "[HeroStronghold] " + st + " reached 25 power! Destruction is near!");
-                      }
-                }.run();
-            } else if (currentPower == 10) {
-                new Runnable() {
-                      @Override
-                      public void run()
-                      {
-                        plugin.getServer().broadcastMessage(ChatColor.RED + "[HeroStronghold] " + st + " reached 10 power! Destruction is at hand!");
-                      }
-                }.run();
-            } else if (currentPower <= 0) {
-                new Runnable() {
-                      @Override
-                      public void run()
-                      {
-                        plugin.getServer().broadcastMessage(ChatColor.RED + "[HeroStronghold] " + st + " reached 0 power!");
-                      }
-                }.run();
-                destroySuperRegion(s, true);
+    public synchronized void reduceRegion(SuperRegion sr) {
+        int currentPower = sr.getPower() - 1;
+        setPower(sr, currentPower);
+        final String st = sr.getName();
+        if (currentPower == 25) {
+            new Runnable() {
+                  @Override
+                  public void run()
+                  {
+                    plugin.getServer().broadcastMessage(ChatColor.RED + "[HeroStronghold] " + st + " reached 25 power! Destruction is near!");
+                  }
+            }.run();
+        } else if (currentPower == 10) {
+            new Runnable() {
+                  @Override
+                  public void run()
+                  {
+                    plugin.getServer().broadcastMessage(ChatColor.RED + "[HeroStronghold] " + st + " reached 10 power! Destruction is at hand!");
+                  }
+            }.run();
+        } else if (currentPower <= 0) {
+            new Runnable() {
+                  @Override
+                  public void run()
+                  {
+                    plugin.getServer().broadcastMessage(ChatColor.RED + "[HeroStronghold] " + st + " reached 0 power!");
+                  }
+            }.run();
+        }
+    }
+    
+    public synchronized void setPower(SuperRegion sr, int newPower) {
+        File superRegionFile = new File(plugin.getDataFolder() + "/superregions", sr.getName() + ".yml");
+        if (!superRegionFile.exists()) {
+            plugin.warning("Failed to find file " + sr.getName() + ".yml");
+            return;
+        }
+        FileConfiguration sRegionConfig = new YamlConfiguration();
+        try {
+            sRegionConfig.load(superRegionFile);
+        } catch (Exception e) {
+            plugin.warning("Failed to load " + sr.getName() + ".yml to save new Power");
+            return;
+        }
+        sRegionConfig.set("power", newPower);
+        try {
+            sRegionConfig.save(superRegionFile);
+        } catch (Exception e) {
+            plugin.warning("Failed to save " + sr.getName() + ".yml");
+            return;
+        }
+        sr.setPower(newPower);
+    }
+    
+    /**
+     * Adds a double to the taxRevenue record for the SuperRegion
+     */
+    public synchronized void addTaxRevenue(SuperRegion sr, double input) {
+        File superRegionFile = new File(plugin.getDataFolder() + "/superregions", sr.getName() + ".yml");
+        if (!superRegionFile.exists()) {
+            plugin.warning("Failed to find file " + sr.getName() + ".yml");
+            return;
+        }
+        FileConfiguration sRegionConfig = new YamlConfiguration();
+        try {
+            sRegionConfig.load(superRegionFile);
+        } catch (Exception e) {
+            plugin.warning("Failed to load " + sr.getName() + ".yml to save new taxRevenue");
+            return;
+        }
+        sr.addTaxRevenue(input);
+        LinkedList<Double> taxRevenue = sr.getTaxRevenue();
+        sRegionConfig.set("tax-revenue", taxRevenue);
+        try {
+            sRegionConfig.save(superRegionFile);
+        } catch (Exception e) {
+            plugin.warning("Failed to save " + sr.getName() + ".yml");
+            return;
+        }
+    }
+    
+    /**
+     * Adds (or subtracts if negative) the balance from the super-region.
+     * It saves that data to sr.getName() + ".yml".
+     * If the new balance would be less than 0, it takes the remainder and
+     * subtracts that from the owner's balance.
+     */
+    public synchronized double addBalance(SuperRegion sr, double balance) {
+        File superRegionFile = new File(plugin.getDataFolder() + "/superregions", sr.getName() + ".yml");
+        if (!superRegionFile.exists()) {
+            plugin.warning("Failed to save " + sr.getName() + " new bank balance: " + balance);
+            return 0;
+        }
+        FileConfiguration sRegionConfig = new YamlConfiguration();
+        try {
+            sRegionConfig.load(superRegionFile);
+        } catch (Exception e) {
+            plugin.warning("Failed to load " + sr.getName() + ".yml to save new bank balance");
+            return 0;
+        }
+        double newBalance = balance + sr.getBalance();
+        if (balance < 0) {
+            if (newBalance < 0 && HeroStronghold.econ != null) {
+                String ownerName = sr.getOwners().get(0);
+                double ownerBalance = HeroStronghold.econ.bankBalance(ownerName).balance;
+                if (newBalance + ownerBalance <= 0 && ownerBalance != 0) {
+                    HeroStronghold.econ.withdrawPlayer(ownerName, ownerBalance);
+                    Player p = plugin.getServer().getPlayer(ownerName);
+                    if (p != null && p.isOnline()) {
+                        p.sendMessage(ChatColor.RED + "[HeroStronghold] " + sr.getName() + " and you are out of money. Do something fast!");
+                    }
+                } else {
+                    HeroStronghold.econ.withdrawPlayer(ownerName, -newBalance);
+                }
+                
             }
         }
+        sRegionConfig.set("balance", newBalance);
+        try {
+            sRegionConfig.save(superRegionFile);
+        } catch (Exception e) {
+            plugin.warning("Failed to save " + sr.getName() + ".yml");
+            return 0;
+        }
+        
+        return newBalance;
     }
     
     public boolean shouldTakeAction(Location loc, Player player, int modifier, String effectName) {

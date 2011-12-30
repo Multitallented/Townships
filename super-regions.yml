@@ -12,8 +12,8 @@ village:
   - inn.1
   money-requirement: 100000.0
   money-output-daily: -25.0
-  max-power: 750
-  daily-power-increase: 250
+  max-power: 500
+  daily-power-increase: 50
   charter: 3
   child-super-regions: []
 town:
@@ -33,8 +33,8 @@ town:
   - village.1
   money-requirement: 200000.0
   money-output-daily: -50.0
-  max-power: 1500
-  daily-power-increase: 500
+  max-power: 1000
+  daily-power-increase: 150
   charter: 6
   child-regions:
   - village
@@ -56,7 +56,7 @@ city:
   money-requirement: 400000.0
   money-output-daily: -100.0
   max-power: 3000
-  daily-power-increase: 1000
+  daily-power-increase: 500
   charter: 12
   child-regions:
   - town
@@ -71,8 +71,8 @@ militarybase:
   - hospital.1
   money-requirement: 10000.0
   money-output-daily: -15.0
-  max-power: 500
-  daily-power-increase: 500
+  max-power: 200
+  daily-power-increase: 150
   charter: 0
   child-regions: []
 miningcolony:
@@ -89,7 +89,7 @@ miningcolony:
   - house.1
   money-requirement: 20000.0
   money-output-daily: -30.0
-  max-power: 1000
-  daily-power-increase: 250
+  max-power: 300
+  daily-power-increase: 30
   charter: 3
   child-regions: []

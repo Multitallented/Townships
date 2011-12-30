@@ -53,8 +53,13 @@ public class RegionEntityListener extends EntityListener {
             if (sr.hasMember(playername) || sr.hasOwner(playername))
                 regionsToReduce.add(s);
         }
-        if (!regionsToReduce.isEmpty())
-            rm.reduceRegion(regionsToReduce);
+        if (!regionsToReduce.isEmpty()) {
+            for (String s : regionsToReduce) {
+                SuperRegion sr = rm.getSuperRegion(s);
+                rm.reduceRegion(sr);
+                rm.destroySuperRegion(s, true);
+            }
+        }
     }
     
     @Override

@@ -1,5 +1,6 @@
 package main.java.multitallented.plugins.herostronghold.region;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.bukkit.Location;
@@ -15,9 +16,11 @@ public class SuperRegion {
     private final Map<String, List<String>> members;
     private final List<String> owners;
     private int power;
-    private double taxes = 0; //TODO implement daily member taxes
+    private double taxes = 0;
+    private double balance = 0;
+    private LinkedList<Double> taxRevenue;
     
-    public SuperRegion(String name, Location l, String type, List<String> owner, Map<String, List<String>> members, int power, double taxes) {
+    public SuperRegion(String name, Location l, String type, List<String> owner, Map<String, List<String>> members, int power, double taxes, double balance, LinkedList<Double> taxRevenue) {
         this.name = name;
         this.l = l;
         this.type=type;
@@ -25,15 +28,27 @@ public class SuperRegion {
         this.members = members;
         this.power = power;
         this.taxes = taxes;
+        this.balance = balance;
+        this.taxRevenue = taxRevenue;
     }
     
-    public SuperRegion(String name, Location l, String type, List<String> owner, Map<String, List<String>> members, int power) {
-        this.name = name;
-        this.l = l;
-        this.type=type;
-        this.owners = owner;
-        this.members = members;
-        this.power = power;
+    public LinkedList<Double> getTaxRevenue() {
+        return taxRevenue;
+    }
+    
+    public void addTaxRevenue(double input) {
+        taxRevenue.addFirst(input);
+        if (taxRevenue.size() > 5) {
+            taxRevenue.removeLast();
+        }
+    }
+    
+    public double getBalance() {
+        return balance;
+    }
+    
+    public void setBalance(double balance) {
+        this.balance = balance;
     }
     
     public double getTaxes() {

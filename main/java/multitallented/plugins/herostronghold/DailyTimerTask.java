@@ -1,8 +1,11 @@
 package main.java.multitallented.plugins.herostronghold;
 
+import java.util.HashSet;
+import java.util.Set;
 import main.java.multitallented.plugins.herostronghold.region.RegionManager;
 import main.java.multitallented.plugins.herostronghold.region.SuperRegion;
 import net.milkbowl.vault.economy.Economy;
+import org.bukkit.ChatColor;
 
 /**
  *
@@ -10,15 +13,18 @@ import net.milkbowl.vault.economy.Economy;
  */
 public class DailyTimerTask implements Runnable {
     private final RegionManager rm;
-    public DailyTimerTask(RegionManager rm) {
-        this.rm = rm;
+    private final HeroStronghold plugin;
+    public DailyTimerTask(HeroStronghold plugin) {
+        this.plugin = plugin;
+        this.rm = plugin.getRegionManager();
     }
 
     @Override
     public void run() {
-        if (HeroStronghold.econ != null) {
-            Economy econ = HeroStronghold.econ;
-            for (SuperRegion sr : rm.getSortedSuperRegions()) {
+        Set<SuperRegion> destroyThese = new HashSet<SuperRegion>();
+        Economy econ = HeroStronghold.econ;
+        for (SuperRegion sr : rm.getSortedSuperRegions()) {
+            if (econ != null) {
                 double total = 0;
                 double tax = sr.getTaxes();
                 if (tax != 0) {
@@ -34,14 +40,47 @@ public class DailyTimerTask implements Runnable {
                             }
                         }
                     }
-                    //econ.
+                    rm.addTaxRevenue(sr, total);
+                    double output = rm.getSuperRegionType(sr.getType()).getOutput();
+                    total += output;
+                    double newBalance = total + sr.getBalance();
+                    if (newBalance < 0) {
+                        destroyThese.add(sr);
+                        final String st = sr.getName();
+                        new Runnable() {
+                              @Override
+                              public void run() {
+                                    plugin.getServer().broadcastMessage(ChatColor.RED + "[HeroStronghold] " + st + " ran out of money!");
+                              }
+                        }.run();
+                    } else
+                        rm.addBalance(sr, total);
+                    
                 }
             }
+            int power = sr.getPower();
+            int maxPower = rm.getSuperRegionType(sr.getType()).getMaxPower();
+            int dailyPower = rm.getSuperRegionType(sr.getType()).getDailyPower();
+            if (power <= 0) {
+                destroyThese.add(sr);
+                final String st = sr.getName();
+                new Runnable() {
+                      @Override
+                      public void run() {
+                            plugin.getServer().broadcastMessage(ChatColor.RED + "[HeroStronghold] " + st + " has no power!");
+                      }
+                }.run();
+            } else if (power >= maxPower) {
+                //Dont need to do anything here apparently
+            } else if (power + dailyPower > maxPower) {
+                rm.setPower(sr, maxPower);
+            } else {
+                rm.setPower(sr, power + dailyPower);
+            }
         }
-        
-        //TODO setup taxes
-        //TODO setup power gain
-        //TODO setup daily-output
+        for (SuperRegion dsr : destroyThese) {
+            rm.destroySuperRegion(dsr.getName(), true);
+        }
     }
     
 }

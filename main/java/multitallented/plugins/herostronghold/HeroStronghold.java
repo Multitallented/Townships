@@ -136,7 +136,7 @@ public class HeroStronghold extends JavaPlugin {
         date.setHours(0);
         long timeUntilDay = (86400000 + date.getTime() - System.currentTimeMillis()) / 50;
         System.out.println("[HeroStronghold] " + timeUntilDay + " ticks until 00:00");
-        DailyTimerTask dtt = new DailyTimerTask(regionManager);
+        DailyTimerTask dtt = new DailyTimerTask(this);
         getServer().getScheduler().scheduleSyncRepeatingTask(this, dtt, timeUntilDay, 1728000);
         
         log.info("[HeroStronghold] is now enabled!");
@@ -323,6 +323,7 @@ public class HeroStronghold extends JavaPlugin {
                 reqMap.put(currentIS.getType(), currentIS.getAmount());
             }
             //Check the area for required blocks
+            //TODO fix this junk
             if (!requirements.isEmpty()) {
                 outer: for (int x= (int) (currentLocation.getX()-radius); x< radius + currentLocation.getX(); x++) {
                     for (int y = currentLocation.getY() - radius > 1 ? (int) (currentLocation.getY() - radius) : 1; y < radius + currentLocation.getY() && y < 128; y++) {
@@ -601,9 +602,6 @@ public class HeroStronghold extends JavaPlugin {
                 pendingCharters.remove(args[2]);
             }
             String playername = player.getName();
-            if (econ != null) {
-                econ.createBank(args[2], playername);
-            }
             if (!owners.contains(playername))
                 owners.add(playername);
             regionManager.addSuperRegion(args[2], currentLocation, regionTypeName, owners, members, currentRegionType.getMaxPower());
@@ -1093,8 +1091,12 @@ public class HeroStronghold extends JavaPlugin {
                     }
                 }
             }*/
-            if (locationToDestroy != null)
+            if (locationToDestroy != null) {
+                if (econ != null) {
+                    //TODO delete a bank
+                }
                 regionManager.removeRegion(locationToDestroy);
+            }
             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You're not standing in a region.");
             return true;
         } else if (args.length > 1 && args[0].equalsIgnoreCase("destroy")) {
