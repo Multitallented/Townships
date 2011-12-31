@@ -13,9 +13,7 @@ import multitallented.redcastlemedia.bukkit.herostronghold.effect.EffectManager;
 import com.herocraftonline.dev.heroes.Heroes;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -120,6 +118,7 @@ public class HeroStronghold extends JavaPlugin {
         }
         
         //TODO add /god
+        //TODO fix message lists by size
         
         new EffectManager(this);
         
@@ -478,6 +477,7 @@ public class HeroStronghold extends JavaPlugin {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] That name is too long.");
                 return true;
             }
+            //TODO fix this always evaluating true
             if (getServer().getPlayerExact(args[2]) != null || getServer().getOfflinePlayer(args[2]) != null) {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] A super-region cant share a name with a player.");
                 return true;
