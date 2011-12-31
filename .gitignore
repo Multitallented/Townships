@@ -1,0 +1,7 @@
+$ cat .gitignore
+
+nbproject/*
+dist/*
+build/*
+manifest.mf
+pom.xml
