@@ -1560,6 +1560,9 @@ public class HeroStronghold extends JavaPlugin {
         this.configManager = cm;
     }
     
+    public ConfigManager getConfigManager() {
+        return this.configManager;
+    }
     public void setCharters(Map<String, List<String>> input) {
         this.pendingCharters = input;
     }

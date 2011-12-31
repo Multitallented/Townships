@@ -1,6 +1,5 @@
 package multitallented.redcastlemedia.bukkit.herostronghold.effect;
 
-import multitallented.redcastlemedia.bukkit.herostronghold.effect.Effect;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;

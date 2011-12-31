@@ -1,7 +1,7 @@
 author: Multitallented
 database: false
 description: Allows you to create regions that can give buffs or debuffs to players with certain HeroClasses.
-main: main.java.multitallented.plugins.herostronghold.HeroStronghold
+main: multitallented.redcastlemedia.bukkit.herostronghold.HeroStronghold
 name: HeroStronghold
 startup: postworld
 version: 0.1-b000
