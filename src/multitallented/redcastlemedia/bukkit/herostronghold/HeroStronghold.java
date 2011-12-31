@@ -489,6 +489,7 @@ public class HeroStronghold extends JavaPlugin {
                 return true;
             }
             
+            //TODO fix this always being null
             //Check if valid super region
             Location currentLocation = player.getLocation();
             SuperRegionType currentRegionType = regionManager.getSuperRegionType(regionTypeName);
@@ -501,7 +502,7 @@ public class HeroStronghold extends JavaPlugin {
                             perms.has(player, "herostronghold.create." + s))) {
                         message += s + ", ";
                         if (j >= 2) {
-                            player.sendMessage(message.substring(0, message.length() - 3));
+                            player.sendMessage(message.substring(0, message.length() - 2));
                             message = ChatColor.GOLD + "";
                             j=-1;
                         }
@@ -509,7 +510,7 @@ public class HeroStronghold extends JavaPlugin {
                     }
                 }
                 if (j!= 0)
-                    player.sendMessage(message.substring(0, message.length() - 3));
+                    player.sendMessage(message.substring(0, message.length() - 2));
                 return true;
             }
             

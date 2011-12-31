@@ -96,8 +96,8 @@ public class RegionManager {
                 sRegionFile.createNewFile();
             }
             sRegionConfig.load(sRegionFile);
-            for (String key : regionConfig.getKeys(false)) {
-                ConfigurationSection currentRegion = regionConfig.getConfigurationSection(key);
+            for (String key : sRegionConfig.getKeys(false)) {
+                ConfigurationSection currentRegion = sRegionConfig.getConfigurationSection(key);
                 superRegionTypes.put(key, new SuperRegionType(key, currentRegion.getStringList("effects"),
                         (int) Math.pow(currentRegion.getInt("radius"), 2),
                         processRegionTypeMap(currentRegion.getStringList("requirements")),

@@ -21,6 +21,7 @@ public class DailyTimerTask implements Runnable {
 
     @Override
     public void run() {
+        //TODO throw a new day event?
         Set<SuperRegion> destroyThese = new HashSet<SuperRegion>();
         Economy econ = HeroStronghold.econ;
         for (SuperRegion sr : rm.getSortedSuperRegions()) {
