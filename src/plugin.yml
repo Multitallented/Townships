@@ -12,16 +12,10 @@ commands:
       aliases: ['herostronghold', 'hs']
       description: HeroStronghold commands
       usage: /<command>
-   god:
-      description: Prevents you from taking any damage
-      usage: /<command>
 permissions:
    herostronghold.create.all:
       description: Allows you to create a HeroStronghold of any type if you have the necessary materials
       default: op
    herostronghold.admin:
       description: Lets you use admin commands
-      default: op
-   herostronghold.god:
-      description: Lets you use /god
       default: op

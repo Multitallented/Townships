@@ -150,8 +150,7 @@ public class HeroStronghold extends JavaPlugin {
         if (args.length > 2 && args[0].equalsIgnoreCase("charter")) {
             
             //Check if valid super region
-            SuperRegion sr = regionManager.getSuperRegion(args[1]);
-            SuperRegionType currentRegionType = regionManager.getSuperRegionType(sr.getType());
+            SuperRegionType currentRegionType = regionManager.getSuperRegionType(args[1]);
             if (currentRegionType == null) {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + args[1] + " isnt a valid region type");
                 int j=0;
@@ -204,8 +203,8 @@ public class HeroStronghold extends JavaPlugin {
             }
             
             //Check if allowed super-region
-            if (regionManager.getSuperRegion(args[2]) != null || !regionManager.getSuperRegion(args[2]).hasOwner(player.getName())
-                    || regionManager.getSuperRegion(args[2]).getType().equalsIgnoreCase(args[1])) {
+            if (regionManager.getSuperRegion(args[2]) != null && (!regionManager.getSuperRegion(args[2]).hasOwner(player.getName())
+                    || regionManager.getSuperRegion(args[2]).getType().equalsIgnoreCase(args[1]))) {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] That exact super-region already exists.");
                 return true;
             }
@@ -217,7 +216,7 @@ public class HeroStronghold extends JavaPlugin {
             pendingCharters.put(args[2], tempList);
             configManager.writeToCharter(args[2], tempList);
             player.sendMessage(ChatColor.GOLD + "[HeroStronghold] Youve successfully created a charter for " + args[2]);
-            player.sendMessage(ChatColor.GOLD + "[HeroStronghold] Get other people to type /hs sign " + args[2] + " to get started.");
+            player.sendMessage(ChatColor.GOLD + "[HeroStronghold] Get other people to type /hs signcharter " + args[2] + " to get started.");
             return true;
         } else if (args.length > 1 && args[0].equalsIgnoreCase("signcharter")) {
             //Check if valid name
