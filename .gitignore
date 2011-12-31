@@ -1,5 +1,7 @@
 $ cat .gitignore
 
+.gitignore
+a/*
 nbproject/*
 dist/*
 build/*
