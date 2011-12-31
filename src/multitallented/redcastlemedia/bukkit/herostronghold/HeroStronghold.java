@@ -1,15 +1,15 @@
-package main.java.multitallented.plugins.herostronghold;
+package multitallented.redcastlemedia.bukkit.herostronghold;
 /**
  *
  * @author Multitallented
  */
-import main.java.multitallented.plugins.herostronghold.checkregiontask.CheckRegionTask;
-import main.java.multitallented.plugins.herostronghold.region.RegionManager;
-import main.java.multitallented.plugins.herostronghold.region.Region;
-import main.java.multitallented.plugins.herostronghold.region.RegionType;
-import main.java.multitallented.plugins.herostronghold.region.SuperRegionType;
-import main.java.multitallented.plugins.herostronghold.region.SuperRegion;
-import main.java.multitallented.plugins.herostronghold.effect.EffectManager;
+import multitallented.redcastlemedia.bukkit.herostronghold.checkregiontask.CheckRegionTask;
+import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionManager;
+import multitallented.redcastlemedia.bukkit.herostronghold.region.Region;
+import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionType;
+import multitallented.redcastlemedia.bukkit.herostronghold.region.SuperRegionType;
+import multitallented.redcastlemedia.bukkit.herostronghold.region.SuperRegion;
+import multitallented.redcastlemedia.bukkit.herostronghold.effect.EffectManager;
 import com.herocraftonline.dev.heroes.Heroes;
 import java.util.ArrayList;
 import java.util.Date;
@@ -19,7 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
-import main.java.multitallented.plugins.herostronghold.listeners.*;
+import multitallented.redcastlemedia.bukkit.herostronghold.listeners.*;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.ChatColor;

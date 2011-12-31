@@ -1,4 +1,4 @@
-package main.java.multitallented.plugins.herostronghold.events;
+package multitallented.redcastlemedia.bukkit.herostronghold.events;
 
 import org.bukkit.Location;
 import org.bukkit.event.Event;

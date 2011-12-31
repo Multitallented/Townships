@@ -1,13 +1,13 @@
-package main.java.multitallented.plugins.herostronghold.listeners;
+package multitallented.redcastlemedia.bukkit.herostronghold.listeners;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
-import main.java.multitallented.plugins.herostronghold.region.Region;
-import main.java.multitallented.plugins.herostronghold.region.RegionManager;
-import main.java.multitallented.plugins.herostronghold.region.RegionType;
-import main.java.multitallented.plugins.herostronghold.region.SuperRegion;
-import main.java.multitallented.plugins.herostronghold.region.SuperRegionType;
+import multitallented.redcastlemedia.bukkit.herostronghold.region.Region;
+import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionManager;
+import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionType;
+import multitallented.redcastlemedia.bukkit.herostronghold.region.SuperRegion;
+import multitallented.redcastlemedia.bukkit.herostronghold.region.SuperRegionType;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Creeper;

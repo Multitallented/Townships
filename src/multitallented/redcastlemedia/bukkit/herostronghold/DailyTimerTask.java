@@ -1,9 +1,9 @@
-package main.java.multitallented.plugins.herostronghold;
+package multitallented.redcastlemedia.bukkit.herostronghold;
 
 import java.util.HashSet;
 import java.util.Set;
-import main.java.multitallented.plugins.herostronghold.region.RegionManager;
-import main.java.multitallented.plugins.herostronghold.region.SuperRegion;
+import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionManager;
+import multitallented.redcastlemedia.bukkit.herostronghold.region.SuperRegion;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.ChatColor;
 

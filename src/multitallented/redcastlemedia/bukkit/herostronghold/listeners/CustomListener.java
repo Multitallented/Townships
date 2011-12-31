@@ -1,7 +1,7 @@
-package main.java.multitallented.plugins.herostronghold.listeners;
+package multitallented.redcastlemedia.bukkit.herostronghold.listeners;
 
-import main.java.multitallented.plugins.herostronghold.events.RegionDestroyedEvent;
-import main.java.multitallented.plugins.herostronghold.region.RegionManager;
+import multitallented.redcastlemedia.bukkit.herostronghold.events.RegionDestroyedEvent;
+import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionManager;
 import org.bukkit.event.CustomEventListener;
 import org.bukkit.event.Event;
 

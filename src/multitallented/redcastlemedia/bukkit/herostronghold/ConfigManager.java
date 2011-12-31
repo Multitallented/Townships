@@ -1,4 +1,4 @@
-package main.java.multitallented.plugins.herostronghold;
+package multitallented.redcastlemedia.bukkit.herostronghold;
 
 import java.io.File;
 import java.util.HashMap;

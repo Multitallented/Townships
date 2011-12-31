@@ -1,10 +1,10 @@
-package main.java.multitallented.plugins.herostronghold.listeners;
+package multitallented.redcastlemedia.bukkit.herostronghold.listeners;
 
-import main.java.multitallented.plugins.herostronghold.effect.Effect;
-import main.java.multitallented.plugins.herostronghold.HeroStronghold;
-import main.java.multitallented.plugins.herostronghold.region.Region;
-import main.java.multitallented.plugins.herostronghold.region.RegionManager;
-import main.java.multitallented.plugins.herostronghold.region.RegionType;
+import multitallented.redcastlemedia.bukkit.herostronghold.effect.Effect;
+import multitallented.redcastlemedia.bukkit.herostronghold.HeroStronghold;
+import multitallented.redcastlemedia.bukkit.herostronghold.region.Region;
+import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionManager;
+import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionType;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
