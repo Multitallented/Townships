@@ -7,3 +7,4 @@ dist/*
 build/*
 manifest.mf
 pom.xml
+build.xml
