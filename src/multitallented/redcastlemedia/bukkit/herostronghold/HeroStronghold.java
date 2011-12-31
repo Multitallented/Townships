@@ -117,7 +117,6 @@ public class HeroStronghold extends JavaPlugin {
             log.info("[HeroStronghold] didnt find Heroes, waiting for Heroes to be enabled.");
         }
         
-        //TODO add /god
         //TODO fix message lists by size
         
         new EffectManager(this);
@@ -1494,6 +1493,18 @@ public class HeroStronghold extends JavaPlugin {
                 return true;
             }
             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] There is no player or super-region by that name");
+            return true;
+        } else if (args.length > 0 && args[0].equalsIgnoreCase("god")) {
+            if (perms == null || !perms.has(player, "herostronghold.god")) {
+                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Sorry you don't have permission to do that.");
+                return true;
+            }
+            
+            if (regionEntityListener.toggleGod(player)) {
+                player.sendMessage(ChatColor.GOLD + "[HeroStronghold] Godmode Enabled.");
+            } else {
+                player.sendMessage(ChatColor.GOLD + "[HeroStronghold] Godmode Disabled.");
+            }
             return true;
         } else {
             if (args.length > 0 && args[args.length - 1].equals("2")) {
