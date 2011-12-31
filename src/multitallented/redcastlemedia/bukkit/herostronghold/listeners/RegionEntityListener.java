@@ -253,12 +253,36 @@ public class RegionEntityListener extends EntityListener {
         if (event.isCancelled()) {
             return;
         }
-        //TODO make it so regions can be destroyed by tnt
-        Location l = event.getLocation();
+        
+        Location loc = event.getLocation();
         Entity ent = event.getEntity();
         if ((!(ent instanceof Creeper) || !(ent instanceof EnderDragon) || !(ent instanceof TNTPrimed) || !(ent instanceof Fireball))
-                && !rm.shouldTakeAction(l, null, 4, "denyblockbreak"))
+                && !rm.shouldTakeAction(loc, null, 4, "denyblockbreak")) {
             event.setCancelled(true);
+            return;
+        }
+        Region destroyMe = null;
+        
+        double x = loc.getX();
+        for (Region r : rm.getSortedRegions()) {
+            int radius = rm.getRegionType(r.getType()).getRadius();
+            Location l = r.getLocation();
+            if (l.getX() + radius < x) {
+                return;
+            }
+            try {
+                if (!(l.getX() - radius > x) && l.distanceSquared(loc) < radius) {
+                    destroyMe = r;
+                }
+            } catch (IllegalArgumentException iae) {
+                
+            }
+        }
+        
+        if (destroyMe != null) {
+            rm.destroyRegion(destroyMe.getLocation());
+            rm.removeRegion(destroyMe.getLocation());
+        }
     }
 
     @Override

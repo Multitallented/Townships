@@ -198,8 +198,8 @@ public class HeroStronghold extends JavaPlugin {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] There is already a charter or region with that name.");
                 return true;
             }
-            if (getServer().getPlayerExact(args[2]) != null || getServer().getOfflinePlayer(args[2]) != null) {
-                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] A super-region cant share a name with a player.");
+            if (getServer().getPlayerExact(args[2]) != null) {
+                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Dont name a super-region after a player");
                 return true;
             }
             
@@ -476,9 +476,8 @@ public class HeroStronghold extends JavaPlugin {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] That name is too long.");
                 return true;
             }
-            //TODO fix this always evaluating true
-            if (getServer().getPlayerExact(args[2]) != null || getServer().getOfflinePlayer(args[2]) != null) {
-                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] A super-region cant share a name with a player.");
+            if (getServer().getPlayerExact(args[2]) != null) {
+                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Dont name a super-region after a player.");
                 return true;
             }
             
@@ -1376,17 +1375,39 @@ public class HeroStronghold extends JavaPlugin {
             boolean createAll = permNull || perms.has(player, "herostronghold.create.all");
             for (String s : regionManager.getRegionTypes()) {
                 if (createAll || permNull || perms.has(player, "herostronghold.create." + s)) {
-                    message += s + ", ";
-                    if (j>4) {
-                        player.sendMessage(message.substring(0, message.length() - 2));
-                        message = ChatColor.GOLD + "";
-                        j=-1;
+                    if (message.length() + s.length() + 2 > 55) {
+                        player.sendMessage(message);
+                        message += ChatColor.GOLD + "";
+                        j++;
                     }
-                    j++;
+                    if (j==0) {
+                        message += s;
+                        j++;
+                    } else if (j > 14) {
+                        break;
+                    } else {
+                        message += ", " + s;
+                    }
                 }
             }
-            if (j!=0)
-                player.sendMessage(message.substring(0, message.length() - 2));
+            for (String s : regionManager.getSuperRegionTypes()) {
+                if (createAll || permNull || perms.has(player, "herostronghold.create." + s)) {
+                    if (message.length() + s.length() + 2 > 55) {
+                        player.sendMessage(message);
+                        message += ChatColor.GOLD + "";
+                        j++;
+                    }
+                    if (j==0) {
+                        message += s;
+                        j++;
+                    } else if (j > 14) {
+                        break;
+                    } else {
+                        message += ", " + s;
+                    }
+                }
+            }
+            player.sendMessage(message);
             return true;
         } else if (args.length > 1 && (args[0].equalsIgnoreCase("stats") || args[0].equalsIgnoreCase("who"))) {
             Player p = getServer().getPlayer(args[1]);
@@ -1397,45 +1418,28 @@ public class HeroStronghold extends JavaPlugin {
                 int j = 0;
                 for (SuperRegion sr : regionManager.getSortedSuperRegions()) {
                     if (sr.hasOwner(playername) || sr.hasMember(playername)) {
-                        message += sr.getName() + ", ";
-                        if (j>=2) {
-                            player.sendMessage(message.substring(0, message.length() - 2));
+                        if (message.length() + sr.getName().length() + 2 > 55) {
+                            player.sendMessage(message);
                             message = ChatColor.GOLD + "";
-                            j=-1;
+                            j++;
                         }
-                        j++;
+                        if (j==0) {
+                            message += sr.getName();
+                            j++;
+                        } else if (j > 14) {
+                            break;
+                        } else {
+                            message += ", " + sr.getName();
+                        }
                     }
                 }
-                if (j!=0)
-                player.sendMessage(message.substring(0, message.length() - 2));
-                return true;
-            }
-            OfflinePlayer op = getServer().getOfflinePlayer(args[1]);
-            if (op != null) {
-                String playername = op.getName();
-                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + args[1] + " is a member of:");
-                String message = ChatColor.GOLD + "";
-                int j = 0;
-                for (SuperRegion sr : regionManager.getSortedSuperRegions()) {
-                    if (sr.hasOwner(playername) || sr.hasMember(playername)) {
-                        message += sr.getName() + ", ";
-                        if (j>=2) {
-                            player.sendMessage(message.substring(0, message.length() - 2));
-                            message = ChatColor.GOLD + "";
-                            j=-1;
-                        }
-                        j++;
-                    }
-                }
-                if (j!=0)
-                player.sendMessage(message.substring(0, message.length() - 2));
+                player.sendMessage(message);
                 return true;
             }
             SuperRegion sr = regionManager.getSuperRegion(args[1]);
             
             if (sr != null) {
                 //TODO make revenue include all owned regions within the super region
-                boolean isOwner = sr.hasOwner(player.getName());
                 SuperRegionType srt = regionManager.getSuperRegionType(sr.getType());
                 int population = sr.getOwners().size() + sr.getMembers().size();
                 double revenue = sr.getTaxes() * population + srt.getOutput();
@@ -1492,7 +1496,7 @@ public class HeroStronghold extends JavaPlugin {
                 }
                 return true;
             }
-            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] There is no player or super-region by that name");
+            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Could not find player or super-region by that name");
             return true;
         } else if (args.length > 0 && args[0].equalsIgnoreCase("god")) {
             if (perms == null || !perms.has(player, "herostronghold.god")) {
