@@ -88,7 +88,7 @@ public class RegionEntityListener extends EntityListener {
             }
             SuperRegionType srt = rm.getSuperRegionType(sr.getType());
             try {
-                if (l.getX() - radius > x1 && l.distanceSquared(loc) < radius) {
+                if (!(l.getX() - radius > x1) && l.distanceSquared(loc) < radius) {
                     if (srt.hasEffect("denypvp")) {
                         dPlayer.sendMessage(ChatColor.RED + "[HeroStronghold] " + player.getDisplayName() + " is protected in this region.");
                         event.setCancelled(true);
@@ -142,7 +142,7 @@ public class RegionEntityListener extends EntityListener {
                 return;
             }
             try {
-                if (l.getX() - radius > x && l.distanceSquared(player.getLocation()) < radius) {
+                if (!(l.getX() - radius > x) && l.distanceSquared(player.getLocation()) < radius) {
                     ArrayList<String> effects = rm.getRegionType(r.getType()).getEffects();
                     if (effects != null && !effects.isEmpty()) {
                         for (String effect : effects) {

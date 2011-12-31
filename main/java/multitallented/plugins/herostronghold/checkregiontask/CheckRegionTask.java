@@ -35,7 +35,6 @@ public class CheckRegionTask implements Runnable {
 
     @Override
     public void run() {
-        //TODO check for power increase daily
         Player[] players = server.getOnlinePlayers();
         int chunk = players.length / 4;
         PluginManager pm = server.getPluginManager();

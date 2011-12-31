@@ -12,7 +12,7 @@ public class SuperRegionType {
     private final int radius;
     private final Map<String, Integer> requirements;
     private final double moneyRequirement;
-    private final double output; //TODO implement output daily
+    private final double output;
     private final String name;
     private final List<String> children;
     private final int maxPower;

@@ -1,7 +1,5 @@
 package main.java.multitallented.plugins.herostronghold.listeners;
 
-import java.util.Iterator;
-import java.util.Set;
 import main.java.multitallented.plugins.herostronghold.effect.Effect;
 import main.java.multitallented.plugins.herostronghold.HeroStronghold;
 import main.java.multitallented.plugins.herostronghold.region.Region;
@@ -58,7 +56,7 @@ public class RegionBlockListener extends BlockListener {
                 return;
             }
             try {
-                if (l.getX() - radius > x1 && l.distanceSquared(loc) < radius) {
+                if (!(l.getX() - radius > x1) && l.distanceSquared(loc) < radius) {
                     Region currentRegion = regionManager.getRegion(currentLoc);
                     RegionType currentRegionType = regionManager.getRegionType(currentRegion.getType());
                     Player player = event.getPlayer();

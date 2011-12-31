@@ -49,10 +49,7 @@ public class RegionManager {
         configManager = new ConfigManager(config, plugin);
         plugin.setConfigManager(configManager);
         
-        
-        //TODO add get set methods for global settings
-        //TODO implement global settings in listeners
-        //TODO write to super-region file when editing power
+        //TODO make it so admins can create custom super-regions
         
         FileConfiguration regionConfig = new YamlConfiguration();
         try {
@@ -419,7 +416,7 @@ public class RegionManager {
                 break;
             }
             try {
-                if (l.getX() - radius > x1 && l.distanceSquared(loc) < radius) {
+                if (!(l.getX() - radius > x1) && l.distanceSquared(loc) < radius) {
                     SuperRegionType srt = getSuperRegionType(sr.getType());
                     String rt = srt.getName();
                     int required = srt.getRequirement(rt);
@@ -432,7 +429,7 @@ public class RegionManager {
                             return;
                         }
                         try {
-                            if (rl.getX() - radius1 > x && rl.distanceSquared(loc) < radius1 && getRegion(rl).getType().equals(rt)) {
+                            if (!(rl.getX() - radius1 > x) && rl.distanceSquared(loc) < radius1 && getRegion(rl).getType().equals(rt)) {
                                 required--;
                                 if (required <= 0)
                                     break;
@@ -565,6 +562,29 @@ public class RegionManager {
         }
     }
     
+    public void setTaxes(SuperRegion sr, double taxes) {
+        File superRegionFile = new File(plugin.getDataFolder() + "/superregions", sr.getName() + ".yml");
+        if (!superRegionFile.exists()) {
+            plugin.warning("Failed to find file " + sr.getName() + ".yml");
+            return;
+        }
+        FileConfiguration sRegionConfig = new YamlConfiguration();
+        try {
+            sRegionConfig.load(superRegionFile);
+        } catch (Exception e) {
+            plugin.warning("Failed to load " + sr.getName() + ".yml to save new taxes");
+            return;
+        }
+        sRegionConfig.set("taxes", taxes);
+        try {
+            sRegionConfig.save(superRegionFile);
+        } catch (Exception e) {
+            plugin.warning("Failed to save " + sr.getName() + ".yml");
+            return;
+        }
+        sr.setTaxes(taxes);
+    }
+    
     /**
      * Adds (or subtracts if negative) the balance from the super-region.
      * It saves that data to sr.getName() + ".yml".
@@ -622,7 +642,7 @@ public class RegionManager {
                 return false;
             }
             try {
-                if (l.getX() - radius > x && l.distanceSquared(player.getLocation()) < radius) {
+                if (!(l.getX() - radius > x) && l.distanceSquared(player.getLocation()) < radius) {
                     if ((r.isOwner(player.getName()) || r.isMember(player.getName())) || effect.regionHasEffect(getRegionType(r.getType()).getEffects(), effectName) == 0 ||
                             !effect.hasReagents(l))
                         return false;
