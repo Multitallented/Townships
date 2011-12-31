@@ -1498,18 +1498,6 @@ public class HeroStronghold extends JavaPlugin {
             }
             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Could not find player or super-region by that name");
             return true;
-        } else if (args.length > 0 && args[0].equalsIgnoreCase("god")) {
-            if (perms == null || !perms.has(player, "herostronghold.god")) {
-                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Sorry you don't have permission to do that.");
-                return true;
-            }
-            
-            if (regionEntityListener.toggleGod(player)) {
-                player.sendMessage(ChatColor.GOLD + "[HeroStronghold] Godmode Enabled.");
-            } else {
-                player.sendMessage(ChatColor.GOLD + "[HeroStronghold] Godmode Disabled.");
-            }
-            return true;
         } else {
             if (args.length > 0 && args[args.length - 1].equals("2")) {
                 sender.sendMessage(ChatColor.GRAY + "[HeroStronghold] by " + ChatColor.GOLD + "Multitallented" + ChatColor.GRAY + ": <> = required, () = optional" +

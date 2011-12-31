@@ -35,17 +35,8 @@ import org.bukkit.event.painting.PaintingPlaceEvent;
  */
 public class RegionEntityListener extends EntityListener {
     private final RegionManager rm;
-    private HashSet<Player> godPlayers = new HashSet<Player>();
     public RegionEntityListener(RegionManager rm) {
         this.rm = rm;
-    }
-    
-    public boolean toggleGod(Player p) {
-        if (godPlayers.remove(p)) {
-            return false;
-        }
-        godPlayers.add(p);
-        return true;
     }
     
     @Override
@@ -72,16 +63,7 @@ public class RegionEntityListener extends EntityListener {
     
     @Override
     public void onEntityDamage(EntityDamageEvent event) {
-        if (event.isCancelled() || !(event.getEntity() instanceof Player))
-            return;
-        Player player = (Player) event.getEntity();
-        
-        if (godPlayers.contains(player)) {
-            event.setCancelled(true);
-            return;
-        }
-                
-        if (!(event instanceof EntityDamageByEntityEvent))
+        if (event.isCancelled() || !(event.getEntity() instanceof Player) || !(event instanceof EntityDamageByEntityEvent))
             return;
         
         EntityDamageByEntityEvent edby = (EntityDamageByEntityEvent) event;
@@ -92,6 +74,7 @@ public class RegionEntityListener extends EntityListener {
         if (!(damager instanceof Player)) {
             return;
         }
+        Player player = (Player) event.getEntity();
         Player dPlayer = (Player) damager;
         
         Location loc = player.getLocation();

@@ -2,11 +2,8 @@ package multitallented.redcastlemedia.bukkit.herostronghold;
 
 import java.io.File;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -17,7 +14,9 @@ import org.bukkit.configuration.file.YamlConfiguration;
 public class ConfigManager {
     
     private boolean explode;
-    private final Set<Material> matBreakBlackList;
+    private final FileConfiguration config;
+    private final HeroStronghold plugin;
+    /*private final Set<Material> matBreakBlackList;
     private final Set<Material> matPlaceBlackList;
     private final Set<Material> matNotifyBreakBlackList;
     private final Set<Material> matNotifyPlaceBlackList;
@@ -63,10 +62,8 @@ public class ConfigManager {
     private final boolean denyWolfSpawn;
     private final boolean denyWolfTame;
     private final boolean denyEnderDragonSpawn;
-    private final FileConfiguration config;
-    private final HeroStronghold plugin;
     private final boolean denyFriendlyFire;
-    private final boolean denyPvP;
+    private final boolean denyPvP;*/
     
     public ConfigManager(FileConfiguration config, HeroStronghold plugin) {
         this.config = config;
@@ -74,7 +71,7 @@ public class ConfigManager {
         
         //Parse region config data
         explode = config.getBoolean("explode-on-destroy", false);
-        matBreakBlackList = processMatSet(config.getStringList("block-break-blacklist"));
+        /*matBreakBlackList = processMatSet(config.getStringList("block-break-blacklist"));
         matPlaceBlackList = processMatSet(config.getStringList("block-place-blacklist"));
         matNotifyBreakBlackList = processMatSet(config.getStringList("block-notify-on-break"));
         matNotifyPlaceBlackList = processMatSet(config.getStringList("block-notify-on-place"));
@@ -123,13 +120,12 @@ public class ConfigManager {
         denySilverfishSpawn = config.getBoolean("creatures.silverfish.deny-spawn", false);
         denyWolfSpawn = config.getBoolean("creatures.wolf.deny-spawn", false);
         denyWolfTame = config.getBoolean("creatures.wolf.deny-tame", false);
-        denyEnderDragonSpawn = config.getBoolean("creatures.enderdragon.deny-spawn", false);
+        denyEnderDragonSpawn = config.getBoolean("creatures.enderdragon.deny-spawn", false);*/
         
         loadCharters();
-        //TODO add get set methods for global config settings
     }
     
-    private Set<Material> processMatSet(List<String> input) {
+    /*private Set<Material> processMatSet(List<String> input) {
         Set<Material> tempSet = new HashSet<Material>();
         try {
             for (String s : input) {
@@ -141,7 +137,7 @@ public class ConfigManager {
             
         }
         return tempSet;
-    }
+    }*/
     
     private void loadCharters() {
         Map<String, List<String>> charters = new HashMap<String, List<String>>();

@@ -2,6 +2,7 @@ package multitallented.redcastlemedia.bukkit.herostronghold.region;
 
 import multitallented.redcastlemedia.bukkit.herostronghold.effect.Effect;
 import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -49,23 +50,19 @@ public class RegionManager {
         configManager = new ConfigManager(config, plugin);
         plugin.setConfigManager(configManager);
         
-        //TODO make it so admins can create custom super-regions
-        
         FileConfiguration regionConfig = new YamlConfiguration();
         try {
             File regionFile = new File(plugin.getDataFolder(), "regions.yml");
-            boolean newFile = false;
             if (!regionFile.exists()) {
-                newFile = regionFile.createNewFile();
-                if (!newFile) {
-                    plugin.warning("Unable to create new regions.yml file");
-                    plugin.getServer().getPluginManager().disablePlugin(plugin);
+                InputStream defRegionConfigStream = plugin.getResource("regions.yml");
+                if (defRegionConfigStream != null) {
+                    FileConfiguration defRegionConfig = YamlConfiguration.loadConfiguration(defRegionConfigStream);
+                    regionConfig.setDefaults(defRegionConfig);
                 }
+                regionConfig.options().copyDefaults(true);
+                regionFile.createNewFile();
             }
             regionConfig.load(regionFile);
-            if (newFile) {
-                regionConfig.options().copyDefaults();
-            }
             for (String key : regionConfig.getKeys(false)) {
                 ConfigurationSection currentRegion = regionConfig.getConfigurationSection(key);
                 regionTypes.put(key, new RegionType(key,
@@ -81,6 +78,7 @@ public class RegionManager {
                         currentRegion.getDouble("money-requirement"),
                         currentRegion.getDouble("upkeep-money-output")));
             }
+            regionConfig.save(regionFile);
         } catch (Exception ex) {
             plugin.warning("Unable to load regions.yml");
             plugin.getServer().getPluginManager().disablePlugin(plugin);
@@ -88,18 +86,16 @@ public class RegionManager {
         FileConfiguration sRegionConfig = new YamlConfiguration();
         try {
             File sRegionFile = new File(plugin.getDataFolder(), "super-regions.yml");
-            boolean newFile = false;
             if (!sRegionFile.exists()) {
-                newFile = sRegionFile.createNewFile();
-                if (!newFile) {
-                    plugin.warning("Unable to create new super-regions.yml");
-                    plugin.getServer().getPluginManager().disablePlugin(plugin);
+                InputStream defSRegionConfigStream = plugin.getResource("super-regions.yml");
+                if (defSRegionConfigStream != null) {
+                    FileConfiguration defSRegionConfig = YamlConfiguration.loadConfiguration(defSRegionConfigStream);
+                    sRegionConfig.setDefaults(defSRegionConfig);
                 }
+                sRegionConfig.options().copyDefaults(true);
+                sRegionFile.createNewFile();
             }
             sRegionConfig.load(sRegionFile);
-            if (newFile) {
-                sRegionConfig.options().copyDefaults();
-            }
             for (String key : regionConfig.getKeys(false)) {
                 ConfigurationSection currentRegion = regionConfig.getConfigurationSection(key);
                 superRegionTypes.put(key, new SuperRegionType(key, currentRegion.getStringList("effects"),
@@ -112,8 +108,10 @@ public class RegionManager {
                         currentRegion.getInt("daily-power-increase", 10),
                         currentRegion.getInt("charter", 0)));
             }
+            sRegionConfig.save(sRegionFile);
         } catch (Exception e) {
-            
+            plugin.warning("Unable to load super-regions.yml");
+            plugin.getServer().getPluginManager().disablePlugin(plugin);
         }
 
         File playerFolder = new File(plugin.getDataFolder(), "data"); // Setup the Data Folder if it doesn't already exist
