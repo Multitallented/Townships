@@ -1,6 +1,6 @@
-package main.java.multitallented.plugins.herostronghold.region;
+package multitallented.redcastlemedia.bukkit.herostronghold.region;
 
-import main.java.multitallented.plugins.herostronghold.effect.Effect;
+import multitallented.redcastlemedia.bukkit.herostronghold.effect.Effect;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,9 +11,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import main.java.multitallented.plugins.herostronghold.ConfigManager;
-import main.java.multitallented.plugins.herostronghold.HeroStronghold;
-import main.java.multitallented.plugins.herostronghold.events.RegionDestroyedEvent;
+import multitallented.redcastlemedia.bukkit.herostronghold.ConfigManager;
+import multitallented.redcastlemedia.bukkit.herostronghold.HeroStronghold;
+import multitallented.redcastlemedia.bukkit.herostronghold.events.RegionDestroyedEvent;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;

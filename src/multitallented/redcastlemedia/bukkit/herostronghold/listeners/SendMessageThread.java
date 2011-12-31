@@ -1,4 +1,4 @@
-package main.java.multitallented.plugins.herostronghold.listeners;
+package multitallented.redcastlemedia.bukkit.herostronghold.listeners;
 
 import java.util.Map;
 import org.bukkit.ChatColor;

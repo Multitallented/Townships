@@ -2,11 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package main.java.multitallented.plugins.herostronghold.checkregiontask;
+package multitallented.redcastlemedia.bukkit.herostronghold.checkregiontask;
 
-import main.java.multitallented.plugins.herostronghold.events.PlayerInRegionEvent;
-import main.java.multitallented.plugins.herostronghold.region.Region;
-import main.java.multitallented.plugins.herostronghold.region.RegionManager;
+import multitallented.redcastlemedia.bukkit.herostronghold.events.PlayerInRegionEvent;
+import multitallented.redcastlemedia.bukkit.herostronghold.region.Region;
+import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionManager;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
