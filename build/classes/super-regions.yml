@@ -1,0 +1,95 @@
+village:
+  effects:
+  - denyblockbuild
+  - denyblockbreak
+  - denyplayerinteract
+  - denyfriendlyfire
+  radius: 50
+  requirements:
+  - house.5
+  - farm.1
+  - townhall.1
+  - inn.1
+  money-requirement: 100000.0
+  money-output-daily: -25.0
+  max-power: 500
+  daily-power-increase: 50
+  charter: 3
+  child-super-regions: []
+town:
+  effects:
+  - denyblockbuild
+  - denyblockbreak
+  - denyplayerinteract
+  - denypvp
+  radius: 100
+  requirements:
+  - house.10
+  - farm.2
+  - townhall.1
+  - marketplace.1
+  - inn.1
+  - hospital.1
+  - village.1
+  money-requirement: 200000.0
+  money-output-daily: -50.0
+  max-power: 1000
+  daily-power-increase: 150
+  charter: 6
+  child-regions:
+  - village
+city:
+  effects:
+  - denyblockbuild
+  - denyblockbreak
+  - denyplayerinteract
+  - denypvp
+  radius: 100
+  requirements:
+  - house.20
+  - farm.4
+  - townhall.1
+  - marketplace.2
+  - inn.3
+  - hospital.2
+  - town.1
+  money-requirement: 400000.0
+  money-output-daily: -100.0
+  max-power: 3000
+  daily-power-increase: 500
+  charter: 12
+  child-regions:
+  - town
+militarybase:
+  effects:
+  - denyblockbuild
+  - denyfriendlyfire
+  radius: 25
+  requirements:
+  - house.1
+  - arrowturret.4
+  - hospital.1
+  money-requirement: 10000.0
+  money-output-daily: -15.0
+  max-power: 200
+  daily-power-increase: 150
+  charter: 0
+  child-regions: []
+miningcolony:
+  effects:
+  - denyblockbuild
+  - denyblockbreak
+  - denyplayerinteract
+  - denypvp
+  radius: 30
+  requirements:
+  - ironrefinery.2
+  - goldrefinery.1
+  - redstonerefinery.1
+  - house.1
+  money-requirement: 20000.0
+  money-output-daily: -30.0
+  max-power: 300
+  daily-power-increase: 30
+  charter: 3
+  child-regions: []

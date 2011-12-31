@@ -1,0 +1,23 @@
+author: multitallented
+database: false
+description: Allows you to create regions that can give buffs or debuffs to players
+  with certain HeroClasses.
+generator: http://dinnerbone.com/minecraft/tools/pluginator/
+main: main.java.multitallented.plugins.herostronghold.HeroStronghold
+name: HeroStronghold
+startup: postworld
+version: '0.1'
+depend: [Vault]
+softdepend: [Heroes]
+commands:
+   herostrong:
+      aliases: ['herostronghold', 'hs']
+      description: HeroStronghold commands
+      usage: /<command>
+permissions:
+   herostronghold.create.all:
+      description: Allows you to create a HeroStronghold of any type if you have the necessary materials
+      default: op
+   herostronghold.admin:
+      description: Lets you use admin commands
+      default: op

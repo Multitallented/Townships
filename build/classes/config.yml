@@ -1,0 +1,74 @@
+explode-on-destroy: false
+block-place-blacklist:
+  - IRON_ORE
+  - GOLD_ORE
+block-break-blacklist: []
+block-notify-on-place: []
+block-notify-on-break: []
+deny-tnt-block-damage: false
+deny-tnt-damage: false
+deny-flint-steel-use: true
+deny-firespread: true
+disable-lavaspread: false
+disable-waterspread: false
+player-damage:
+  teleport-to-sky-on-void-falling: false
+  deny-drowning-damage: false
+  deny-void-damage: false
+  deny-fire-damage: false
+  deny-lava-damage: false
+  deny-mob-damage: false
+  deny-fall-damage: false
+  deny-explosion-damage: false
+  deny-suffocation-damage: false
+  deny-contact-damage: false
+  deny-lightning-damage: false
+  deny-friendly-fire: false
+  deny-pvp: false
+creatures:
+  creepers:
+    deny-block-destruction: true
+    deny-spawn: false
+  ghast:
+    deny-block-destruction: false
+    deny-spawn: false
+  enderman:
+    deny-block-take-and-place: true
+    deny-spawn: false
+  zombie:
+    deny-spawn: false
+  skeleton:
+    deny-spawn: false
+  spider:
+    deny-spawn: false
+  cave-spider:
+    deny-spawn: false
+  slime:
+    deny-spawn: false
+  magma-cube:
+    deny-spawn: false
+  blaze:
+    deny-spawn: false
+  zombie-pigmen:
+    deny-spawn: false
+  snowman:
+    deny-spawn: false
+  mooshroom:
+    deny-spawn: false
+  sheep:
+    deny-spawn: false
+  cow:
+    deny-spawn: false
+  chicken:
+    deny-spawn: false
+  squid:
+    deny-spawn: false
+  pig:
+    deny-spawn: false
+  silverfish:
+    deny-spawn: false
+  wolf:
+    deny-spawn: false
+    deny-tame: false
+  enderdragon:
+    deny-spawn: false
