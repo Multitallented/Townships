@@ -52,7 +52,7 @@ public class Effect {
             return 0;
         return data;
     }
-    
+    //TODO fix these
     public boolean isOwnerOfRegion(Player p, Location l) {
         return getPlugin().getRegionManager().getRegion(l).getOwners().contains(p.getName());
     }

@@ -875,24 +875,26 @@ public class HeroStronghold extends JavaPlugin {
                 return true;
             } else if (sr.hasMember(playername)) {
                 player.sendMessage(message);
+                //TODO fix this message
                 int j=0;
                 for (String s : sr.getMember(label)) {
                     message2 += s + ", ";
                     if (j >= 3) {
-                        player.sendMessage(message2.substring(0, message2.length() - 3));
+                        player.sendMessage(message2.substring(0, message2.length() - 2));
                         message2 = ChatColor.GOLD + "";
                         j = -1;
                     }
                     j++;
                 }
                 if (j != 0)
-                    player.sendMessage(message2.substring(0, message2.length() - 3));
+                    player.sendMessage(message2.substring(0, message2.length() - 2));
                 return true;
             }
             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + playername + " doesn't belong to that region.");
             return true;
         } else if (args.length > 0 && args[0].equalsIgnoreCase("ch")) {
             //Check if wanting to be set to any other channel
+            //TODO fix this set channel to nothing
             if (args.length == 1 || args[1].equalsIgnoreCase("o") || args[1].equalsIgnoreCase("all") || args[1].equalsIgnoreCase("none")) {
                 dpeListener.setPlayerChannel(player, "");
                 return true;
@@ -984,7 +986,9 @@ public class HeroStronghold extends JavaPlugin {
             }
             
             //Add the player to the super region
-            sr.addMember(player.getName(), new ArrayList<String>());
+            ArrayList<String> perm = new ArrayList<String>();
+            perm.add("member");
+            regionManager.setMember(sr, player.getName(), perm);
             pendingInvites.remove(player.getName());
             player.sendMessage(ChatColor.GOLD + "[HeroStronghold] Welcome to " + args[1]);
             for (String s : sr.getMembers().keySet()) {
@@ -1045,6 +1049,7 @@ public class HeroStronghold extends JavaPlugin {
                     pl.sendMessage(ChatColor.GOLD + playername + " is now an owner of " + args[2]);
                 }
             }
+            //TODO make this save
             sr.addOwner(playername);
             return true;
         } else if (args.length > 2 && args[0].equalsIgnoreCase("remove")) {
@@ -1124,12 +1129,17 @@ public class HeroStronghold extends JavaPlugin {
                 return true;
             }
             
-            if (sr.togglePerm(playername, args[2])) {
+            List<String> perm = sr.getMember(playername);
+            if (perm.contains(args[2])) {
+                perm.remove(args[2]);
+                regionManager.setMember(sr, playername, perm);
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Removed perm " + args[2] + " for " + args[1] + " in " + args[3]);
                 if (p != null)
                     p.sendMessage(ChatColor.GRAY + "[HeroStronghold] Your perm " + args[2] + " was revoked in " + args[3]);
                 return true;
             } else {
+                perm.add(args[2]);
+                regionManager.setMember(sr, playername, perm);
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Added perm " + args[2] + " for " + args[1] + " in " + args[3]);
                 if (p != null)
                     p.sendMessage(ChatColor.GRAY + "[HeroStronghold] You were granted permission " + args[2] + " in " + args[3]);

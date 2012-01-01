@@ -27,7 +27,7 @@ public class RegionPlayerInteractListener extends PlayerListener {
     public void onPlayerChat(PlayerChatEvent event) {
         Player player = event.getPlayer();
         String channel = channels.get(player);
-        if (channel == null)
+        if (channel == null || channel.equals(""))
             return;
         event.setCancelled(true);
         SendMessageThread smt = new SendMessageThread(channel, channels, player, event.getMessage());
@@ -40,7 +40,15 @@ public class RegionPlayerInteractListener extends PlayerListener {
     
     public void setPlayerChannel(Player p, String s) {
         if (s.equals("")) {
+            String prevChannel = channels.get(p);
             channels.remove(p);
+            SendMessageThread smt = new SendMessageThread(prevChannel, channels, p, p.getDisplayName() + " has left channel " + s);
+            try {
+                smt.run();
+            } catch(Exception e) {
+                
+            }
+            return;
         }
         channels.put(p, s);
         SendMessageThread smt = new SendMessageThread(s, channels, p, p.getDisplayName() + " has joined channel " + s);

@@ -190,7 +190,10 @@ public class RegionManager {
                     ConfigurationSection configMembers = sRegionDataConfig.getConfigurationSection("members");
                     Map<String, List<String>> members = new HashMap<String, List<String>>();
                     for (String s : configMembers.getKeys(false)) {
-                        members.put(s, members.get(s));
+                        List<String> perm = configMembers.getStringList(s);
+                        if (perm.contains("member")) {
+                            members.put(s, configMembers.getStringList(s));
+                        }
                     }
                     int power = sRegionDataConfig.getInt("power", 10);
                     double taxes = sRegionDataConfig.getDouble("taxes", 0.0);
@@ -309,7 +312,7 @@ public class RegionManager {
             dataFile.createNewFile();
             dataConfig = new YamlConfiguration();
             System.out.println("[HeroStronghold] saving new superregion to " + name + ".yml");
-            liveSuperRegions.put(name, new SuperRegion(name, loc, type, owners, new HashMap<String, List<String>>(), maxpower, 0.0, 0.0, new LinkedList<Double>()));
+            liveSuperRegions.put(name, new SuperRegion(name, loc, type, owners, members, maxpower, 0.0, 0.0, new LinkedList<Double>()));
             /*int sort = (int) loc.getX() + superRegionTypes.get(type).getRadius();
             float k = sortedSuperRegions.size() / 2;
             int j = (int) k;
@@ -609,6 +612,58 @@ public class RegionManager {
             return;
         }
         sr.setTaxes(taxes);
+    }
+    
+    public void setMember(SuperRegion sr, String name, List<String> input) {
+        File superRegionFile = new File(plugin.getDataFolder() + "/superregions", sr.getName() + ".yml");
+        if (!superRegionFile.exists()) {
+            plugin.warning("Failed to find file " + sr.getName() + ".yml");
+            return;
+        }
+        FileConfiguration sRegionConfig = new YamlConfiguration();
+        try {
+            sRegionConfig.load(superRegionFile);
+        } catch (Exception e) {
+            plugin.warning("Failed to load " + sr.getName() + ".yml to save member");
+            return;
+        }
+        sRegionConfig.set("members." + name, input);
+        try {
+            sRegionConfig.save(superRegionFile);
+        } catch (Exception e) {
+            plugin.warning("Failed to save " + sr.getName() + ".yml");
+            return;
+        }
+        sr.addMember(name, input);
+    }
+    
+    public void setOwner(SuperRegion sr, String name) {
+        File superRegionFile = new File(plugin.getDataFolder() + "/superregions", sr.getName() + ".yml");
+        if (!superRegionFile.exists()) {
+            plugin.warning("Failed to find file " + sr.getName() + ".yml");
+            return;
+        }
+        FileConfiguration sRegionConfig = new YamlConfiguration();
+        try {
+            sRegionConfig.load(superRegionFile);
+        } catch (Exception e) {
+            plugin.warning("Failed to load " + sr.getName() + ".yml to save owner");
+            return;
+        }
+        List<String> owners = sr.getOwners();
+        if (!owners.remove(name)) {
+            owners.add(name);
+            sr.addOwner(name);
+        } else {
+            sr.remove(name);
+        }
+        sRegionConfig.set("owners", owners);
+        try {
+            sRegionConfig.save(superRegionFile);
+        } catch (Exception e) {
+            plugin.warning("Failed to save " + sr.getName() + ".yml");
+            return;
+        }
     }
     
     /**
