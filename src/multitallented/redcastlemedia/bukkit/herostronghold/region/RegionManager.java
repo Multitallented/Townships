@@ -47,6 +47,8 @@ public class RegionManager {
         this.plugin = plugin;
         this.config = config;
         
+        //TODO sometimes super-region type is invalid?
+        
         configManager = new ConfigManager(config, plugin);
         plugin.setConfigManager(configManager);
         
@@ -195,8 +197,10 @@ public class RegionManager {
                     double balance = sRegionDataConfig.getDouble("balance", 0.0);
                     List<Double> taxRevenue1 = sRegionDataConfig.getDoubleList("tax-revenue");
                     LinkedList<Double> taxRevenue = new LinkedList<Double>();
-                    for (double d : taxRevenue1) {
-                        taxRevenue.add(d);
+                    if (taxRevenue1 != null) {
+                        for (double d : taxRevenue1) {
+                            taxRevenue.add(d);
+                        }
                     }
                     if (location != null && type != null && owners != null) {
                         liveSuperRegions.put(name, new SuperRegion(name, location, type, owners, members, power, taxes, balance, taxRevenue));
@@ -212,7 +216,7 @@ public class RegionManager {
                 }
             } catch (Exception e) {
                 System.out.println("[HeroStronghold] failed to load superregions from " + sRegionFile.getName());
-                System.out.println(e.getStackTrace());
+                e.printStackTrace();
             }
         }
         if (sortedSuperRegions.size() > 1) {
@@ -432,7 +436,7 @@ public class RegionManager {
         
         double x1 = loc.getX();
         for (SuperRegion sr : getSortedSuperRegions()) {
-            int radius = getRegionType(sr.getType()).getRadius();
+            int radius = getSuperRegionType(sr.getType()).getRadius();
             Location l = sr.getLocation();
             if (l.getX() + radius < x1) {
                 break;

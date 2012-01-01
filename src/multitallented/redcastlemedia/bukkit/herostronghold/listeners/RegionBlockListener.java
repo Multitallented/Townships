@@ -222,8 +222,6 @@ public class RegionBlockListener extends BlockListener {
             }
 
             IgniteCause cause = event.getCause();
-
-            boolean isFireSpread = cause == IgniteCause.SPREAD;
             
             if (cause == IgniteCause.LIGHTNING && regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyblockbreak")) {
                 event.setCancelled(true);
@@ -235,7 +233,7 @@ public class RegionBlockListener extends BlockListener {
                 return;
             }
 
-            if (isFireSpread && regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyblockbreak")) {
+            if (cause == IgniteCause.SPREAD && regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyblockbreak")) {
                 event.setCancelled(true);
                 return;
             }
@@ -251,7 +249,7 @@ public class RegionBlockListener extends BlockListener {
         
         @Override
         public void onBlockBurn(BlockBurnEvent event) {
-            if (event.isCancelled() && !regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyblockbreak")) {
+            if (event.isCancelled() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyblockbreak")) {
                 return;
             }
             event.setCancelled(true);
