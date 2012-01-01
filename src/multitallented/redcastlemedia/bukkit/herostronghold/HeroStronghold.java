@@ -282,13 +282,14 @@ public class HeroStronghold extends JavaPlugin {
             }
             
             //Check if player can afford to create this herostronghold
+            double costCheck = 0;
             if (econ != null) {
                 double cost = currentRegionType.getMoneyRequirement();
                 if (econ.getBalance(player.getName()) < cost) {
                     player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You need $" + cost + " to make this type of structure.");
                     return true;
                 } else {
-                    econ.withdrawPlayer(player.getName(), cost);
+                    costCheck = cost;
                 }
                 
             }
@@ -447,6 +448,9 @@ public class HeroStronghold extends JavaPlugin {
             
             ArrayList<String> owners = new ArrayList<String>();
             owners.add(player.getName());
+            if (costCheck > 0) {
+                econ.withdrawPlayer(player.getName(), costCheck);
+            }
             regionManager.addRegion(currentLocation, regionName, owners);
             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.WHITE + "You successfully create a " + ChatColor.RED + regionName);
             
@@ -514,13 +518,14 @@ public class HeroStronghold extends JavaPlugin {
             }
             
             //Check if player can afford to create this herostronghold
+            double costCheck = 0;
             if (econ != null) {
                 double cost = currentRegionType.getMoneyRequirement();
                 if (econ.getBalance(player.getName()) < cost) {
                     player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You need $" + cost + " to make this type of region.");
                     return true;
                 } else {
-                    econ.withdrawPlayer(player.getName(), cost);
+                    costCheck = cost;
                 }
                 
             }
@@ -715,8 +720,12 @@ public class HeroStronghold extends JavaPlugin {
                 pendingCharters.remove(args[2]);
             }
             String playername = player.getName();
-            if (!owners.contains(playername))
+            if (!owners.contains(playername)) {
                 owners.add(playername);
+            }
+            if (costCheck > 0) {
+                econ.withdrawPlayer(player.getName(), costCheck);
+            }
             regionManager.addSuperRegion(args[2], currentLocation, regionTypeName, owners, members, currentRegionType.getMaxPower());
             player.sendMessage(ChatColor.GOLD + "[HeroStronghold] You've created a new " + args[1] + " called " + args[2]);
             return true;
