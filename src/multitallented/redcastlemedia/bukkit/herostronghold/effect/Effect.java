@@ -52,7 +52,7 @@ public class Effect {
             return 0;
         return data;
     }
-    //TODO fix these
+    //TODO fix these to add super-regions
     public boolean isOwnerOfRegion(Player p, Location l) {
         return getPlugin().getRegionManager().getRegion(l).getOwners().contains(p.getName());
     }

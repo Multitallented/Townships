@@ -875,26 +875,32 @@ public class HeroStronghold extends JavaPlugin {
                 return true;
             } else if (sr.hasMember(playername)) {
                 player.sendMessage(message);
-                //TODO fix this message
                 int j=0;
                 for (String s : sr.getMember(label)) {
-                    message2 += s + ", ";
-                    if (j >= 3) {
-                        player.sendMessage(message2.substring(0, message2.length() - 2));
-                        message2 = ChatColor.GOLD + "";
-                        j = -1;
+                    if (message2.length() + s.length() + 2 > 57) {
+                        player.sendMessage(message2 + ", ");
+                        message2 = ChatColor.GOLD + s;
+                        j++;
+                    } else {
+                        if (j==0) {
+                            message2 += s;
+                            j++;
+                        } else if (j > 14) {
+                            break;
+                        } else {
+                            message2 += ", " + s;
+                        }
                     }
-                    j++;
                 }
-                if (j != 0)
-                    player.sendMessage(message2.substring(0, message2.length() - 2));
+                if (!sr.getMember(label).isEmpty()) {
+                    player.sendMessage(message2);
+                }
                 return true;
             }
             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + playername + " doesn't belong to that region.");
             return true;
         } else if (args.length > 0 && args[0].equalsIgnoreCase("ch")) {
             //Check if wanting to be set to any other channel
-            //TODO fix this set channel to nothing
             if (args.length == 1 || args[1].equalsIgnoreCase("o") || args[1].equalsIgnoreCase("all") || args[1].equalsIgnoreCase("none")) {
                 dpeListener.setPlayerChannel(player, "");
                 return true;
@@ -1006,17 +1012,12 @@ public class HeroStronghold extends JavaPlugin {
             return true;
         } else if (args.length > 2 && args[0].equalsIgnoreCase("addowner")) {
             Player p = getServer().getPlayer(args[1]);
-            OfflinePlayer op = getServer().getOfflinePlayer(args[1]);
             String playername = "";
             
             //Check valid player
             if (p == null) {
-                if (op == null) {
-                    player.sendMessage(ChatColor.GRAY + "[Herostronghold] There is no player named: " + args[1]);
-                    return true;
-                } else {
-                    playername = op.getName();
-                }
+                player.sendMessage(ChatColor.GRAY + "[Herostronghold] There is no player online named: " + args[1]);
+                return true;
             } else {
                 playername = p.getName();
             }
@@ -1049,7 +1050,7 @@ public class HeroStronghold extends JavaPlugin {
                     pl.sendMessage(ChatColor.GOLD + playername + " is now an owner of " + args[2]);
                 }
             }
-            //TODO make this save
+            if (sr.hasOwner(playername))
             sr.addOwner(playername);
             return true;
         } else if (args.length > 2 && args[0].equalsIgnoreCase("remove")) {

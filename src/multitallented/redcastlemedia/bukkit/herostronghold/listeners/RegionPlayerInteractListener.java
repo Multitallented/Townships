@@ -25,6 +25,7 @@ public class RegionPlayerInteractListener extends PlayerListener {
     
     @Override
     public void onPlayerChat(PlayerChatEvent event) {
+        //TODO add custom titles
         Player player = event.getPlayer();
         String channel = channels.get(player);
         if (channel == null || channel.equals(""))
@@ -42,11 +43,13 @@ public class RegionPlayerInteractListener extends PlayerListener {
         if (s.equals("")) {
             String prevChannel = channels.get(p);
             channels.remove(p);
-            SendMessageThread smt = new SendMessageThread(prevChannel, channels, p, p.getDisplayName() + " has left channel " + s);
-            try {
-                smt.run();
-            } catch(Exception e) {
-                
+            if (prevChannel != null && !prevChannel.endsWith(s)) {
+                SendMessageThread smt = new SendMessageThread(prevChannel, channels, p, p.getDisplayName() + " has left channel " + s);
+                try {
+                    smt.run();
+                } catch(Exception e) {
+
+                }
             }
             return;
         }
