@@ -470,6 +470,7 @@ public class HeroStronghold extends JavaPlugin {
             
             return true;
         } else if (args.length > 2 && args[0].equalsIgnoreCase("create")) {
+            //TODO validate overlapping super-regions
             //Check if valid name (further name checking later)
             if (args[2].length() > 25) {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] That name is too long.");
@@ -890,11 +891,23 @@ public class HeroStronghold extends JavaPlugin {
             }
             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + playername + " doesn't belong to that region.");
             return true;
-        } else if (args.length > 1 && args[0].equalsIgnoreCase("ch")) {
+        } else if (args.length > 0 && args[0].equalsIgnoreCase("ch")) {
+            //Check if wanting to be set to any other channel
+            if (args.length == 1 || args[1].equalsIgnoreCase("o") || args[1].equalsIgnoreCase("all") || args[1].equalsIgnoreCase("none")) {
+                dpeListener.setPlayerChannel(player, "");
+                return true;
+            }
+            
+            if (args.length < 2) {
+                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] /hs ch channelname.  /hs ch (to go to all chat)");
+                return true;
+            }
+            
             //Check if valid super region
             SuperRegion sr = regionManager.getSuperRegion(args[1]);
             if (sr == null) {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] There is no super-region by that name (" + args[1] + ").");
+                player.sendMessage(ChatColor.GRAY + "Try /hs ch to go to all chat.");
                 return true;
             }
             
@@ -947,7 +960,7 @@ public class HeroStronghold extends JavaPlugin {
             pendingInvites.put(invitee.getName(), args[2]);
             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You have invited " + ChatColor.GOLD + args[1] + ChatColor.GRAY + " to join " + ChatColor.GOLD + args[2]);
             if (invitee != null)
-                invitee.sendMessage(ChatColor.GOLD + "[HeroStronghold] You have been invited to join " + args[2]);
+                invitee.sendMessage(ChatColor.GOLD + "[HeroStronghold] You have been invited to join " + args[2] + ". /hs accept " + args[2]);
             return true;
         } else if (args.length > 1 && args[0].equalsIgnoreCase("accept")) {
             //Check if player has a pending invite to that super-region

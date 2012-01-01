@@ -25,14 +25,14 @@ public class SendMessageThread implements Runnable {
     public void run() {
         int i=0;
         for (Player p : channels.keySet()) {
-            if (!channels.get(p).equals(channel)) {
+            if (channels.get(p).equals(channel)) {
                 p.sendMessage(ChatColor.GRAY + "[" + ChatColor.GREEN + channel + ChatColor.GRAY + "]" + p.getDisplayName()
                         + ": " + message);
                 i++;
             }
         }
         if (i<=1)
-            player.sendMessage(ChatColor.GOLD + "No hears you. You are alone in this channel.");
+            player.sendMessage(ChatColor.GOLD + "[" + channel + "] No hears you. You are alone in this channel.");
     }
     
 }

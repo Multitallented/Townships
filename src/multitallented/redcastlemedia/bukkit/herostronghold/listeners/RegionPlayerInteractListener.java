@@ -39,6 +39,9 @@ public class RegionPlayerInteractListener extends PlayerListener {
     }
     
     public void setPlayerChannel(Player p, String s) {
+        if (s.equals("")) {
+            channels.remove(p);
+        }
         channels.put(p, s);
         SendMessageThread smt = new SendMessageThread(s, channels, p, p.getDisplayName() + " has joined channel " + s);
         try {
