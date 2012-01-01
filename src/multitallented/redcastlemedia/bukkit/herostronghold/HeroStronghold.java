@@ -357,7 +357,7 @@ public class HeroStronghold extends JavaPlugin {
             if (!requirements.isEmpty()) {
                 reqMap = new HashMap<Integer, Integer>();
                 for (ItemStack currentIS : requirements) {
-                    reqMap.put(currentIS.getTypeId(), currentIS.getAmount());
+                    reqMap.put(new Integer(currentIS.getTypeId()), new Integer(currentIS.getAmount()));
                 }
                 //Check the area for required blocks
                 //TODO Fix this!! It's slow, and it probably doesn't work
@@ -554,17 +554,23 @@ public class HeroStronghold extends JavaPlugin {
                 warning("Possible failure to find correct charter for " + args[2]);
             }
             
-            Map<String, Integer> requirements = (HashMap<String, Integer>) ((HashMap<String, Integer>) currentRegionType.getRequirements()).clone();
+            Map<String, Integer> requirements = currentRegionType.getRequirements();
+            HashMap<String, Integer> req = new HashMap<String, Integer>();
+            for (String s : currentRegionType.getRequirements().keySet()) {
+                req.put(new String(s), new Integer(requirements.get(s)));
+            }
             
             //Check for required regions
-            List<String> children = (ArrayList<String>) ((ArrayList<String>) currentRegionType.getChildren()).clone();
-            for (String s : children) {
-                if (!requirements.containsKey(s))
-                    requirements.put(s, 1);
+            List<String> children = currentRegionType.getChildren();
+            if (children != null) {
+                for (String s : children) {
+                    if (!requirements.containsKey(s))
+                        requirements.put(new String(s), 1);
+                }
             }
             
             //Check if there already is a super-region by that name, but not if it's one of the child regions
-            if (regionManager.getSuperRegion(args[2]) != null && !children.contains(args[2])) {
+            if (regionManager.getSuperRegion(args[2]) != null && (children == null || !children.contains(args[2]))) {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] There is already a super-region by that name.");
                 return true;
             }

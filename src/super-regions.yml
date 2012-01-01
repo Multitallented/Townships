@@ -30,7 +30,6 @@ town:
   - marketplace.1
   - inn.1
   - hospital.1
-  - village.1
   money-requirement: 200000.0
   money-output-daily: -50.0
   max-power: 1000
@@ -52,7 +51,6 @@ city:
   - marketplace.2
   - inn.3
   - hospital.2
-  - town.1
   money-requirement: 400000.0
   money-output-daily: -100.0
   max-power: 3000

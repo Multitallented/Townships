@@ -86,13 +86,14 @@ public class RegionBlockListener extends BlockListener {
                     int i = 0;
                     for (ItemStack currentStack : currentRegionType.getRequirements()) {
                         if (currentStack.getTypeId() == event.getBlock().getTypeId()) {
-                            amountRequired = currentStack.getAmount();
+                            amountRequired = new Integer(currentStack.getAmount());
                             break;
                         }
                     }
                     if (amountRequired == 0)
                         return;
-
+                    
+                    //TODO improve this
                     for (int x= (int) (currentLoc.getX()-radius); x<radius + currentLoc.getX(); x++) {
                         for (int y = currentLoc.getY()- radius > 1 ? (int) (currentLoc.getY() - radius) : 1; y< radius + currentLoc.getY() && y < 128; y++) {
                             for (int z = (int) (currentLoc.getZ() - radius); z<radius + currentLoc.getZ(); z++) {
