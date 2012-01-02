@@ -46,7 +46,6 @@ public class RegionManager {
         this.plugin = plugin;
         this.config = config;
         
-        
         configManager = new ConfigManager(config, plugin);
         plugin.setConfigManager(configManager);
         
@@ -636,6 +635,29 @@ public class RegionManager {
         sr.addMember(name, input);
     }
     
+    public void removeMember(SuperRegion sr, String name) {
+        File superRegionFile = new File(plugin.getDataFolder() + "/superregions", sr.getName() + ".yml");
+        if (!superRegionFile.exists()) {
+            plugin.warning("Failed to find file " + sr.getName() + ".yml");
+            return;
+        }
+        FileConfiguration sRegionConfig = new YamlConfiguration();
+        try {
+            sRegionConfig.load(superRegionFile);
+        } catch (Exception e) {
+            plugin.warning("Failed to load " + sr.getName() + ".yml to remove member " + name);
+            return;
+        }
+        sRegionConfig.set("members." + name, new ArrayList<String>());
+        try {
+            sRegionConfig.save(superRegionFile);
+        } catch (Exception e) {
+            plugin.warning("Failed to save " + sr.getName() + ".yml");
+            return;
+        }
+        sr.remove(name);
+    }
+    
     public void setOwner(SuperRegion sr, String name) {
         File superRegionFile = new File(plugin.getDataFolder() + "/superregions", sr.getName() + ".yml");
         if (!superRegionFile.exists()) {
@@ -682,14 +704,22 @@ public class RegionManager {
             plugin.warning("Failed to load " + r.getID() + ".yml to save member");
             return;
         }
-        regionConfig.set("members", name);
+        ArrayList<String> members = r.getMembers();
+        if (r.isMember(name)) {
+            members.remove(name);
+            regionConfig.set("members", members);
+            r.remove(name);
+        } else {
+            members.add(name);
+            regionConfig.set("members", members);
+            r.addMember(name);
+        }
         try {
             regionConfig.save(regionFile);
         } catch (Exception e) {
             plugin.warning("Failed to save " + r.getID() + ".yml");
             return;
         }
-        r.addMember(name);
     }
     
     public void setOwner(Region r, String name) {

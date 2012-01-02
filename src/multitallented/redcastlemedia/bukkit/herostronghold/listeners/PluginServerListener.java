@@ -7,7 +7,6 @@ import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.event.server.ServerListener;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.PluginManager;
 
 /**
  *
@@ -30,7 +29,7 @@ public class PluginServerListener extends ServerListener {
             Logger log = Logger.getLogger("Minecraft");
             String message = "[HeroStronghold] " + name + " has been disabled!";
             log.info(message);
-            heroes = null;
+            HeroStronghold.heroes = null;
         }
         /*else if (name.equals("iConomy") || name.equals("BOSEconomy") || name.equals("Essentials")) {
             HeroStronghold.econ = null;
@@ -43,7 +42,9 @@ public class PluginServerListener extends ServerListener {
         String name = currentPlugin.getDescription().getName();
         
         if (name.equals("Heroes")) {
-            heroes = (Heroes) currentPlugin;
+            HeroStronghold.heroes = (Heroes) currentPlugin;
+            Logger log = Logger.getLogger("Minecraft");
+            log.info("[HeroStronghold] Successfully hooked Heroes.");
         }
         /*else if (name.equals("Vault") && (pm.isPluginEnabled("iConomy") || pm.isPluginEnabled("BOSEconomy") || pm.isPluginEnabled("Essentials"))
                 && HeroStronghold.econ == null) {
@@ -54,13 +55,4 @@ public class PluginServerListener extends ServerListener {
         }*/
     }
     
-    public void setupHeroes(Heroes heroes) {
-        if (this.heroes != null && heroes != null) {
-            this.heroes = heroes;
-        }
-    }
-    
-    public Heroes getHeroes() {
-        return heroes;
-    }
 }

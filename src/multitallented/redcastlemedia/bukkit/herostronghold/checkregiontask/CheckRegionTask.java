@@ -39,9 +39,8 @@ public class CheckRegionTask implements Runnable {
         int chunk = players.length / 4;
         PluginManager pm = server.getPluginManager();
         for (int j=chunk * i; j<(i==3 ? players.length : chunk * (i+1)); j++) {
-            //TODO fix index out of bounds exception
-            CheckPlayerInRegionThread thread = new CheckPlayerInRegionThread(this, pm, regionManager, players[j]);
             try {
+                CheckPlayerInRegionThread thread = new CheckPlayerInRegionThread(this, pm, regionManager, players[j]);
                 thread.run();
             } catch (Exception e) {
                 

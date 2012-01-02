@@ -138,7 +138,6 @@ public class ConfigManager {
         }
         return tempSet;
     }*/
-    //TODO fix this loading charters
     private void loadCharters() {
         Map<String, List<String>> charters = new HashMap<String, List<String>>();
         File charterFolder = new File(plugin.getDataFolder(), "charters");
@@ -150,8 +149,10 @@ public class ConfigManager {
             } catch (Exception e) {
                 plugin.warning("Failed to load charter " + charterFile.getName());
             }
-            String key = charterFile.getName().replace(".yml", "");
-            charters.put(key, charterConfig.getStringList(key));
+            for (String key : charterConfig.getKeys(false)) {
+                charters.put(key, charterConfig.getStringList(key));
+                break;
+            }
         }
         //send loaded charters for live use
         plugin.setCharters(charters);
