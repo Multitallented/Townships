@@ -26,7 +26,7 @@ public class SendMessageThread implements Runnable {
         int i=0;
         for (Player p : channels.keySet()) {
             if (channels.get(p).equals(channel)) {
-                p.sendMessage(ChatColor.GRAY + "[" + ChatColor.GREEN + channel + ChatColor.GRAY + "]" + p.getDisplayName()
+                p.sendMessage(ChatColor.GRAY + "[" + ChatColor.GREEN + channel + ChatColor.GRAY + "]" + player.getDisplayName()
                         + ": " + message);
                 i++;
             }
