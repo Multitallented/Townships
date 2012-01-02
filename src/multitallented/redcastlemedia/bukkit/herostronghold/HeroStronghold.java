@@ -540,7 +540,6 @@ public class HeroStronghold extends JavaPlugin {
             
             return true;
         } else if (args.length > 2 && args[0].equalsIgnoreCase("create")) {
-            //TODO validate overlapping super-regions
             //Check if valid name (further name checking later)
             if (args[2].length() > 25) {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] That name is too long.");
@@ -661,6 +660,14 @@ public class HeroStronghold extends JavaPlugin {
                                 quietDestroy.add(sr.getName());
                             }
                             String rType = sr.getType();
+                            if (rType.equals(regionTypeName)) {
+                                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] There is already a " + regionTypeName + " here");
+                                return true;
+                            }
+                            if (!sr.hasOwner(player.getName()) && (!sr.hasMember(player.getName()) || !sr.getMember(player.getName()).contains(regionTypeName))) {
+                                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You are not permitted to build a " + regionTypeName + " inside " + sr.getName());
+                                return true;
+                            } 
                             if (req.containsKey(rType)) {
                                 int amount = req.get(rType);
                                 if (amount < 2) {
@@ -877,7 +884,6 @@ public class HeroStronghold extends JavaPlugin {
                 return true;
             }
             
-            //TODO deposit doesn't work
             //Deposit the money
             econ.withdrawPlayer(player.getName(), amount);
             regionManager.addBalance(sr, amount);
@@ -1512,6 +1518,7 @@ public class HeroStronghold extends JavaPlugin {
             regionManager.destroySuperRegion(args[1], true);
             return true;
         } else if (args.length > 0 && args[0].equalsIgnoreCase("list")) {
+            //TODO fix this list
             int j=0;
             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] list of Region Types");
             String message = ChatColor.GOLD + "";
