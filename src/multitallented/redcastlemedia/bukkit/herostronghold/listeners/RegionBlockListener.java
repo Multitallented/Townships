@@ -92,11 +92,11 @@ public class RegionBlockListener extends BlockListener {
                     }
                     if (amountRequired == 0)
                         return;
+                    int radius1 = (int) Math.sqrt(radius); 
                     
-                    //TODO improve this
-                    for (int x= (int) (currentLoc.getX()-radius); x<radius + currentLoc.getX(); x++) {
-                        for (int y = currentLoc.getY()- radius > 1 ? (int) (currentLoc.getY() - radius) : 1; y< radius + currentLoc.getY() && y < 128; y++) {
-                            for (int z = (int) (currentLoc.getZ() - radius); z<radius + currentLoc.getZ(); z++) {
+                    for (int x= (int) (currentLoc.getX()-radius1); x<radius1 + currentLoc.getX(); x++) {
+                        for (int y = currentLoc.getY()- radius1 > 1 ? (int) (currentLoc.getY() - radius1) : 1; y< radius1 + currentLoc.getY() && y < 128; y++) {
+                            for (int z = (int) (currentLoc.getZ() - radius1); z<radius1 + currentLoc.getZ(); z++) {
                                 Block tempBlock = currentLoc.getWorld().getBlockAt(x, y, z);
                                 if (tempBlock.getTypeId() == event.getBlock().getTypeId()) {
                                     if (i >= amountRequired) {
