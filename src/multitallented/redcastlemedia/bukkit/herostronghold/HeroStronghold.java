@@ -36,6 +36,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.util.Vector;
 
 public class HeroStronghold extends JavaPlugin {
     private PluginServerListener serverListener;
@@ -374,8 +375,7 @@ public class HeroStronghold extends JavaPlugin {
             String playername = player.getName();
             String currentRegionName = currentRegionType.getName();
             
-            Location loc = player.getLocation();
-            double x1 = loc.getX();
+            double x1 = currentLocation.getX();
             for (SuperRegion sr : regionManager.getSortedSuperRegions()) {
                 int radius = regionManager.getSuperRegionType(sr.getType()).getRadius();
                 Location l = sr.getLocation();
@@ -383,7 +383,7 @@ public class HeroStronghold extends JavaPlugin {
                     break;
                 }
                 try {
-                    if (!(l.getX() - radius > x1) && l.distanceSquared(loc) < radius) {
+                    if (!(l.getX() - radius > x1) && l.distanceSquared(currentLocation) < radius) {
                         if (!sr.hasOwner(playername)) {
                             if (!sr.hasMember(playername) || !sr.getMember(playername).contains(currentRegionName)) {
                                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You dont have permission from an owner of " + sr.getName()
@@ -424,10 +424,9 @@ public class HeroStronghold extends JavaPlugin {
                 for (ItemStack currentIS : requirements) {
                     reqMap.put(new Integer(currentIS.getTypeId()), new Integer(currentIS.getAmount()));
                 }
+                
                 //Check the area for required blocks
-                //TODO Fix this!! It's slow, and it doesn't work
-                //TODO make this multi-threaded?
-                int radius = currentRegionType.getRadius();
+                int radius = (int) Math.sqrt(currentRegionType.getRadius());
 
                 int lowerLeftX = (int) currentLocation.getX() - radius;
                 int lowerLeftY = (int) currentLocation.getY() - radius;
@@ -438,17 +437,19 @@ public class HeroStronghold extends JavaPlugin {
                 int upperRightY = (int) currentLocation.getY() + radius;
                 upperRightY = upperRightY > 128 ? 128 : upperRightY;
                 int upperRightZ = (int) currentLocation.getZ() + radius;
-
+                
                 World world = currentLocation.getWorld();
+                
                 
                 outer: for (int x=lowerLeftX; x<upperRightX; x++) {
                     
                     for (int z=lowerLeftZ; z<upperRightZ; z++) {
                         
                         for (int y=lowerLeftY; y<upperRightY; y++) {
+                            
                             int type = world.getBlockTypeIdAt(x, y, z);
-                            if (reqMap.containsKey(type)) {
-                                if (reqMap.get(type) <= 1) {
+                            if (type != 0 && reqMap.containsKey(type)) {
+                                if (reqMap.get(type) < 2) {
                                     reqMap.remove(type);
                                     if (reqMap.isEmpty()) {
                                         break outer;
@@ -463,7 +464,6 @@ public class HeroStronghold extends JavaPlugin {
                     
                 }
             }
-            
             
             
             /*if (!requirements.isEmpty()) {
