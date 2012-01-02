@@ -64,6 +64,7 @@ public class ConfigManager {
     private final boolean denyEnderDragonSpawn;
     private final boolean denyFriendlyFire;
     private final boolean denyPvP;*/
+    private final double maxTax;
     
     public ConfigManager(FileConfiguration config, HeroStronghold plugin) {
         this.config = config;
@@ -71,6 +72,7 @@ public class ConfigManager {
         
         //Parse region config data
         explode = config.getBoolean("explode-on-destroy", false);
+        maxTax = config.getDouble("max-tax", 0.0); 
         /*matBreakBlackList = processMatSet(config.getStringList("block-break-blacklist"));
         matPlaceBlackList = processMatSet(config.getStringList("block-place-blacklist"));
         matNotifyBreakBlackList = processMatSet(config.getStringList("block-notify-on-break"));
@@ -185,6 +187,10 @@ public class ConfigManager {
     
     public boolean getExplode() {
         return explode;
+    }
+    
+    public double getMaxTax() {
+        return maxTax;
     }
     
     public synchronized void removeCharter(String name) {

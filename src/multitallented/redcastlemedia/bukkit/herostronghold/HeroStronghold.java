@@ -156,6 +156,7 @@ public class HeroStronghold extends JavaPlugin {
             SuperRegionType currentRegionType = regionManager.getSuperRegionType(args[1]);
             if (currentRegionType == null) {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + args[1] + " isnt a valid region type");
+                //TODO fix this message loop
                 int j=0;
                 String message = ChatColor.GOLD + "";
                 for (String s : regionManager.getSuperRegionTypes()) {
@@ -163,7 +164,7 @@ public class HeroStronghold extends JavaPlugin {
                             perms.has(player, "herostronghold.create." + s))) {
                         message += s + ", ";
                         if (j >= 2) {
-                            player.sendMessage(message.substring(0, message.length() - 3));
+                            player.sendMessage(message.substring(0, message.length() - 2));
                             message = ChatColor.GOLD + "";
                             j=-1;
                         }
@@ -171,7 +172,7 @@ public class HeroStronghold extends JavaPlugin {
                     }
                 }
                 if (j!= 0)
-                    player.sendMessage(message.substring(0, message.length() - 3));
+                    player.sendMessage(message.substring(0, message.length() - 2));
                 return true;
             }
             
@@ -491,6 +492,7 @@ public class HeroStronghold extends JavaPlugin {
             if (reqMap != null && !reqMap.isEmpty()) {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] you don't have all of the required blocks in this structure.");
                 String message = ChatColor.GOLD + "";
+                //TODO fix this message loop
                 int j=0;
                 for (int type : reqMap.keySet()) {
                     message += reqMap.get(type) + " " + Material.getMaterial(type).name() + ", ";
@@ -904,7 +906,8 @@ public class HeroStronghold extends JavaPlugin {
             double taxes = 0;
             try {
                 taxes = Double.parseDouble(args[1]);
-                if (taxes < 0) {
+                double maxTax = configManager.getMaxTax();
+                if (taxes < 0 && (maxTax == 0 || taxes <= maxTax)) {
                     player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You cant set negative taxes.");
                     return true;
                 }
@@ -913,7 +916,8 @@ public class HeroStronghold extends JavaPlugin {
                 return true;
             }
             
-            //TODO possibly have a max tax from config?
+            
+            
             //Set the taxes
             regionManager.setTaxes(sr, taxes);
             return true;
@@ -1603,6 +1607,7 @@ public class HeroStronghold extends JavaPlugin {
                     player.sendMessage(message);
                 }
                 String message = ChatColor.GRAY + "Owners: ";
+                //TODO fix this message loop
                 int j = 0;
                 for (String s : sr.getOwners()) {
                     if (j == 0)
@@ -1639,25 +1644,28 @@ public class HeroStronghold extends JavaPlugin {
             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Could not find player or super-region by that name");
             return true;
         } else {
+            //TODO add a page 3 to help for more instruction?
             if (args.length > 0 && args[args.length - 1].equals("2")) {
                 sender.sendMessage(ChatColor.GRAY + "[HeroStronghold] by " + ChatColor.GOLD + "Multitallented" + ChatColor.GRAY + ": <> = required, () = optional" +
                         ChatColor.GOLD + " Page 2");
                 sender.sendMessage(ChatColor.GRAY + "/hs settaxes <amount> <name>");
+                sender.sendMessage(ChatColor.GRAY + "/hs withdraw|deposit <amount> <name>");
                 sender.sendMessage(ChatColor.GRAY + "/hs listperms <playername> <name>");
                 sender.sendMessage(ChatColor.GRAY + "/hs toggleperm <playername> <perm> <name>");
                 sender.sendMessage(ChatColor.GRAY + "/hs destroy (name)");
-                sender.sendMessage(ChatColor.GRAY + "/hs ch <channel>");
-                sender.sendMessage(ChatColor.GRAY + "Google 'HeroStronghold bukkit' for more info | " + ChatColor.GOLD + "Page 2");
+                sender.sendMessage(ChatColor.GRAY + "/hs ch (channel) -- Use /hs ch for all chat");
+                sender.sendMessage(ChatColor.GRAY + "Google 'HeroStronghold bukkit' for more info | " + ChatColor.GOLD + "Page 2/2");
             } else {
                 sender.sendMessage(ChatColor.GRAY + "[HeroStronghold] by " + ChatColor.GOLD + "Multitallented" + ChatColor.GRAY + ": () = optional" +
                         ChatColor.GOLD + " Page 1");
                 sender.sendMessage(ChatColor.GRAY + "/hs list");
                 sender.sendMessage(ChatColor.GRAY + "/hs charter <superregiontype> <name>");
+                sender.sendMessage(ChatColor.GRAY + "/hs charterstats <name>");
                 sender.sendMessage(ChatColor.GRAY + "/hs signcharter <name>");
                 sender.sendMessage(ChatColor.GRAY + "/hs create <regiontype> (name)");
                 sender.sendMessage(ChatColor.GRAY + "/hs addowner|addmember|remove <playername> (name)");
                 sender.sendMessage(ChatColor.GRAY + "/hs accept <name>");
-                sender.sendMessage(ChatColor.GRAY + "Google 'HeroStronghold bukkit' for more info |" + ChatColor.GOLD + " Page 1");
+                sender.sendMessage(ChatColor.GRAY + "Google 'HeroStronghold bukkit' for more info |" + ChatColor.GOLD + " Page 1/2");
             }
             
             return true;

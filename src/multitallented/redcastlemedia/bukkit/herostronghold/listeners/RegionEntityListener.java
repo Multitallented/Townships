@@ -80,7 +80,7 @@ public class RegionEntityListener extends EntityListener {
         Location loc = player.getLocation();
         double x1 = loc.getX();
         for (SuperRegion sr : rm.getSortedSuperRegions()) {
-            int radius = rm.getRegionType(sr.getType()).getRadius();
+            int radius = rm.getSuperRegionType(sr.getType()).getRadius();
             Location l = sr.getLocation();
             if (l.getX() + radius < x1) {
                 break;
