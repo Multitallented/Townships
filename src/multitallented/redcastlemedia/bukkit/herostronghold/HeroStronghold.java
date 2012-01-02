@@ -119,7 +119,6 @@ public class HeroStronghold extends JavaPlugin {
         }
         
         //TODO fix message lists by size
-        //TODO add /hs leave (name)
         //TODO hook heroes and award exp
         
         new EffectManager(this);
@@ -1324,17 +1323,11 @@ public class HeroStronghold extends JavaPlugin {
             String playername = args[1];
             Player aPlayer = getServer().getPlayer(playername);
             if (aPlayer == null) {
-                OfflinePlayer op = getServer().getOfflinePlayer(playername);
-                if (op == null) {
-                    SuperRegion sr = regionManager.getSuperRegion(args[1]);
-                    if (sr == null) {
-                        player.sendMessage(ChatColor.GRAY + "[HeroStronghold] There is no player by the name of " + args[1]);
-                        return true;
-                    } else {
-                        playername = args[1];
-                    }
+                SuperRegion sr = regionManager.getSuperRegion(args[1]);
+                if (sr == null) {
+                    playername = args[1];
                 } else {
-                    playername = op.getName();
+                    playername = "sr:" + sr.getName();
                 }
             } else {
                 playername = aPlayer.getName();

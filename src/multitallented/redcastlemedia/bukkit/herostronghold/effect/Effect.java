@@ -7,6 +7,7 @@ import multitallented.redcastlemedia.bukkit.herostronghold.HeroStronghold;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.Region;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionManager;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionType;
+import multitallented.redcastlemedia.bukkit.herostronghold.region.SuperRegion;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -57,7 +58,24 @@ public class Effect {
     }
     
     public boolean isMemberOfRegion(Player p, Location l) {
-        return getPlugin().getRegionManager().getRegion(l).getMembers().contains(p.getName());
+        RegionManager rm = getPlugin().getRegionManager();
+        Region r = rm.getRegion(l);
+        if (r.isMember(p.getName())) {
+            return true;
+        } else {
+            for (String s : r.getMembers()) {
+                if (s.contains("sr:")) {
+                    String superRegionName = s.replace("sr:", "");
+                    SuperRegion sr = rm.getSuperRegion(superRegionName);
+                    if (sr != null && sr.hasMember(p.getName())) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            }
+        }
+        return false;
     }
     
     public boolean hasReagents(Location l) {

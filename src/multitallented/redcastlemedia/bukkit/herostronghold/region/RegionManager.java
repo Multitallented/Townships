@@ -434,6 +434,7 @@ public class RegionManager {
     
     public void checkIfDestroyedSuperRegion(Location loc) {
         Set<String> regionsToDestroy = new HashSet<String>();
+        Region or = getRegion(loc);
         
         double x1 = loc.getX();
         for (SuperRegion sr : getSortedSuperRegions()) {
@@ -445,18 +446,17 @@ public class RegionManager {
             try {
                 if (!(l.getX() - radius > x1) && l.distanceSquared(loc) < radius) {
                     SuperRegionType srt = getSuperRegionType(sr.getType());
-                    String rt = srt.getName();
-                    int required = srt.getRequirement(rt);
+                    int required = srt.getRequirement(or.getType());
                     
                     double x = loc.getX();
                     for (Region r : getSortedRegions()) {
-                        int radius1 = getRegionType(r.getType()).getRadius();
                         Location rl = r.getLocation();
-                        if (rl.getX() + radius1 < x) {
+                        double rlx = rl.getX();
+                        if (rlx + radius < x) {
                             return;
                         }
                         try {
-                            if (!(rl.getX() - radius1 > x) && rl.distanceSquared(loc) < radius1 && getRegion(rl).getType().equals(rt)) {
+                            if (!(rlx - radius > x) && rl.distanceSquared(l) < radius && getRegion(rl).getType().equals(or.getType())) {
                                 required--;
                                 if (required <= 0)
                                     break;
