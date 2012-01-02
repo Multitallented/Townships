@@ -138,7 +138,7 @@ public class ConfigManager {
         }
         return tempSet;
     }*/
-    
+    //TODO fix this loading charters
     private void loadCharters() {
         Map<String, List<String>> charters = new HashMap<String, List<String>>();
         File charterFolder = new File(plugin.getDataFolder(), "charters");
@@ -184,5 +184,16 @@ public class ConfigManager {
     
     public boolean getExplode() {
         return explode;
+    }
+    
+    public synchronized void removeCharter(String name) {
+        File charter = new File(plugin.getDataFolder() + "/charters", name + ".yml");
+        if (!charter.exists()) {
+            plugin.warning("Unable to delete non-existent charter " + name + ".yml");
+            return;
+        }
+        if (!charter.delete()) {
+            plugin.warning("Unable to delete charter " + name + ".yml");
+        }
     }
 }

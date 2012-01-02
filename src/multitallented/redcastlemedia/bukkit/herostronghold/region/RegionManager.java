@@ -19,7 +19,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -47,7 +46,6 @@ public class RegionManager {
         this.plugin = plugin;
         this.config = config;
         
-        //TODO sometimes super-region type is invalid?
         
         configManager = new ConfigManager(config, plugin);
         plugin.setConfigManager(configManager);
@@ -391,13 +389,14 @@ public class RegionManager {
         
         plugin.getServer().getPluginManager().callEvent(new RegionDestroyedEvent(l));
         if (configManager.getExplode()) {
-            l.getBlock().setTypeId(46);
+            l.getWorld().createExplosion(l, 4f);
+            /*l.getBlock().setTypeId(46);
             if (l.getY()- 1 > 0) {
                 l.getBlock().getRelative(BlockFace.DOWN).setType(Material.REDSTONE_TORCH_ON);
-            } 
-        } else {
-            l.getBlock().setTypeId(0);
+            }*/
+            
         }
+        l.getBlock().setTypeId(0);
     }
     
     public void destroySuperRegion(String name, boolean sendMessage) {
@@ -662,6 +661,62 @@ public class RegionManager {
             sRegionConfig.save(superRegionFile);
         } catch (Exception e) {
             plugin.warning("Failed to save " + sr.getName() + ".yml");
+            return;
+        }
+    }
+    
+    public void setMember(Region r, String name) {
+        Player p = plugin.getServer().getPlayer(name);
+        if (p != null) {
+            name = p.getName();
+        }
+        File regionFile = new File(plugin.getDataFolder() + "/data", r.getID() + ".yml");
+        if (!regionFile.exists()) {
+            plugin.warning("Failed to find file " + r.getID() + ".yml");
+            return;
+        }
+        FileConfiguration regionConfig = new YamlConfiguration();
+        try {
+            regionConfig.load(regionFile);
+        } catch (Exception e) {
+            plugin.warning("Failed to load " + r.getID() + ".yml to save member");
+            return;
+        }
+        regionConfig.set("members", name);
+        try {
+            regionConfig.save(regionFile);
+        } catch (Exception e) {
+            plugin.warning("Failed to save " + r.getID() + ".yml");
+            return;
+        }
+        r.addMember(name);
+    }
+    
+    public void setOwner(Region r, String name) {
+        File regionFile = new File(plugin.getDataFolder() + "/superregions", r.getID() + ".yml");
+        if (!regionFile.exists()) {
+            plugin.warning("Failed to find file " + r.getID() + ".yml");
+            return;
+        }
+        FileConfiguration regionConfig = new YamlConfiguration();
+        try {
+            regionConfig.load(regionFile);
+        } catch (Exception e) {
+            plugin.warning("Failed to load " + r.getID() + ".yml to save owner");
+            return;
+        }
+        List<String> owners = r.getOwners();
+        if (!owners.remove(name)) {
+            owners.add(name);
+            r.addOwner(name);
+        } else {
+            r.remove(name);
+        }
+        regionConfig.set("owners", owners);
+        try {
+            regionConfig.save(regionFile);
+        } catch (Exception e) {
+            plugin.warning("Failed to save " + r.getID() + ".yml");
             return;
         }
     }

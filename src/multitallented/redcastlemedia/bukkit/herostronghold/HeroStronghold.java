@@ -118,6 +118,8 @@ public class HeroStronghold extends JavaPlugin {
         }
         
         //TODO fix message lists by size
+        //TODO add /hs leave (name)
+        //TODO hook heroes and award exp
         
         new EffectManager(this);
         
@@ -218,6 +220,40 @@ public class HeroStronghold extends JavaPlugin {
             player.sendMessage(ChatColor.GOLD + "[HeroStronghold] Youve successfully created a charter for " + args[2]);
             player.sendMessage(ChatColor.GOLD + "[HeroStronghold] Get other people to type /hs signcharter " + args[2] + " to get started.");
             return true;
+        } else if (args.length > 1 && args[0].equalsIgnoreCase("charterstats")) {
+            //Check if valid charter
+            if (!pendingCharters.containsKey(args[1])) {
+                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + args[1] + " isn't a valid charter type.");
+                return true;
+            }
+            
+            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + args[1] + " signatures: ");
+            int j=0;
+            String message = ChatColor.GOLD + "";
+            List<String> charter = pendingCharters.get(args[1]);
+            if (charter != null) {
+                for (String s : charter) {
+                    if (message.length() + s.length() + 2 > 55) {
+                        player.sendMessage(message);
+                        message = ChatColor.GOLD + "";
+                        j++;
+                    }
+                    if (j==0) {
+                        message += s;
+                        j++;
+                    } else if (j > 14) {
+                        break;
+                    } else {
+                        message += ", " + s;
+                    }
+                }
+                player.sendMessage(message);
+            } else {
+                player.sendMessage(ChatColor.RED + "[HeroStronghold] There was an error loading that charter");
+                warning("Failed to load charter " + args[1] + ".yml");
+            }
+            
+            return true;
         } else if (args.length > 1 && args[0].equalsIgnoreCase("signcharter")) {
             //Check if valid name
             if (!pendingCharters.containsKey(args[1])) {
@@ -226,7 +262,7 @@ public class HeroStronghold extends JavaPlugin {
             }
             
             //Check permission
-            if (perms != null && perms.has(player, "herostronghold.join")) {
+            if (perms != null && !perms.has(player, "herostronghold.join")) {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You dont have permission to sign a charter.");
                 return true;
             }
@@ -261,7 +297,8 @@ public class HeroStronghold extends JavaPlugin {
             }
             RegionType currentRegionType = regionManager.getRegionType(regionName);
             if (currentRegionType == null) {
-                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + regionName + " isnt a valid super-region type");
+                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + regionName + " isnt a valid region type");
+                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Try /hs create " + regionName + " <insert_name_here>");
                 /*int j=0;
                 String message = ChatColor.GOLD + "";
                 for (String s : regionManager.getRegionTypes()) {
@@ -717,6 +754,7 @@ public class HeroStronghold extends JavaPlugin {
                 regionManager.destroySuperRegion(s, false);
             }
             if (currentCharter > 0) {
+                configManager.removeCharter(args[2]);
                 pendingCharters.remove(args[2]);
             }
             String playername = player.getName();
@@ -1224,7 +1262,6 @@ public class HeroStronghold extends JavaPlugin {
             return true;
         } else if (args.length > 1 && args[0].equalsIgnoreCase("addmember")) {
             String playername = args[1];
-            boolean isSuperRegion = false;
             Player aPlayer = getServer().getPlayer(playername);
             if (aPlayer == null) {
                 OfflinePlayer op = getServer().getOfflinePlayer(playername);
@@ -1234,7 +1271,6 @@ public class HeroStronghold extends JavaPlugin {
                         player.sendMessage(ChatColor.GRAY + "[HeroStronghold] There is no player by the name of " + args[1]);
                         return true;
                     } else {
-                        isSuperRegion = true;
                         playername = args[1];
                     }
                 } else {
