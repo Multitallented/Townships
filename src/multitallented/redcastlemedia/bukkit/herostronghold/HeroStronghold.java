@@ -1593,8 +1593,7 @@ public class HeroStronghold extends JavaPlugin {
                         " Power: " + (sr.getPower() < srt.getDailyPower() ? ChatColor.RED : ChatColor.GOLD) + sr.getPower() + 
                         " (+" + srt.getDailyPower() + ") / " + srt.getMaxPower());
                 player.sendMessage(ChatColor.GRAY + "Taxes: " + ChatColor.GOLD + sr.getTaxes()
-                        + ChatColor.GRAY + " Revenue: " + (revenue < 0 ? ChatColor.RED : ChatColor.GOLD) + revenue +
-                        " Size: " + ChatColor.GOLD + ((int) (Math.pow(srt.getRadius(), 2) * 3.14)));
+                        + ChatColor.GRAY + " Revenue: " + (revenue < 0 ? ChatColor.RED : ChatColor.GOLD) + revenue);
                 if (sr.getTaxes() != 0) {
                     String message = ChatColor.GRAY + "Tax Revenue History: " + ChatColor.GOLD;
                     int j = 0;

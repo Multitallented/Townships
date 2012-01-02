@@ -788,6 +788,7 @@ public class RegionManager {
             }
         }
         sRegionConfig.set("balance", newBalance);
+        sr.setBalance(newBalance);
         try {
             sRegionConfig.save(superRegionFile);
         } catch (Exception e) {
