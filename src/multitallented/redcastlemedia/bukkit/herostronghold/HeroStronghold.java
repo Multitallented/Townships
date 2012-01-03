@@ -119,8 +119,6 @@ public class HeroStronghold extends JavaPlugin {
             log.info("[HeroStronghold] didnt find Heroes, waiting for Heroes to be enabled.");
         }
         
-        //TODO /hs regionid
-        //TODO /hs info <regiontype|superregiontype>
         //TODO fix destruction of super-regions
         
         new EffectManager(this);
@@ -539,21 +537,26 @@ public class HeroStronghold extends JavaPlugin {
             
             //Tell the player what reagents are required for it to work
             String message = ChatColor.GOLD + "Reagents: ";
-            int j=0;
-            for (ItemStack is : currentRegionType.getReagents()) {
-                message += is.getAmount() + ":" + is.getType().name() + ", ";
-                if (j >= 2) {
-                    player.sendMessage(message.substring(0, message.length()-2));
-                    message = ChatColor.GOLD + "";
-                    j=-1;
+                int j=0;
+                for (ItemStack is : currentRegionType.getReagents()) {
+                    String addLine = is.getAmount() + ":" + is.getType().name() + ", ";
+                    if (message.length() + addLine.length() > 55) {
+                        player.sendMessage(message.substring(0, message.length() - 2));
+                        message = ChatColor.GOLD + "";
+                        j++;
+                    }
+                    if (j < 14) {
+                        message += addLine;
+                    } else {
+                        break;
+                    }
                 }
-                j++;
-            }
-            if (currentRegionType.getReagents().isEmpty()) {
-                message += "None";
-                player.sendMessage(message);
-            } else if (j!= 0)
-                player.sendMessage(message.substring(0, message.length()-2));
+                if (currentRegionType.getReagents().isEmpty()) {
+                    message += "None";
+                    player.sendMessage(message);
+                } else {
+                    player.sendMessage(message.substring(0, message.length()-2));
+                }
             
             return true;
         } else if (args.length > 2 && args[0].equalsIgnoreCase("create")) {
@@ -1290,6 +1293,10 @@ public class HeroStronghold extends JavaPlugin {
                 return true;
             }
         } else if (args.length > 0 && args[0].equalsIgnoreCase("regionid")) {
+            if (perms != null && perms.has(player, "herostronghold.admin")) {
+                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Only admins can use this command.");
+                return true;
+            }
             Location loc = player.getLocation();
             double x = loc.getX();
             for (Region r : regionManager.getSortedRegions()) {
@@ -1300,18 +1307,197 @@ public class HeroStronghold extends JavaPlugin {
                 }
                 try {
                     if (!(l.getX() - radius > x) && l.distanceSquared(loc) < radius) {
-                        if (perms != null && perms.has(player, "herostronghold.admin")) {
-                            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.GOLD + r.getID());
-                        } else {
-                            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Only admins can use this command.");
-                            return true;
-                        }
+                        player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.GOLD + r.getID());
                     }
                 } catch (IllegalArgumentException iae) {
 
                 }
             }
             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You're not standing in a region.");
+            return true;
+        } else if (args.length > 1 && args[0].equalsIgnoreCase("info")) {
+            //Check if valid regiontype or super-regiontype
+            RegionType rt = regionManager.getRegionType(args[1]);
+            SuperRegionType srt = regionManager.getSuperRegionType(args[1]);
+            if (rt == null && srt == null) {
+                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] There is no region type called " + args[1]);
+                return true;
+            }
+            if (rt != null) {
+                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Info for region type " + ChatColor.GOLD + args[1] + ":");
+                player.sendMessage(ChatColor.GRAY + "Cost: " + ChatColor.GOLD + rt.getMoneyRequirement() + ChatColor.GRAY +
+                        ", UpkeepCost: " + ChatColor.GOLD + rt.getMoneyOutput() + ChatColor.GRAY + ", Radius: " + ChatColor.GOLD + (int) Math.sqrt(rt.getRadius()));
+                
+                String message = ChatColor.GOLD + "Effects: ";
+                int j=0;
+                for (String is : rt.getEffects()) {
+                    String addLine = is.split("\\.")[0] + ", ";
+                    if (message.length() + addLine.length() > 55) {
+                        player.sendMessage(message.substring(0, message.length() - 2));
+                        message = ChatColor.GOLD + "";
+                        j++;
+                    }
+                    if (j < 12) {
+                        message += addLine;
+                    } else {
+                        break;
+                    }
+                }
+                if (rt.getEffects().isEmpty()) {
+                    message += "None";
+                    player.sendMessage(message);
+                } else {
+                    player.sendMessage(message.substring(0, message.length()-2));
+                }
+                message = ChatColor.GOLD + "Requirements: ";
+                for (ItemStack is : rt.getRequirements()) {
+                    String addLine = is.getAmount() + ":" + is.getType().name() + ", ";
+                    if (message.length() + addLine.length() > 55) {
+                        player.sendMessage(message.substring(0, message.length() - 2));
+                        message = ChatColor.GOLD + "";
+                        j++;
+                    }
+                    if (j < 12) {
+                        message += addLine;
+                    } else {
+                        break;
+                    }
+                }
+                if (rt.getRequirements().isEmpty()) {
+                    message += "None";
+                    player.sendMessage(message);
+                } else {
+                    player.sendMessage(message.substring(0, message.length()-2));
+                }
+                message = ChatColor.GOLD + "Reagents: ";
+                for (ItemStack is : rt.getReagents()) {
+                    String addLine = is.getAmount() + ":" + is.getType().name() + ", ";
+                    if (message.length() + addLine.length() > 55) {
+                        player.sendMessage(message.substring(0, message.length() - 2));
+                        message = ChatColor.GOLD + "";
+                        j++;
+                    }
+                    if (j < 12) {
+                        message += addLine;
+                    } else {
+                        break;
+                    }
+                }
+                if (rt.getReagents().isEmpty()) {
+                    message += "None";
+                    player.sendMessage(message);
+                } else {
+                    player.sendMessage(message.substring(0, message.length()-2));
+                }
+                message = ChatColor.GOLD + "UpkeepCost: ";
+                for (ItemStack is : rt.getUpkeep()) {
+                    String addLine = is.getAmount() + ":" + is.getType().name() + ", ";
+                    if (message.length() + addLine.length() > 55) {
+                        player.sendMessage(message.substring(0, message.length() - 2));
+                        message = ChatColor.GOLD + "";
+                        j++;
+                    }
+                    if (j < 12) {
+                        message += addLine;
+                    } else {
+                        break;
+                    }
+                }
+                if (rt.getUpkeep().isEmpty()) {
+                    message += "None";
+                    player.sendMessage(message);
+                } else {
+                    player.sendMessage(message.substring(0, message.length()-2));
+                }
+                message = ChatColor.GOLD + "Output: ";
+                for (ItemStack is : rt.getOutput()) {
+                    String addLine = is.getAmount() + ":" + is.getType().name() + ", ";
+                    if (message.length() + addLine.length() > 55) {
+                        player.sendMessage(message.substring(0, message.length() - 2));
+                        message = ChatColor.GOLD + "";
+                        j++;
+                    }
+                    if (j < 12) {
+                        message += addLine;
+                    } else {
+                        break;
+                    }
+                }
+                if (rt.getOutput().isEmpty()) {
+                    message += "None";
+                    player.sendMessage(message);
+                } else {
+                    player.sendMessage(message.substring(0, message.length()-2));
+                }
+            } else if (srt != null) {
+                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Info for super-region type " + ChatColor.GOLD + args[1] + ":");
+                player.sendMessage(ChatColor.GRAY + "Cost: " + ChatColor.GOLD + srt.getMoneyRequirement() + ChatColor.GRAY +
+                        ", UpkeepCost: " + ChatColor.GOLD + srt.getOutput());
+                player.sendMessage(ChatColor.GRAY + "Power: " + ChatColor.GOLD + srt.getMaxPower() + " (+" + srt.getDailyPower() + "), " +
+                        ChatColor.GRAY + "Charter: " + ChatColor.GOLD + srt.getCharter() + ChatColor.GRAY + ", Radius: " + ChatColor.GOLD + (int) Math.sqrt(srt.getRadius()));
+                
+                String message = ChatColor.GOLD + "Effects: ";
+                int j=0;
+                for (String is : rt.getEffects()) {
+                    String addLine = is + ", ";
+                    if (message.length() + addLine.length() > 55) {
+                        player.sendMessage(message.substring(0, message.length() - 2));
+                        message = ChatColor.GOLD + "";
+                        j++;
+                    }
+                    if (j < 11) {
+                        message += addLine;
+                    } else {
+                        break;
+                    }
+                }
+                if (srt.getEffects().isEmpty()) {
+                    message += "None";
+                    player.sendMessage(message);
+                } else {
+                    player.sendMessage(message.substring(0, message.length()-2));
+                }
+                message = ChatColor.GOLD + "Requirements: ";
+                for (String is : srt.getRequirements().keySet()) {
+                    String addLine = is + ":" + srt.getRequirement(is) + ", ";
+                    if (message.length() + addLine.length() > 55) {
+                        player.sendMessage(message.substring(0, message.length() - 2));
+                        message = ChatColor.GOLD + "";
+                        j++;
+                    }
+                    if (j < 12) {
+                        message += addLine;
+                    } else {
+                        break;
+                    }
+                }
+                if (srt.getRequirements().isEmpty()) {
+                    message += "None";
+                    player.sendMessage(message);
+                } else {
+                    player.sendMessage(message.substring(0, message.length()-2));
+                }
+                message = ChatColor.GOLD + "Evolves from: ";
+                for (String is : srt.getChildren()) {
+                    String addLine = is + ", ";
+                    if (message.length() + addLine.length() > 55) {
+                        player.sendMessage(message.substring(0, message.length() - 2));
+                        message = ChatColor.GOLD + "";
+                        j++;
+                    }
+                    if (j < 12) {
+                        message += addLine;
+                    } else {
+                        break;
+                    }
+                }
+                if (srt.getChildren().isEmpty()) {
+                    message += "None";
+                    player.sendMessage(message);
+                } else {
+                    player.sendMessage(message.substring(0, message.length()-2));
+                }
+            }
             return true;
         } else if (args.length > 1 && args[0].equalsIgnoreCase("addowner")) {
             String playername = args[1];
@@ -1708,6 +1894,7 @@ public class HeroStronghold extends JavaPlugin {
             if (args.length > 0 && args[args.length - 1].equals("2")) {
                 sender.sendMessage(ChatColor.GRAY + "[HeroStronghold] by " + ChatColor.GOLD + "Multitallented" + ChatColor.GRAY + ": <> = required, () = optional" +
                         ChatColor.GOLD + " Page 2");
+                sender.sendMessage(ChatColor.GRAY + "/hs accept <name>");
                 sender.sendMessage(ChatColor.GRAY + "/hs settaxes <amount> <name>");
                 sender.sendMessage(ChatColor.GRAY + "/hs withdraw|deposit <amount> <name>");
                 sender.sendMessage(ChatColor.GRAY + "/hs listperms <playername> <name>");
@@ -1720,12 +1907,13 @@ public class HeroStronghold extends JavaPlugin {
                 sender.sendMessage(ChatColor.GRAY + "[HeroStronghold] by " + ChatColor.GOLD + "Multitallented" + ChatColor.GRAY + ": () = optional" +
                         ChatColor.GOLD + " Page 1");
                 sender.sendMessage(ChatColor.GRAY + "/hs list");
+                sender.sendMessage(ChatColor.GRAY + "/hs info <regiontype|superregiontype>");
                 sender.sendMessage(ChatColor.GRAY + "/hs charter <superregiontype> <name>");
                 sender.sendMessage(ChatColor.GRAY + "/hs charterstats <name>");
                 sender.sendMessage(ChatColor.GRAY + "/hs signcharter <name>");
                 sender.sendMessage(ChatColor.GRAY + "/hs create <regiontype> (name)");
                 sender.sendMessage(ChatColor.GRAY + "/hs addowner|addmember|remove <playername> (name)");
-                sender.sendMessage(ChatColor.GRAY + "/hs accept <name>");
+                sender.sendMessage(ChatColor.GRAY + "/hs whatshere");
                 sender.sendMessage(ChatColor.GRAY + "Google 'HeroStronghold bukkit' for more info |" + ChatColor.GOLD + " Page 1/2");
             }
             

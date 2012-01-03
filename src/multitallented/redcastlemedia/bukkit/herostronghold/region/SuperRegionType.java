@@ -34,6 +34,10 @@ public class SuperRegionType {
         this.exp = exp;
     }
     
+    public List<String> getEffects() {
+        return effects;
+    }
+    
     public double getExp() {
         return exp;
     }
