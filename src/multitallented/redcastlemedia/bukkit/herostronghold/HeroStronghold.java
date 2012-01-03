@@ -76,7 +76,7 @@ public class HeroStronghold extends JavaPlugin {
         serverListener = new PluginServerListener(this);
         blockListener = new RegionBlockListener(this);
         dpeListener = new RegionPlayerInteractListener(regionManager);
-        regionEntityListener = new RegionEntityListener(regionManager);
+        regionEntityListener = new RegionEntityListener(this);
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvent(Type.BLOCK_BREAK, blockListener, Priority.Highest, this);
         pm.registerEvent(Type.BLOCK_PLACE, blockListener, Priority.High, this);
@@ -119,6 +119,10 @@ public class HeroStronghold extends JavaPlugin {
             log.info("[HeroStronghold] didnt find Heroes, waiting for Heroes to be enabled.");
         }
         
+        //TODO /hs regionid
+        //TODO /hs info <regiontype|superregiontype>
+        //TODO fix destruction of super-regions
+        
         new EffectManager(this);
         
         //Setup repeating sync task for checking regions
@@ -138,6 +142,9 @@ public class HeroStronghold extends JavaPlugin {
         log.info("[HeroStronghold] is now enabled!");
     }
     
+    public Map<Player, String> getChannels() {
+        return dpeListener.getChannels();
+    }
     
     @Override
     public boolean onCommand(CommandSender sender, org.bukkit.command.Command command, String label, String[] args) {

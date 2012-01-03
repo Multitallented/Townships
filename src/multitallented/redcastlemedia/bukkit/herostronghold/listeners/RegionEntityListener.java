@@ -3,6 +3,7 @@ package multitallented.redcastlemedia.bukkit.herostronghold.listeners;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import multitallented.redcastlemedia.bukkit.herostronghold.HeroStronghold;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.Region;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionManager;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.SuperRegion;
@@ -35,8 +36,10 @@ import org.bukkit.event.painting.PaintingPlaceEvent;
  */
 public class RegionEntityListener extends EntityListener {
     private final RegionManager rm;
-    public RegionEntityListener(RegionManager rm) {
-        this.rm = rm;
+    private final HeroStronghold plugin;
+    public RegionEntityListener(HeroStronghold plugin) {
+        this.plugin = plugin;
+        this.rm = plugin.getRegionManager();
     }
     
     @Override
@@ -56,6 +59,12 @@ public class RegionEntityListener extends EntityListener {
             for (String s : regionsToReduce) {
                 SuperRegion sr = rm.getSuperRegion(s);
                 rm.reduceRegion(sr);
+                SendMessageThread smt = new SendMessageThread(sr.getName(), plugin.getChannels(), null, player, "lost 1 power (" + sr.getPower() + " remaining)");
+                try {
+                    smt.run();
+                } catch(Exception e) {
+
+                }
                 rm.destroySuperRegion(s, true);
             }
         }

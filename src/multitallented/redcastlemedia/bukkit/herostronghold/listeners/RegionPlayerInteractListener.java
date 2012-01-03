@@ -91,6 +91,10 @@ public class RegionPlayerInteractListener extends PlayerListener {
         }
     }
     
+    public Map<Player, String> getChannels() {
+        return channels;
+    }
+    
     @Override
     public void onPlayerInteract(PlayerInteractEvent event) {
         if (event.isCancelled() || !rm.shouldTakeAction(event.getClickedBlock().getLocation(), event.getPlayer(), 0, "denyplayerinteract"))
