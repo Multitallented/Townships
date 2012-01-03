@@ -449,6 +449,9 @@ public class RegionManager {
                 if (!(l.getX() - radius > x1) && l.distanceSquared(loc) < radius) {
                     SuperRegionType srt = getSuperRegionType(sr.getType());
                     int required = srt.getRequirement(or.getType());
+                    if (required != 0) {
+                        required++;
+                    }
                     
                     double x = loc.getX();
                     for (Region r : getSortedRegions()) {
@@ -815,7 +818,7 @@ public class RegionManager {
                 if (!(l.getX() - radius > x) && l.distanceSquared(loc) < radius) {
                     if ((player != null && (r.isOwner(player.getName()) || r.isMember(player.getName()))) || effect.regionHasEffect(getRegionType(r.getType()).getEffects(), effectName) == 0 ||
                             !effect.hasReagents(l)) {
-                        return false;
+                        break;
                     }
                     return true;
                 }
@@ -824,21 +827,22 @@ public class RegionManager {
             }
         }
         
-        
-        /*for (Location l : getRegionLocations()) {
+        for (SuperRegion sr : getSortedSuperRegions()) {
+            int radius = getSuperRegionType(sr.getType()).getRadius();
+            Location l = sr.getLocation();
+            if (l.getX() + radius < x) {
+                return false;
+            }
             try {
-                Region r = getRegion(l);
-                RegionType rt = getRegionType(r.getType());
-                if (rt.getRadius() >= Math.sqrt(l.distanceSquared(loc))) {
-                    if ((r.isOwner(player.getName()) || r.isMember(player.getName())) || effect.regionHasEffect(rt.getEffects(), effectName) == 0 ||
-                            !effect.hasReagents(l))
-                        return false;
-                    return true;
+                if (!(l.getX() - radius > x) && l.distanceSquared(loc) < radius) {
+                    if (!((player != null && (sr.hasOwner(player.getName()) || sr.hasMember(player.getName()))) || !getSuperRegionType(sr.getType()).hasEffect(effectName))) {
+                        return true;
+                    }
                 }
             } catch (IllegalArgumentException iae) {
-            
+                
             }
-        }*/
+        }
         return false;
     }
 
