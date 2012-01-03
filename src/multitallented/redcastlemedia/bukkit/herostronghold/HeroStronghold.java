@@ -1289,6 +1289,30 @@ public class HeroStronghold extends JavaPlugin {
                     p.sendMessage(ChatColor.GRAY + "[HeroStronghold] You were granted permission " + args[2] + " in " + args[3]);
                 return true;
             }
+        } else if (args.length > 0 && args[0].equalsIgnoreCase("regionid")) {
+            Location loc = player.getLocation();
+            double x = loc.getX();
+            for (Region r : regionManager.getSortedRegions()) {
+                int radius = regionManager.getRegionType(r.getType()).getRadius();
+                Location l = r.getLocation();
+                if (l.getX() + radius < x) {
+                    break;
+                }
+                try {
+                    if (!(l.getX() - radius > x) && l.distanceSquared(loc) < radius) {
+                        if (perms != null && perms.has(player, "herostronghold.admin")) {
+                            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.GOLD + r.getID());
+                        } else {
+                            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Only admins can use this command.");
+                            return true;
+                        }
+                    }
+                } catch (IllegalArgumentException iae) {
+
+                }
+            }
+            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You're not standing in a region.");
+            return true;
         } else if (args.length > 1 && args[0].equalsIgnoreCase("addowner")) {
             String playername = args[1];
             Player aPlayer = getServer().getPlayer(playername);
