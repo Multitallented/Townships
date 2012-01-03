@@ -1292,12 +1292,9 @@ public class HeroStronghold extends JavaPlugin {
                     p.sendMessage(ChatColor.GRAY + "[HeroStronghold] You were granted permission " + args[2] + " in " + args[3]);
                 return true;
             }
-        } else if (args.length > 0 && args[0].equalsIgnoreCase("regionid")) {
-            if (perms != null && perms.has(player, "herostronghold.admin")) {
-                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Only admins can use this command.");
-                return true;
-            }
+        } else if (args.length > 0 && args[0].equalsIgnoreCase("whatshere")) {
             Location loc = player.getLocation();
+            boolean foundRegion = false;
             double x = loc.getX();
             for (Region r : regionManager.getSortedRegions()) {
                 int radius = regionManager.getRegionType(r.getType()).getRadius();
@@ -1307,13 +1304,43 @@ public class HeroStronghold extends JavaPlugin {
                 }
                 try {
                     if (!(l.getX() - radius > x) && l.distanceSquared(loc) < radius) {
-                        player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.GOLD + r.getID());
+                        foundRegion = true;
+                        player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Found Region ID: " + ChatColor.GOLD + r.getID());
+                        String message = ChatColor.GRAY + "Type: " + r.getType();
+                        if (!r.getOwners().isEmpty()) {
+                            message += ", Owned by: " + r.getOwners().get(0);
+                        }
+                        player.sendMessage(message);
+                        break;
                     }
                 } catch (IllegalArgumentException iae) {
 
                 }
             }
-            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You're not standing in a region.");
+            
+            x = loc.getX();
+            for (SuperRegion sr : regionManager.getSortedSuperRegions()) {
+                int radius = regionManager.getRegionType(sr.getType()).getRadius();
+                Location l = sr.getLocation();
+                if (l.getX() + radius < x) {
+                    break;
+                }
+                try {
+                    if (!(l.getX() - radius > x) && l.distanceSquared(loc) < radius) {
+                        player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Found Super-Region named: " + ChatColor.GOLD + sr.getName());
+                        String message = ChatColor.GRAY + "Type: " + sr.getType();
+                        if (!sr.getOwners().isEmpty()) {
+                            message += ", Owned by: " + sr.getOwners().get(0);
+                        }
+                        player.sendMessage(message);
+                    }
+                } catch (IllegalArgumentException iae) {
+
+                }
+            }
+            if (!foundRegion) {
+                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] There are no regions here.");
+            }
             return true;
         } else if (args.length > 1 && args[0].equalsIgnoreCase("info")) {
             //Check if valid regiontype or super-regiontype
