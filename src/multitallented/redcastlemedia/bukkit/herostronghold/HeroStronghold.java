@@ -1536,7 +1536,7 @@ public class HeroStronghold extends JavaPlugin {
                         }
                     }
                 }
-                if (srt == null || srt.getChildren().isEmpty()) {
+                if (srt.getChildren() == null || srt.getChildren().isEmpty()) {
                     message += "None";
                     player.sendMessage(message);
                 } else {
