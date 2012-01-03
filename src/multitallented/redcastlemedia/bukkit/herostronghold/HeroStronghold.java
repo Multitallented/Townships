@@ -1465,7 +1465,7 @@ public class HeroStronghold extends JavaPlugin {
                 
                 String message = ChatColor.GOLD + "Effects: ";
                 int j=0;
-                for (String is : rt.getEffects()) {
+                for (String is : srt.getEffects()) {
                     String addLine = is + ", ";
                     if (message.length() + addLine.length() > 55) {
                         player.sendMessage(message.substring(0, message.length() - 2));
