@@ -240,7 +240,7 @@ public class RegionEntityListener extends EntityListener {
         Location loc = event.getLocation();
         Entity ent = event.getEntity();
         if ((!(ent instanceof Creeper) && !(ent instanceof EnderDragon) && !(ent instanceof TNTPrimed) && !(ent instanceof Fireball))
-                && !rm.shouldTakeAction(loc, null, 4, "denyblockbreak")) {
+                && !rm.shouldTakeAction(loc, null, 4, "denyexplosion")) {
             event.setCancelled(true);
             return;
         }

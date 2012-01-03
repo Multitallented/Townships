@@ -15,33 +15,8 @@ arrowturret:
   - ARROW.1
   upkeep-chance: 0.0
   output: []
-  money-requirement: 5000.0
+  money-requirement: 1500.0
   upkeep-money-output: 0.0
-bank:
-  friendly-classes: []
-  enemy-classes: []
-  effects:
-  - periodicupkeep.1
-  radius: 8
-  requirements:
-  - COBBLESTONE.48
-  - COBBLESTONE_STAIRS.16
-  - GOLD_BLOCK.1
-  - BOOKSHELF.4
-  - DOUBLE_STEP.8
-  - CHEST.4
-  - FENCE.2
-  - THIN_GLASS.2
-  - WOODEN_DOOR.1
-  reagents:
-  - GOLD_INGOT.64
-  - PAPER.32
-  upkeep:
-  - PAPER.2
-  upkeep-chance: 0.1
-  output: []
-  money-requirement: 1000.0
-  upkeep-money-output: 10.0
 arrowfactory:
   friendly-classes: []
   enemy-classes: []
@@ -55,14 +30,16 @@ arrowfactory:
   - WOOD.2
   - FENCE.6
   - FENCE_GATE.1
+  - COBBLESTONE.64
+  - COBBLESTONE_STAIRS.12
   reagents:
   - GRAVEL.2
   - WOOD.2
-  - BED.1
+  - WOOL.1
   upkeep:
   - GRAVEL.1
   - WOOD.1
-  - BED.1
+  - WOOL.1
   upkeep-chance: 0.2
   output:
   - ARROW.12
@@ -87,37 +64,23 @@ teleporter:
   - DIRT.1
   money-requirements: 2000.0
   upkeep-money-output: 0.0
-ward:
-  friendly-classes: []
-  enemy-classes: []
-  effects:
-  - denyblockbuild.1
-  - denyblockbreak.1
-  radius: 10
-  requirements:
-  - FENCE.1
-  - GLASS.7
-  reagents:
-  - DIAMOND.1
-  upkeep: []
-  upkeep-chance: 0.0
-  output: []
-  money-requirements: 2000.0
-  upkeep-money-output: 0.0
 hospital:
   friendly-classes: []
   enemy-classes: []
   effects:
   - gainhealth.1
   - gainstamina.1
-  radius: 10
+  radius: 5
   requirements:
-  - BED_BLOCK.6
+  - WORKBENCH.1
+  - FURNACE.1
+  - CHEST.2
+  - BED_BLOCK.24
   - COBBLESTONE.32
   - WOOD.16
   - WOODEN_DOOR.1
   - THIN_GLASS.4
-  - WOOL.5
+  - WOOL.16
   reagents:
   - WHEAT.1
   upkeep:
@@ -146,16 +109,281 @@ mancannon:
   friendly-classes: []
   enemy-classes: []
   effects:
-  - mancannon.2
+  - mancannon.3
   radius: 2
   requirements:
   - POWERED_RAIL.3
   - PISTON_BASE.1
   reagents:
   - REDSTONE.16
-  upkeep:
-  - REDSTONE.1
+  upkeep: []
   upkeep-chance: 0.0
   output: []
-  money-requirements: 100.0
+  money-requirements: 200.0
   upkeep-money-output: 0.0
+shack:
+  friendly-classes: []
+  enemy-classes: []
+  effects:
+  - denyblockbuild.1
+  - denyblockbreak.1
+  - denyplayerinteract.1
+  - periodicupkeep.1
+  radius: 4
+  requirements:
+  - WOODEN_DOOR.1
+  - THIN_GLASS.3
+  - BOOKSHELF.1
+  - BED_BLOCK.2
+  - FURNACE.1
+  - WORKBENCH.1
+  - WALL_SIGN.1
+  - WOOD.24
+  - COBBLESTONE.12
+  - WOOL.1
+  - CHEST.2
+  reagents:
+  - BREAD.2
+  - IRON_INGOT.1
+  - DIAMOND.1
+  upkeep:
+  - BREAD.2
+  - IRON_INGOT.1
+  upkeep-chance: 0.001
+  output: []
+  money-requirements: 500.0
+  upkeep-money-output: 100.0
+house:
+  friendly-classes: []
+  enemy-classes: []
+  effects:
+  - denyblockbuild.1
+  - denyblockbreak.1
+  - denyplayerinteract.1
+  - periodicupkeep.1
+  - denyfriendlyfire.1
+  radius: 9
+  requirements:
+  - WOODEN_DOOR.3
+  - THIN_GLASS.8
+  - BOOKSHELF.2
+  - BED_BLOCK.2
+  - FURNACE.2
+  - WORKBENCH.1
+  - CHEST.4
+  - WALL_SIGN.1
+  - WOOD.32
+  - LOG.16
+  - WOOL.2
+  reagents:
+  - DIAMOND.2
+  - GOLD_INGOT.2
+  - IRON_INGOT.8
+  - BREAD.4
+  upkeep:
+  - BREAD.4
+  - GOLD_INGOT.1
+  - IRON_INGOT.2
+  upkeep-chance: 0.001
+  output: []
+  money-requirements: 1000.0
+  upkeep-money-output: 200.0
+estate:
+  friendly-classes: []
+  enemy-classes: []
+  effects:
+  - denyblockbuild.1
+  - denyblockbreak.1
+  - denyplayerinteract.1
+  - periodicupkeep.1
+  - gainstamina.1
+  - denypvp.1
+  radius: 15
+  requirements:
+  - WOODEN_DOOR.6
+  - THIN_GLASS.16
+  - BOOKSHELF.10
+  - BED_BLOCK.8
+  - FURNACE.2
+  - WORKBENCH.4
+  - WOOD_STAIRS.4
+  - CHEST.8
+  - WALL_SIGN.5
+  - WOOD.64
+  - LOG.32
+  - WOOL.16
+  - GLOWSTONE.8
+  - NETHERRACK.1
+  reagents:
+  - DIAMOND.4
+  - GOLD_INGOT.4
+  - IRON_INGOT.16
+  - BREAD.8
+  upkeep:
+  - BREAD.8
+  - GOLD_INGOT.2
+  - IRON_INGOT.4
+  upkeep-chance: 0.001
+  output: []
+  money-requirements: 4000.0
+  upkeep-money-output: 500.0
+pigfarm:
+  friendly-classes: []
+  enemy-classes: []
+  effects:
+  - periodicfarm.2
+  radius: 7
+  requirements:
+  - FENCE.16
+  - FENCE_GATE.2
+  - GRASS.16
+  - CHEST.2
+  reagents:
+  - WHEAT.2
+  upkeep:
+  - WHEAT.2
+  upkeep-chance: 0.01
+  output:
+  - STICK.1
+  money-requirements: 50.0
+  upkeep-money-output: -10.0
+ironrefinery:
+  friendly-classes: []
+  enemy-classes: []
+  effects:
+  - periodicupkeep.1
+  radius: 7
+  requirements:
+  - CAULDRON.4
+  - IRON_ORE.4
+  - SMOOTH_BRICK.32
+  - WOOD.16
+  - WOODEN_DOOR.1
+  - THIN_GLASS.2
+  reagents:
+  - STONE_PICKAXE.1
+  upkeep:
+  - STONE_PICKAXE.1
+  upkeep-chance: 0.05
+  output:
+  - IRON_INGOT.1
+  - COBBLESTONE.3
+  money-requirements: 200.0
+  upkeep-money-output: -10.0
+redstonerefinery:
+  friendly-classes: []
+  enemy-classes: []
+  effects:
+  - periodicupkeep.1
+  radius: 7
+  requirements:
+  - CAULDRON.4
+  - REDSTONE_ORE.4
+  - SMOOTH_BRICK.32
+  - WOOD.16
+  - WOODEN_DOOR.1
+  - THIN_GLASS.2
+  reagents:
+  - IRON_PICKAXE.1
+  upkeep:
+  - IRON_PICKAXE.1
+  upkeep-chance: 0.05
+  output:
+  - IRON_INGOT.3
+  - REDSTONE.4
+  money-requirements: 250.0
+  upkeep-money-output: -15.0
+goldrefinery:
+  friendly-classes: []
+  enemy-classes: []
+  effects:
+  - periodicupkeep.1
+  radius: 7
+  requirements:
+  - CAULDRON.4
+  - GOLD_ORE.4
+  - SMOOTH_BRICK.32
+  - WOODEN_DOOR.1
+  - WOOD.16
+  - THIN_GLASS.2
+  reagents:
+  - IRON_PICKAXE.1
+  upkeep:
+  - IRON_PICKAXE.1
+  upkeep-chance: 0.01
+  output:
+  - IRON_INGOT.3
+  - GOLD_INGOT.1
+  money-requirements: 300.0
+  upkeep-money-output: -15.0
+townhall:
+  friendly-classes: []
+  enemy-classes: []
+  effects: []
+  radius: 9
+  requirements:
+  - WALL_SIGN.24
+  - BOOKSHELF.16
+  - CHEST.8
+  - WOOD.32
+  - BRICK.64
+  - THIN_GLASS.6
+  - WOODEN_DOOR.2
+  reagents: []
+  upkeep: []
+  upkeep-chance: 0.0
+  output: []
+  money-requirements: 3000.0
+  upkeep-money-output: 0.0
+market:
+  friendly-classes: []
+  enemy-classes: []
+  effects:
+  - periodicupkeep.1
+  radius: 15
+  requirements:
+  - CHEST.26
+  - WALL_SIGN.16
+  - WOODEN_DOOR.2
+  - THIN_GLASS.8
+  - WOOD.32
+  - WOOL.8
+  - IRON_DOOR.1
+  - STONE_BUTTON.2
+  - COBBLESTONE.16
+  - BRICK_STAIRS.12
+  - BRICK.8
+  reagents: []
+  upkeep: []
+  upkeep-chance: 0.005
+  output: []
+  money-requirements: 6000.0
+  upkeep-money-output: 20.0
+inn:
+  friendly-classes: []
+  enemy-classes: []
+  effects:
+  - denyblockbreak.1
+  - denyblockbuild.1
+  - denyplayerinteract.1
+  - denyfriendlyfire.1
+  radius: 15
+  requirements:
+  - CHEST.16
+  - BED_BLOCK.24
+  - WOODEN_DOOR.14
+  - LOG.32
+  - WOOD.32
+  - WALL_SIGN.12
+  - COBBLESTONE.16
+  reagents:
+  - IRON_INGOT.1
+  - DIAMOND.2
+  - BREAD.8
+  upkeep:
+  - IRON_INGOT.1
+  - BREAD.8
+  upkeep-chance: 0.005
+  output: []
+  money-requirements: 6000.0
+  upkeep-money-output: 20.0

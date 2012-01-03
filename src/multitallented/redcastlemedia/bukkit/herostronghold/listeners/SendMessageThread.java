@@ -13,12 +13,14 @@ public class SendMessageThread implements Runnable {
     private final Player player;
     private final String channel;
     private final String message;
+    private final String title;
 
-    public SendMessageThread(String channel, Map<Player, String> channels, Player player, String message) {
+    public SendMessageThread(String channel, Map<Player, String> channels, String title, Player player, String message) {
         this.channels = channels;
         this.player = player;
         this.channel = channel;
         this.message = message;
+        this.title = title;
     }
 
     @Override
@@ -26,7 +28,7 @@ public class SendMessageThread implements Runnable {
         int i=0;
         for (Player p : channels.keySet()) {
             if (channels.get(p).equals(channel)) {
-                p.sendMessage(ChatColor.GRAY + "[" + ChatColor.GREEN + channel + ChatColor.GRAY + "]" + player.getDisplayName()
+                p.sendMessage(ChatColor.GRAY + "[" + ChatColor.GREEN + channel + ChatColor.GRAY + "]" + title + ", " + player.getDisplayName()
                         + ": " + message);
                 i++;
             }

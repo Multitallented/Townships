@@ -75,7 +75,8 @@ public class RegionManager {
                         processItemStackList(currentRegion.getStringList("output")),
                         currentRegion.getDouble("upkeep-chance"),
                         currentRegion.getDouble("money-requirement"),
-                        currentRegion.getDouble("upkeep-money-output")));
+                        currentRegion.getDouble("upkeep-money-output"),
+                        currentRegion.getDouble("exp")));
             }
             regionConfig.save(regionFile);
         } catch (Exception ex) {
@@ -105,7 +106,8 @@ public class RegionManager {
                         currentRegion.getStringList("children"),
                         currentRegion.getInt("max-power", 100),
                         currentRegion.getInt("daily-power-increase", 10),
-                        currentRegion.getInt("charter", 0)));
+                        currentRegion.getInt("charter", 0),
+                        currentRegion.getDouble("exp")));
             }
             sRegionConfig.save(sRegionFile);
         } catch (Exception e) {

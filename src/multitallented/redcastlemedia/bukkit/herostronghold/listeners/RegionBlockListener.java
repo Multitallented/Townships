@@ -199,7 +199,7 @@ public class RegionBlockListener extends BlockListener {
         
         @Override
         public void onBlockFromTo(BlockFromToEvent event) {
-            if (event.isCancelled() || !regionManager.shouldTakeAction(event.getToBlock().getLocation(), null, 0, "denyblockbreak"))
+            if (event.isCancelled() || !regionManager.shouldTakeAction(event.getToBlock().getLocation(), null, 0, "denyliquid"))
                 return;
             
             Block blockFrom = event.getBlock();
@@ -223,22 +223,22 @@ public class RegionBlockListener extends BlockListener {
 
             IgniteCause cause = event.getCause();
             
-            if (cause == IgniteCause.LIGHTNING && regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyblockbreak")) {
+            if (cause == IgniteCause.LIGHTNING && regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyfire")) {
                 event.setCancelled(true);
                 return;
             }
 
-            if (cause == IgniteCause.LAVA && regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyblockbreak")) {
+            if (cause == IgniteCause.LAVA && regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyfire")) {
                 event.setCancelled(true);
                 return;
             }
 
-            if (cause == IgniteCause.SPREAD && regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyblockbreak")) {
+            if (cause == IgniteCause.SPREAD && regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyfire")) {
                 event.setCancelled(true);
                 return;
             }
 
-            if (cause == IgniteCause.FLINT_AND_STEEL && regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 1, "denyblockbreak")) {
+            if (cause == IgniteCause.FLINT_AND_STEEL && regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 1, "denyfire")) {
                 event.setCancelled(true);
                 if (event.getPlayer() != null)
                     event.getPlayer().sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");

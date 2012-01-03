@@ -25,13 +25,22 @@ public class RegionPlayerInteractListener extends PlayerListener {
     
     @Override
     public void onPlayerChat(PlayerChatEvent event) {
-        //TODO add custom titles
         Player player = event.getPlayer();
         String channel = channels.get(player);
         if (channel == null || channel.equals(""))
             return;
         event.setCancelled(true);
-        SendMessageThread smt = new SendMessageThread(channel, channels, player, event.getMessage());
+        String title = null;
+        try {
+            for (String s : rm.getSuperRegion(channel).getMember(player.getName())) {
+                if (s.contains("title:")) {
+                    title = s.replace("title:", "");
+                }
+            }
+        } catch (NullPointerException npe) {
+            
+        }
+        SendMessageThread smt = new SendMessageThread(channel, channels, title, player, event.getMessage());
         try {
             smt.run();
         } catch (Exception e) {
@@ -42,9 +51,19 @@ public class RegionPlayerInteractListener extends PlayerListener {
     public void setPlayerChannel(Player p, String s) {
         if (s.equals("")) {
             String prevChannel = channels.get(p);
+            String title = null;
+            try {
+                for (String sn : rm.getSuperRegion(prevChannel).getMember(p.getName())) {
+                    if (sn.contains("title:")) {
+                        title = sn.replace("title:", "");
+                    }
+                }
+            } catch (NullPointerException npe) {
+
+            }
             channels.remove(p);
             if (prevChannel != null && !prevChannel.endsWith(s)) {
-                SendMessageThread smt = new SendMessageThread(prevChannel, channels, p, p.getDisplayName() + " has left channel " + s);
+                SendMessageThread smt = new SendMessageThread(prevChannel, channels, title, p, p.getDisplayName() + " has left channel " + s);
                 try {
                     smt.run();
                 } catch(Exception e) {
@@ -54,7 +73,17 @@ public class RegionPlayerInteractListener extends PlayerListener {
             return;
         }
         channels.put(p, s);
-        SendMessageThread smt = new SendMessageThread(s, channels, p, p.getDisplayName() + " has joined channel " + s);
+        String title = null;
+        try {
+            for (String sn : rm.getSuperRegion(s).getMember(p.getName())) {
+                if (sn.contains("title:")) {
+                    title = sn.replace("title:", "");
+                }
+            }
+        } catch (NullPointerException npe) {
+
+        }
+        SendMessageThread smt = new SendMessageThread(s, channels, title, p, p.getDisplayName() + " has joined channel " + s);
         try {
             smt.run();
         } catch (Exception e) {
@@ -82,7 +111,7 @@ public class RegionPlayerInteractListener extends PlayerListener {
 
     @Override
     public void onPlayerBucketFill(PlayerBucketFillEvent event) {
-        if (event.isCancelled() || !rm.shouldTakeAction(event.getBlockClicked().getLocation(), event.getPlayer(), 0, "denyplayerinteract"))
+        if (event.isCancelled() || !rm.shouldTakeAction(event.getBlockClicked().getLocation(), event.getPlayer(), 0, "denybucketuse"))
             return;
 
         event.getPlayer().sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
@@ -91,7 +120,7 @@ public class RegionPlayerInteractListener extends PlayerListener {
 
     @Override
     public void onPlayerBucketEmpty(PlayerBucketEmptyEvent event) {
-        if (event.isCancelled() || !rm.shouldTakeAction(event.getBlockClicked().getLocation(), event.getPlayer(), 0, "denyplayerinteract"))
+        if (event.isCancelled() || !rm.shouldTakeAction(event.getBlockClicked().getLocation(), event.getPlayer(), 0, "denybucketuse"))
             return;
 
         event.getPlayer().sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");

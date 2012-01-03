@@ -4,63 +4,86 @@ village:
   - denyblockbreak
   - denyplayerinteract
   - denyfriendlyfire
+  - denybucketuse
+  - denyfire
+  - denyliquid
+  - denyexplosion
   radius: 50
   requirements:
+  - shack.10
   - house.5
-  - farm.1
+  - estate.1
+  - pigfarm.1
   - townhall.1
   - inn.1
   money-requirement: 100000.0
-  money-output-daily: -25.0
+  money-output-daily: -50.0
   max-power: 500
   daily-power-increase: 50
-  charter: 3
+  charter: 5
   child-super-regions: []
+  exp: 5000
 town:
   effects:
   - denyblockbuild
   - denyblockbreak
   - denyplayerinteract
   - denypvp
+  - denybucketuse
+  - denyfire
+  - denyliquid
+  - denyexplosion
   radius: 100
   requirements:
+  - shack.15
   - house.10
-  - farm.2
+  - estate.2
+  - pigfarm.2
   - townhall.1
   - marketplace.1
   - inn.1
   - hospital.1
   money-requirement: 200000.0
-  money-output-daily: -50.0
+  money-output-daily: -150.0
   max-power: 1000
   daily-power-increase: 150
-  charter: 6
+  charter: 10
   child-regions:
   - village
+  exp: 10000
 city:
   effects:
   - denyblockbuild
   - denyblockbreak
   - denyplayerinteract
   - denypvp
-  radius: 100
+  - denybucketuse
+  - denyfire
+  - denyliquid
+  - denyexplosion
+  radius: 200
   requirements:
-  - house.20
-  - farm.4
+  - estate.5
+  - house.15
+  - shack.15
+  - pigfarm.2
   - townhall.1
   - marketplace.2
   - inn.3
   - hospital.2
   money-requirement: 400000.0
-  money-output-daily: -100.0
+  money-output-daily: -500.0
   max-power: 3000
   daily-power-increase: 500
-  charter: 12
+  charter: 25
   child-regions:
   - town
+  exp: 25000
 militarybase:
   effects:
   - denyblockbuild
+  - denybucketuse
+  - denyfire
   - denyfriendlyfire
   radius: 25
   requirements:
@@ -73,12 +96,17 @@ militarybase:
   daily-power-increase: 150
   charter: 0
   child-regions: []
+  exp: 2500
 miningcolony:
   effects:
   - denyblockbuild
   - denyblockbreak
   - denyplayerinteract
   - denypvp
+  - denybucketuse
+  - denyfire
+  - denyliquid
+  - denyexplosion
   radius: 30
   requirements:
   - ironrefinery.2
@@ -91,3 +119,33 @@ miningcolony:
   daily-power-increase: 30
   charter: 3
   child-regions: []
+  exp: 3000
+ward:
+  effects:
+  - denyblockbuild
+  - denyblockbreak
+  - denypvp
+  - denybucketuse
+  - denyfire
+  - denyliquid
+  - denyexplosion
+  radius: 20
+  requirements: []
+  money-requirement: 5000.0
+  money-output-daily: -10.0
+  max-power: 100.0
+  daily-power-increase: 10
+  charter: 0
+  child-regions: []
+  exp: 500
+admin:
+  effects: []
+  radius: 30
+  requirements: []
+  money-requirements: 0
+  money-output-daily: 0
+  max-power: 99999999
+  daily-power-increase: 99999999
+  charter: 0
+  child-regions: []
+  exp: 0

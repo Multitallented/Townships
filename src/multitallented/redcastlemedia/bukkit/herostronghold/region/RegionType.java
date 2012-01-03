@@ -9,17 +9,18 @@ import org.bukkit.inventory.ItemStack;
  */
 public class RegionType {
     private String name;
-    ArrayList<String> friendlyClasses = null;
-    ArrayList<String> enemyClasses = null;
-    ArrayList<String> effects = null;
-    final int radius;
-    ArrayList<ItemStack> requirements = null;
-    ArrayList<ItemStack> reagents = null;
-    ArrayList<ItemStack> upkeep = null;
-    ArrayList<ItemStack> output = null;
-    double upkeepChance = 0;
-    double moneyRequirement = 0;
-    double moneyOutput = 0;
+    private final ArrayList<String> friendlyClasses;
+    private final ArrayList<String> enemyClasses;
+    private final ArrayList<String> effects;
+    private final int radius;
+    private final ArrayList<ItemStack> requirements;
+    private final ArrayList<ItemStack> reagents;
+    private final ArrayList<ItemStack> upkeep;
+    private final ArrayList<ItemStack> output;
+    private final double upkeepChance;
+    private final double moneyRequirement;
+    private final double moneyOutput;
+    private final double exp;
     
     
     public RegionType(String name, ArrayList<String> friendlyClasses,
@@ -27,7 +28,7 @@ public class RegionType {
             int radius, ArrayList<ItemStack> requirements,
             ArrayList<ItemStack> reagents, ArrayList<ItemStack> upkeep,
             ArrayList<ItemStack> output, double upkeepChance,
-            double moneyRequirement, double moneyOutput) {
+            double moneyRequirement, double moneyOutput, double exp) {
         this.name = name;
         this.friendlyClasses = friendlyClasses;
         this.enemyClasses = enemyClasses;
@@ -40,8 +41,12 @@ public class RegionType {
         this.upkeepChance = upkeepChance;
         this.moneyRequirement = moneyRequirement;
         this.moneyOutput = moneyOutput;
+        this.exp = exp;
     }
     
+    public double getExp() {
+        return exp;
+    }
     
     public String getName() {
         return name;
