@@ -537,6 +537,7 @@ public class HeroStronghold extends JavaPlugin {
             
             //Tell the player what reagents are required for it to work
             String message = ChatColor.GOLD + "Reagents: ";
+            if (currentRegionType.getReagents() != null) {
                 int j=0;
                 for (ItemStack is : currentRegionType.getReagents()) {
                     String addLine = is.getAmount() + ":" + is.getType().name() + ", ";
@@ -551,12 +552,13 @@ public class HeroStronghold extends JavaPlugin {
                         break;
                     }
                 }
-                if (currentRegionType.getReagents().isEmpty()) {
-                    message += "None";
-                    player.sendMessage(message);
-                } else {
-                    player.sendMessage(message.substring(0, message.length()-2));
-                }
+            }
+            if (currentRegionType.getReagents() == null || currentRegionType.getReagents().isEmpty()) {
+                message += "None";
+                player.sendMessage(message);
+            } else {
+                player.sendMessage(message.substring(0, message.length()-2));
+            }
             
             return true;
         } else if (args.length > 2 && args[0].equalsIgnoreCase("create")) {
@@ -1357,100 +1359,110 @@ public class HeroStronghold extends JavaPlugin {
                 
                 String message = ChatColor.GOLD + "Effects: ";
                 int j=0;
-                for (String is : rt.getEffects()) {
-                    String addLine = is.split("\\.")[0] + ", ";
-                    if (message.length() + addLine.length() > 55) {
-                        player.sendMessage(message.substring(0, message.length() - 2));
-                        message = ChatColor.GOLD + "";
-                        j++;
-                    }
-                    if (j < 12) {
-                        message += addLine;
-                    } else {
-                        break;
+                if (rt.getEffects() != null) {
+                    for (String is : rt.getEffects()) {
+                        String addLine = is.split("\\.")[0] + ", ";
+                        if (message.length() + addLine.length() > 55) {
+                            player.sendMessage(message.substring(0, message.length() - 2));
+                            message = ChatColor.GOLD + "";
+                            j++;
+                        }
+                        if (j < 12) {
+                            message += addLine;
+                        } else {
+                            break;
+                        }
                     }
                 }
-                if (rt.getEffects().isEmpty()) {
+                if (rt.getEffects() == null || rt.getEffects().isEmpty()) {
                     message += "None";
                     player.sendMessage(message);
                 } else {
                     player.sendMessage(message.substring(0, message.length()-2));
                 }
                 message = ChatColor.GOLD + "Requirements: ";
-                for (ItemStack is : rt.getRequirements()) {
-                    String addLine = is.getAmount() + ":" + is.getType().name() + ", ";
-                    if (message.length() + addLine.length() > 55) {
-                        player.sendMessage(message.substring(0, message.length() - 2));
-                        message = ChatColor.GOLD + "";
-                        j++;
-                    }
-                    if (j < 12) {
-                        message += addLine;
-                    } else {
-                        break;
+                if (rt.getRequirements() != null) {
+                    for (ItemStack is : rt.getRequirements()) {
+                        String addLine = is.getAmount() + ":" + is.getType().name() + ", ";
+                        if (message.length() + addLine.length() > 55) {
+                            player.sendMessage(message.substring(0, message.length() - 2));
+                            message = ChatColor.GOLD + "";
+                            j++;
+                        }
+                        if (j < 12) {
+                            message += addLine;
+                        } else {
+                            break;
+                        }
                     }
                 }
-                if (rt.getRequirements().isEmpty()) {
+                if (rt.getRequirements() == null || rt.getRequirements().isEmpty()) {
                     message += "None";
                     player.sendMessage(message);
                 } else {
                     player.sendMessage(message.substring(0, message.length()-2));
                 }
                 message = ChatColor.GOLD + "Reagents: ";
-                for (ItemStack is : rt.getReagents()) {
-                    String addLine = is.getAmount() + ":" + is.getType().name() + ", ";
-                    if (message.length() + addLine.length() > 55) {
-                        player.sendMessage(message.substring(0, message.length() - 2));
-                        message = ChatColor.GOLD + "";
-                        j++;
-                    }
-                    if (j < 12) {
-                        message += addLine;
-                    } else {
-                        break;
+                if (rt.getReagents() != null) {
+                    for (ItemStack is : rt.getReagents()) {
+                        String addLine = is.getAmount() + ":" + is.getType().name() + ", ";
+                        if (message.length() + addLine.length() > 55) {
+                            player.sendMessage(message.substring(0, message.length() - 2));
+                            message = ChatColor.GOLD + "";
+                            j++;
+                        }
+                        if (j < 12) {
+                            message += addLine;
+                        } else {
+                            break;
+                        }
                     }
                 }
-                if (rt.getReagents().isEmpty()) {
+                if (rt.getReagents() == null || rt.getReagents().isEmpty()) {
                     message += "None";
                     player.sendMessage(message);
                 } else {
                     player.sendMessage(message.substring(0, message.length()-2));
                 }
                 message = ChatColor.GOLD + "UpkeepCost: ";
-                for (ItemStack is : rt.getUpkeep()) {
-                    String addLine = is.getAmount() + ":" + is.getType().name() + ", ";
-                    if (message.length() + addLine.length() > 55) {
-                        player.sendMessage(message.substring(0, message.length() - 2));
-                        message = ChatColor.GOLD + "";
-                        j++;
-                    }
-                    if (j < 12) {
-                        message += addLine;
-                    } else {
-                        break;
+                if (rt.getUpkeep() != null) {
+                    for (ItemStack is : rt.getUpkeep()) {
+                        String addLine = is.getAmount() + ":" + is.getType().name() + ", ";
+                        if (message.length() + addLine.length() > 55) {
+                            player.sendMessage(message.substring(0, message.length() - 2));
+                            message = ChatColor.GOLD + "";
+                            j++;
+                        }
+                        if (j < 12) {
+                            message += addLine;
+                        } else {
+                            break;
+                        }
                     }
                 }
-                if (rt.getUpkeep().isEmpty()) {
+                if (rt.getUpkeep() == null || rt.getUpkeep().isEmpty()) {
                     message += "None";
                     player.sendMessage(message);
                 } else {
                     player.sendMessage(message.substring(0, message.length()-2));
                 }
                 message = ChatColor.GOLD + "Output: ";
-                for (ItemStack is : rt.getOutput()) {
-                    String addLine = is.getAmount() + ":" + is.getType().name() + ", ";
-                    if (message.length() + addLine.length() > 55) {
-                        player.sendMessage(message.substring(0, message.length() - 2));
-                        message = ChatColor.GOLD + "";
-                        j++;
-                    }
-                    if (j < 12) {
-                        message += addLine;
-                    } else {
-                        break;
+                if (rt.getOutput() != null) {
+                    for (ItemStack is : rt.getOutput()) {
+                        String addLine = is.getAmount() + ":" + is.getType().name() + ", ";
+                        if (message.length() + addLine.length() > 55) {
+                            player.sendMessage(message.substring(0, message.length() - 2));
+                            message = ChatColor.GOLD + "";
+                            j++;
+                        }
+                        if (j < 12) {
+                            message += addLine;
+                        } else {
+                            break;
+                        }
                     }
                 }
-                if (rt.getOutput().isEmpty()) {
+                if (rt.getOutput() == null || rt.getOutput().isEmpty()) {
                     message += "None";
                     player.sendMessage(message);
                 } else {
@@ -1465,60 +1477,66 @@ public class HeroStronghold extends JavaPlugin {
                 
                 String message = ChatColor.GOLD + "Effects: ";
                 int j=0;
-                for (String is : srt.getEffects()) {
-                    String addLine = is + ", ";
-                    if (message.length() + addLine.length() > 55) {
-                        player.sendMessage(message.substring(0, message.length() - 2));
-                        message = ChatColor.GOLD + "";
-                        j++;
-                    }
-                    if (j < 11) {
-                        message += addLine;
-                    } else {
-                        break;
+                if (srt.getEffects() != null) {
+                    for (String is : srt.getEffects()) {
+                        String addLine = is + ", ";
+                        if (message.length() + addLine.length() > 55) {
+                            player.sendMessage(message.substring(0, message.length() - 2));
+                            message = ChatColor.GOLD + "";
+                            j++;
+                        }
+                        if (j < 11) {
+                            message += addLine;
+                        } else {
+                            break;
+                        }
                     }
                 }
-                if (srt.getEffects().isEmpty()) {
+                if (srt == null || srt.getEffects().isEmpty()) {
                     message += "None";
                     player.sendMessage(message);
                 } else {
                     player.sendMessage(message.substring(0, message.length()-2));
                 }
                 message = ChatColor.GOLD + "Requirements: ";
-                for (String is : srt.getRequirements().keySet()) {
-                    String addLine = is + ":" + srt.getRequirement(is) + ", ";
-                    if (message.length() + addLine.length() > 55) {
-                        player.sendMessage(message.substring(0, message.length() - 2));
-                        message = ChatColor.GOLD + "";
-                        j++;
-                    }
-                    if (j < 12) {
-                        message += addLine;
-                    } else {
-                        break;
+                if (srt.getRequirements() != null) {
+                    for (String is : srt.getRequirements().keySet()) {
+                        String addLine = is + ":" + srt.getRequirement(is) + ", ";
+                        if (message.length() + addLine.length() > 55) {
+                            player.sendMessage(message.substring(0, message.length() - 2));
+                            message = ChatColor.GOLD + "";
+                            j++;
+                        }
+                        if (j < 12) {
+                            message += addLine;
+                        } else {
+                            break;
+                        }
                     }
                 }
-                if (srt.getRequirements().isEmpty()) {
+                if (srt.getRequirements() == null || srt.getRequirements().isEmpty()) {
                     message += "None";
                     player.sendMessage(message);
                 } else {
                     player.sendMessage(message.substring(0, message.length()-2));
                 }
                 message = ChatColor.GOLD + "Evolves from: ";
-                for (String is : srt.getChildren()) {
-                    String addLine = is + ", ";
-                    if (message.length() + addLine.length() > 55) {
-                        player.sendMessage(message.substring(0, message.length() - 2));
-                        message = ChatColor.GOLD + "";
-                        j++;
-                    }
-                    if (j < 12) {
-                        message += addLine;
-                    } else {
-                        break;
+                if (srt.getChildren() != null) {
+                    for (String is : srt.getChildren()) {
+                        String addLine = is + ", ";
+                        if (message.length() + addLine.length() > 55) {
+                            player.sendMessage(message.substring(0, message.length() - 2));
+                            message = ChatColor.GOLD + "";
+                            j++;
+                        }
+                        if (j < 12) {
+                            message += addLine;
+                        } else {
+                            break;
+                        }
                     }
                 }
-                if (srt.getChildren().isEmpty()) {
+                if (srt == null || srt.getChildren().isEmpty()) {
                     message += "None";
                     player.sendMessage(message);
                 } else {
