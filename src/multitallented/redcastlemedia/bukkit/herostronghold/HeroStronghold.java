@@ -1320,7 +1320,7 @@ public class HeroStronghold extends JavaPlugin {
             
             x = loc.getX();
             for (SuperRegion sr : regionManager.getSortedSuperRegions()) {
-                int radius = regionManager.getRegionType(sr.getType()).getRadius();
+                int radius = regionManager.getSuperRegionType(sr.getType()).getRadius();
                 Location l = sr.getLocation();
                 if (l.getX() + radius < x) {
                     break;
