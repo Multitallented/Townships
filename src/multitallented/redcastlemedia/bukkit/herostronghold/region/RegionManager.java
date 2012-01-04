@@ -137,13 +137,7 @@ public class RegionManager {
                     ArrayList<String> members = (ArrayList<String>) dataConfig.getStringList("members");
                     if (location != null && type != null && owners != null && members != null) {
                         liveRegions.put(location, new Region(i, location, type, owners, members));
-                        /*int sort = (int) location.getX() + regionTypes.get(type).getRadius();
-                        float k = sortedRegions.size() / 2;
-                        int j = (int) k;
-                        while (k >= 0.5f) {
-                            k = k / 2;
-                            j = sortedRegions.get(j).getLocation().getX() + regionTypes.get(sortedRegions.get(j).getType()).getRadius() < sort ? Math.round(j + k) : Math.round(j - k);
-                        }*/
+                        
                         sortedRegions.add(liveRegions.get(location));
                     }
                 }
@@ -206,13 +200,7 @@ public class RegionManager {
                     }
                     if (location != null && type != null && owners != null) {
                         liveSuperRegions.put(name, new SuperRegion(name, location, type, owners, members, power, taxes, balance, taxRevenue));
-                        /*int sort = (int) location.getX() + superRegionTypes.get(type).getRadius();
-                        float k = sortedSuperRegions.size() / 2;
-                        int j = (int) k;
-                        while (k >= 0.5f) {
-                            k = k / 2;
-                            j = sortedSuperRegions.get(j).getLocation().getX() + superRegionTypes.get(sortedSuperRegions.get(j).getType()).getRadius() < sort ? Math.round(j + k) : Math.round(j - k);
-                        }*/
+                        
                         sortedSuperRegions.add(liveSuperRegions.get(name));
                     }
                 }
@@ -272,13 +260,7 @@ public class RegionManager {
             System.out.println("[HeroStronghold] saving new region to " + i + ".yml");
             //dataConfig.load(dataFile);
             liveRegions.put(loc, new Region(i, loc, type, owners, new ArrayList<String>()));
-            /*int sort = (int) loc.getX() + getRegionType(type).getRadius();
-            float k = sortedRegions.size() / 2;
-            int j = (int) k;
-            while (k >= 0.5f) {
-                k = k / 2;
-                j = sortedRegions.get(j).getLocation().getX() + getRegionType(sortedRegions.get(j).getType()).getRadius() < sort ? Math.round(j + k) : Math.round(j - k);
-            }*/
+            
             sortedRegions.add(liveRegions.get(loc));
             if (sortedRegions.size() > 1) {
                 Collections.sort(sortedRegions, new Comparator<Region>() {
@@ -312,13 +294,7 @@ public class RegionManager {
             dataConfig = new YamlConfiguration();
             System.out.println("[HeroStronghold] saving new superregion to " + name + ".yml");
             liveSuperRegions.put(name, new SuperRegion(name, loc, type, owners, members, maxpower, 0.0, 0.0, new LinkedList<Double>()));
-            /*int sort = (int) loc.getX() + superRegionTypes.get(type).getRadius();
-            float k = sortedSuperRegions.size() / 2;
-            int j = (int) k;
-            while (k >= 0.5f) {
-                k = k / 2;
-                j = sortedSuperRegions.get(j).getLocation().getX() + superRegionTypes.get(sortedSuperRegions.get(j).getType()).getRadius() < sort ? Math.round(j + k) : Math.round(j - k);
-            }*/
+            
             sortedSuperRegions.add(liveSuperRegions.get(name));
             
             if (sortedSuperRegions.size() > 1) {
@@ -479,35 +455,6 @@ public class RegionManager {
             }
         }
         
-        /*for (String s : getSuperRegionNames()) {
-            SuperRegion sr = getSuperRegion(s);
-            Location loc = sr.getLocation();
-            SuperRegionType srt = getSuperRegionType(sr.getType());
-            String rt = getRegionType(getRegion(l).getType()).getName();
-            int radius = srt.getRadius();
-            try {
-                int required = srt.getRequirement(rt);
-                if (required != 0 && Math.sqrt(loc.distanceSquared(l)) < radius) {
-                    
-                    outer: for (Location rl : getRegionLocations()) {
-                        try {
-                            if (getRegion(rl).getType().equals(rt) && Math.sqrt(rl.distanceSquared(loc)) < radius) {
-                                required--;
-                                if (required <= 0)
-                                    break outer;
-                            }
-                        } catch (IllegalArgumentException iae) {
-                            
-                        }
-                    }
-                    if (required > 0) {
-                        regionsToDestroy.add(s);
-                    }
-                }
-            } catch (IllegalArgumentException iae) {
-                
-            }
-        }*/
         for (String s : regionsToDestroy) {
             destroySuperRegion(s, true);
         }
@@ -630,6 +577,10 @@ public class RegionManager {
             plugin.warning("Failed to load " + sr.getName() + ".yml to save member");
             return;
         }
+        if (sr.hasMember(name)) {
+            sr.remove(name);
+        }
+        sr.addMember(name, input);
         sRegionConfig.set("members." + name, input);
         try {
             sRegionConfig.save(superRegionFile);
@@ -637,7 +588,6 @@ public class RegionManager {
             plugin.warning("Failed to save " + sr.getName() + ".yml");
             return;
         }
-        sr.addMember(name, input);
     }
     
     public void removeMember(SuperRegion sr, String name) {
@@ -653,6 +603,7 @@ public class RegionManager {
             plugin.warning("Failed to load " + sr.getName() + ".yml to remove member " + name);
             return;
         }
+        sr.remove(name);
         sRegionConfig.set("members." + name, new ArrayList<String>());
         try {
             sRegionConfig.save(superRegionFile);
@@ -660,7 +611,6 @@ public class RegionManager {
             plugin.warning("Failed to save " + sr.getName() + ".yml");
             return;
         }
-        sr.remove(name);
     }
     
     public void setOwner(SuperRegion sr, String name) {
@@ -724,7 +674,7 @@ public class RegionManager {
     }
     
     public void setOwner(Region r, String name) {
-        File regionFile = new File(plugin.getDataFolder() + "/superregions", r.getID() + ".yml");
+        File regionFile = new File(plugin.getDataFolder() + "/data", r.getID() + ".yml");
         if (!regionFile.exists()) {
             plugin.warning("Failed to find file " + r.getID() + ".yml");
             return;
