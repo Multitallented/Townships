@@ -677,11 +677,10 @@ public class RegionManager {
             return;
         }
         List<String> owners = sr.getOwners();
-        if (!owners.remove(name)) {
-            owners.add(name);
-            sr.addOwner(name);
+        if (owners.contains(name)) {
+            owners.remove(name);
         } else {
-            sr.remove(name);
+            owners.add(name);
         }
         sRegionConfig.set("owners", owners);
         try {
@@ -710,15 +709,12 @@ public class RegionManager {
             return;
         }
         ArrayList<String> members = r.getMembers();
-        if (r.isMember(name)) {
+        if (members.contains(name)) {
             members.remove(name);
-            regionConfig.set("members", members);
-            r.remove(name);
         } else {
             members.add(name);
-            regionConfig.set("members", members);
-            r.addMember(name);
         }
+        regionConfig.set("members", members);
         try {
             regionConfig.save(regionFile);
         } catch (Exception e) {
@@ -741,11 +737,10 @@ public class RegionManager {
             return;
         }
         List<String> owners = r.getOwners();
-        if (!owners.remove(name)) {
-            owners.add(name);
-            r.addOwner(name);
+        if (owners.contains(name)) {
+            owners.remove(name);
         } else {
-            r.remove(name);
+            owners.add(name);
         }
         regionConfig.set("owners", owners);
         try {

@@ -1547,15 +1547,7 @@ public class HeroStronghold extends JavaPlugin {
         } else if (args.length > 1 && args[0].equalsIgnoreCase("addowner")) {
             String playername = args[1];
             Player aPlayer = getServer().getPlayer(playername);
-            if (aPlayer == null) {
-                OfflinePlayer op = getServer().getOfflinePlayer(playername);
-                if (op == null) {
-                    player.sendMessage(ChatColor.GRAY + "[HeroStronghold] There is no player by the name of " + args[1]);
-                    return true;
-                } else {
-                    playername = op.getName();
-                }
-            } else {
+            if (aPlayer != null) {
                 playername = aPlayer.getName();
             }
             
@@ -1792,8 +1784,7 @@ public class HeroStronghold extends JavaPlugin {
             }
             
             //Check if owner or admin of that region
-            if (!(perms != null && perms.has(player, "herostronghold.admin") &&
-                    !sr.getOwners().get(0).equalsIgnoreCase(player.getName()))) {
+            if (!(perms != null && perms.has(player, "herostronghold.admin") && (sr.getOwners().isEmpty() || !sr.getOwners().get(0).equalsIgnoreCase(player.getName())))) {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You are not the owner of that region.");
                 return true;
             }
