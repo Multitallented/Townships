@@ -65,7 +65,9 @@ public class RegionEntityListener extends EntityListener {
                 } catch(Exception e) {
 
                 }
-                rm.destroySuperRegion(s, true);
+                if (sr.getPower() < 1) {
+                    rm.destroySuperRegion(s, true);
+                }
             }
         }
     }
