@@ -424,30 +424,30 @@ public class RegionManager {
             try {
                 if (!(l.getX() - radius > x1) && l.distanceSquared(loc) < radius) {
                     SuperRegionType srt = getSuperRegionType(sr.getType());
-                    int required = srt.getRequirement(or.getType());
-                    if (required != 0) {
+                    Integer required = srt.getRequirement(or.getType());
+                    if (required != null && required != 0) {
                         required++;
-                    }
                     
-                    double x = loc.getX();
-                    for (Region r : getSortedRegions()) {
-                        Location rl = r.getLocation();
-                        double rlx = rl.getX();
-                        if (rlx + radius < x) {
-                            return;
-                        }
-                        try {
-                            if (!(rlx - radius > x) && rl.distanceSquared(l) < radius && getRegion(rl).getType().equals(or.getType())) {
-                                required--;
-                                if (required <= 0)
-                                    break;
+                        double x = loc.getX();
+                        for (Region r : getSortedRegions()) {
+                            Location rl = r.getLocation();
+                            double rlx = rl.getX();
+                            if (rlx + radius < x) {
+                                return;
                             }
-                        } catch (IllegalArgumentException iae) {
+                            try {
+                                if (!(rlx - radius > x) && rl.distanceSquared(l) < radius && getRegion(rl).getType().equals(or.getType())) {
+                                    required--;
+                                    if (required <= 0)
+                                        break;
+                                }
+                            } catch (IllegalArgumentException iae) {
 
+                            }
                         }
-                    }
-                    if (required > 0) {
-                        regionsToDestroy.add(sr.getName());
+                        if (required > 0) {
+                            regionsToDestroy.add(sr.getName());
+                        }
                     }
                 }
             } catch (IllegalArgumentException iae) {

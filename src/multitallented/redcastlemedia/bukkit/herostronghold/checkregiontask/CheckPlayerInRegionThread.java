@@ -58,27 +58,6 @@ public class CheckPlayerInRegionThread implements Runnable {
             }
         }
         
-        /*for (Location l : rm.getRegionLocations()) {
-            int radius = rm.getRegionType(rm.getRegion(l).getType()).getRadius();
-            try {
-                if (Math.sqrt(loc.distanceSquared(l)) < radius) {
-                    PlayerInRegionEvent pIREvent = new PlayerInRegionEvent(l, p);
-                    pm.callEvent(pIREvent);
-                    try {
-                        for (Location dl : pIREvent.getRegionsToDestroy()) {
-                            if (!crt.containsRegionToDestory(dl)) {
-                                crt.addOrDestroyRegionToDestroy(dl);
-                            }
-                        }
-                    } catch (NullPointerException npe) {
-                        
-                    }
-                    return;
-                }
-            } catch (IllegalArgumentException iae) {
-                
-            }
-        }*/
     }
     
 }

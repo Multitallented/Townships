@@ -62,7 +62,7 @@ teleporter:
   upkeep-chance: 0.0
   output:
   - DIRT.1
-  money-requirements: 2000.0
+  money-requirement: 2000.0
   upkeep-money-output: 0.0
 hospital:
   friendly-classes: []
@@ -88,7 +88,7 @@ hospital:
   upkeep-chance: 0.0
   output:
   - STICK.1
-  money-requirements: 500.0
+  money-requirement: 500.0
   upkeep-money-output: 0.0
 landmine:
   friendly-classes: []
@@ -103,7 +103,7 @@ landmine:
   upkeep: []
   upkeep-chance: 0.0
   output: []
-  money-requirements: 0.0
+  money-requirement: 0.0
   upkeep-money-output: 0.0
 mancannon:
   friendly-classes: []
@@ -119,7 +119,7 @@ mancannon:
   upkeep: []
   upkeep-chance: 0.0
   output: []
-  money-requirements: 200.0
+  money-requirement: 200.0
   upkeep-money-output: 0.0
 shack:
   friendly-classes: []
@@ -151,7 +151,7 @@ shack:
   - IRON_INGOT.1
   upkeep-chance: 0.001
   output: []
-  money-requirements: 500.0
+  money-requirement: 500.0
   upkeep-money-output: 100.0
 house:
   friendly-classes: []
@@ -186,7 +186,7 @@ house:
   - IRON_INGOT.2
   upkeep-chance: 0.001
   output: []
-  money-requirements: 1000.0
+  money-requirement: 1000.0
   upkeep-money-output: 200.0
 estate:
   friendly-classes: []
@@ -225,7 +225,7 @@ estate:
   - IRON_INGOT.4
   upkeep-chance: 0.001
   output: []
-  money-requirements: 4000.0
+  money-requirement: 4000.0
   upkeep-money-output: 500.0
 pigfarm:
   friendly-classes: []
@@ -245,7 +245,7 @@ pigfarm:
   upkeep-chance: 0.01
   output:
   - STICK.1
-  money-requirements: 50.0
+  money-requirement: 50.0
   upkeep-money-output: -10.0
 ironrefinery:
   friendly-classes: []
@@ -268,7 +268,7 @@ ironrefinery:
   output:
   - IRON_INGOT.1
   - COBBLESTONE.3
-  money-requirements: 200.0
+  money-requirement: 200.0
   upkeep-money-output: -10.0
 redstonerefinery:
   friendly-classes: []
@@ -291,7 +291,7 @@ redstonerefinery:
   output:
   - IRON_INGOT.3
   - REDSTONE.4
-  money-requirements: 250.0
+  money-requirement: 250.0
   upkeep-money-output: -15.0
 goldrefinery:
   friendly-classes: []
@@ -314,7 +314,7 @@ goldrefinery:
   output:
   - IRON_INGOT.3
   - GOLD_INGOT.1
-  money-requirements: 300.0
+  money-requirement: 300.0
   upkeep-money-output: -15.0
 townhall:
   friendly-classes: []
@@ -333,7 +333,7 @@ townhall:
   upkeep: []
   upkeep-chance: 0.0
   output: []
-  money-requirements: 3000.0
+  money-requirement: 3000.0
   upkeep-money-output: 0.0
 market:
   friendly-classes: []
@@ -357,7 +357,7 @@ market:
   upkeep: []
   upkeep-chance: 0.005
   output: []
-  money-requirements: 6000.0
+  money-requirement: 6000.0
   upkeep-money-output: 20.0
 inn:
   friendly-classes: []
@@ -385,5 +385,5 @@ inn:
   - BREAD.8
   upkeep-chance: 0.005
   output: []
-  money-requirements: 6000.0
+  money-requirement: 6000.0
   upkeep-money-output: 20.0
