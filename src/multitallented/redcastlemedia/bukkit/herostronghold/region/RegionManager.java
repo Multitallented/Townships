@@ -102,7 +102,7 @@ public class RegionManager {
                         (int) Math.pow(currentRegion.getInt("radius"), 2),
                         processRegionTypeMap(currentRegion.getStringList("requirements")),
                         currentRegion.getDouble("money-requirement", 0),
-                        currentRegion.getDouble("daily-money-output", 0),
+                        currentRegion.getDouble("money-output-daily", 0),
                         currentRegion.getStringList("children"),
                         currentRegion.getInt("max-power", 100),
                         currentRegion.getInt("daily-power-increase", 10),
@@ -780,7 +780,8 @@ public class RegionManager {
             }
             try {
                 if (!(l.getX() - radius > x) && l.distanceSquared(loc) < radius) {
-                    if (!((player != null && (sr.hasOwner(player.getName()) || sr.hasMember(player.getName()))) || !getSuperRegionType(sr.getType()).hasEffect(effectName))) {
+                    if ((player == null || (!sr.hasOwner(player.getName()) && !sr.hasMember(player.getName())))
+                            && getSuperRegionType(sr.getType()).hasEffect(effectName)) {
                         return true;
                     }
                 }

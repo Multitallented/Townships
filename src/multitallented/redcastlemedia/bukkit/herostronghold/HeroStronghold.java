@@ -1133,13 +1133,13 @@ public class HeroStronghold extends JavaPlugin {
                     if (pl != null) {
                         pl.sendMessage(ChatColor.GOLD + playername + " left " + args[2]);
                     }
+                }
+                for (String s : sr.getOwners()) {
+                    Player pl = getServer().getPlayer(s);
+                    if (pl != null) {
+                        pl.sendMessage(ChatColor.GOLD + playername + " left " + args[2]);
                     }
-                    for (String s : sr.getOwners()) {
-                        Player pl = getServer().getPlayer(s);
-                        if (pl != null) {
-                            pl.sendMessage(ChatColor.GOLD + playername + " left " + args[2]);
-                        }
-                    }
+                }
                 return true;
             }
             
@@ -1269,7 +1269,7 @@ public class HeroStronghold extends JavaPlugin {
             if (rt != null) {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Info for region type " + ChatColor.GOLD + args[1] + ":");
                 player.sendMessage(ChatColor.GRAY + "Cost: " + ChatColor.GOLD + rt.getMoneyRequirement() + ChatColor.GRAY +
-                        ", UpkeepCost: " + ChatColor.GOLD + rt.getMoneyOutput() + ChatColor.GRAY + ", Radius: " + ChatColor.GOLD + (int) Math.sqrt(rt.getRadius()));
+                        ", Payout: " + ChatColor.GOLD + rt.getMoneyOutput() + ChatColor.GRAY + ", Radius: " + ChatColor.GOLD + (int) Math.sqrt(rt.getRadius()));
                 
                 String message = ChatColor.GRAY + "Effects: " + ChatColor.GOLD;
                 int j=0;
@@ -1385,7 +1385,7 @@ public class HeroStronghold extends JavaPlugin {
             } else if (srt != null) {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Info for super-region type " + ChatColor.GOLD + args[1] + ":");
                 player.sendMessage(ChatColor.GRAY + "Cost: " + ChatColor.GOLD + srt.getMoneyRequirement() + ChatColor.GRAY +
-                        ", UpkeepCost: " + ChatColor.GOLD + srt.getOutput());
+                        ", Payout: " + ChatColor.GOLD + srt.getOutput());
                 player.sendMessage(ChatColor.GRAY + "Power: " + ChatColor.GOLD + srt.getMaxPower() + " (+" + srt.getDailyPower() + "), " +
                         ChatColor.GRAY + "Charter: " + ChatColor.GOLD + srt.getCharter() + ChatColor.GRAY + ", Radius: " + ChatColor.GOLD + (int) Math.sqrt(srt.getRadius()));
                 
@@ -1507,6 +1507,9 @@ public class HeroStronghold extends JavaPlugin {
                             }
                             regionManager.setOwner(r, playername);
                             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.WHITE + "Added " + playername + " as an owner.");
+                            if (aPlayer != null) {
+                                aPlayer.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.WHITE + "You're now a co-owner of " + player.getDisplayName() + "'s " + r.getType());
+                            }
                             return true;
                         } else {
                             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You don't own this region.");
