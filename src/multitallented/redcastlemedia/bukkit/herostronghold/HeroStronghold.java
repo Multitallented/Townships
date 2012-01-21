@@ -98,7 +98,7 @@ public class HeroStronghold extends JavaPlugin {
         pm.registerEvent(Type.EXPLOSION_PRIME, regionEntityListener, Priority.High, this);
         pm.registerEvent(Type.ENTITY_EXPLODE, regionEntityListener, Priority.High, this);
         pm.registerEvent(Type.ENDERMAN_PICKUP, regionEntityListener, Priority.High, this);
-        pm.registerEvent(Type.ENTITY_DAMAGE, regionEntityListener, Priority.Monitor, this);
+        pm.registerEvent(Type.ENTITY_DAMAGE, regionEntityListener, Priority.Normal, this);
         pm.registerEvent(Type.ENTITY_DEATH, regionEntityListener, Priority.Monitor, this);
         
         pm.registerEvent(Type.PLAYER_INTERACT, dpeListener, Priority.High, this);
