@@ -91,4 +91,8 @@ public class RegionType {
     public boolean containsFriendlyClass(String name) {
         return this.friendlyClasses.contains(name);
     }
+    
+    public boolean containsEnemyClass(String name) {
+        return this.enemyClasses.contains(name);
+    }
 }

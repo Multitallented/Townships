@@ -58,7 +58,7 @@ public class RegionBlockListener extends BlockListener {
                     SuperRegionType currentRegionType = regionManager.getSuperRegionType(sr.getType());
                     Player player = event.getPlayer();
                     if ((player == null || (!sr.hasOwner(player.getName()) && !sr.hasMember(player.getName())))
-                            && currentRegionType.hasEffect("denyblockbreak")) {
+                            && currentRegionType.hasEffect("denyblockbreak") && regionManager.hasAllRequiredRegions(sr)) {
                         event.setCancelled(true);
                         if (player != null)
                             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");

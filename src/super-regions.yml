@@ -16,8 +16,9 @@ village:
   - pigfarm.1
   - townhall.1
   - inn.1
+  central-structure: townhall
   money-requirement: 100000.0
-  money-output-daily: -50.0
+  money-output-daily: -250.0
   max-power: 500
   daily-power-increase: 50
   charter: 5
@@ -43,8 +44,9 @@ town:
   - marketplace.1
   - inn.1
   - hospital.1
+  central-structure: townhall
   money-requirement: 200000.0
-  money-output-daily: -150.0
+  money-output-daily: -500.0
   max-power: 1000
   daily-power-increase: 150
   charter: 10
@@ -71,8 +73,9 @@ city:
   - marketplace.2
   - inn.3
   - hospital.2
+  central-structure: townhall
   money-requirement: 400000.0
-  money-output-daily: -500.0
+  money-output-daily: -1000.0
   max-power: 3000
   daily-power-increase: 500
   charter: 25
@@ -90,6 +93,7 @@ militarybase:
   - house.1
   - arrowturret.4
   - hospital.1
+  central-structure: house
   money-requirement: 10000.0
   money-output-daily: -15.0
   max-power: 200
@@ -113,6 +117,7 @@ miningcolony:
   - goldrefinery.1
   - redstonerefinery.1
   - house.1
+  central-structure: house
   money-requirement: 20000.0
   money-output-daily: -30.0
   max-power: 300

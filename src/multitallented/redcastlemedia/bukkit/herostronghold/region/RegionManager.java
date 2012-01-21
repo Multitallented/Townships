@@ -14,7 +14,9 @@ import java.util.Map;
 import java.util.Set;
 import multitallented.redcastlemedia.bukkit.herostronghold.ConfigManager;
 import multitallented.redcastlemedia.bukkit.herostronghold.HeroStronghold;
+import multitallented.redcastlemedia.bukkit.herostronghold.events.RegionCreatedEvent;
 import multitallented.redcastlemedia.bukkit.herostronghold.events.RegionDestroyedEvent;
+import multitallented.redcastlemedia.bukkit.herostronghold.events.SuperRegionCreatedEvent;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -23,6 +25,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.TNTPrimed;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -107,7 +110,8 @@ public class RegionManager {
                         currentRegion.getInt("max-power", 100),
                         currentRegion.getInt("daily-power-increase", 10),
                         currentRegion.getInt("charter", 0),
-                        currentRegion.getDouble("exp")));
+                        currentRegion.getDouble("exp", 0),
+                        currentRegion.getString("central-structure")));
             }
             sRegionConfig.save(sRegionFile);
         } catch (Exception e) {
@@ -259,8 +263,15 @@ public class RegionManager {
             dataConfig = new YamlConfiguration();
             System.out.println("[HeroStronghold] saving new region to " + i + ".yml");
             //dataConfig.load(dataFile);
-            liveRegions.put(loc, new Region(i, loc, type, owners, new ArrayList<String>()));
             
+            
+            dataConfig.set("location", loc.getWorld().getName() + ":" + loc.getX()
+                    + ":" + loc.getBlockY() + ":" + loc.getZ());
+            dataConfig.set("type", type);
+            dataConfig.set("owners", owners);
+            dataConfig.set("members", new ArrayList<String>());
+            dataConfig.save(dataFile);
+            liveRegions.put(loc, new Region(i, loc, type, owners, new ArrayList<String>()));
             sortedRegions.add(liveRegions.get(loc));
             if (sortedRegions.size() > 1) {
                 Collections.sort(sortedRegions, new Comparator<Region>() {
@@ -271,19 +282,14 @@ public class RegionManager {
                     }
                 });
             }
-            dataConfig.set("location", loc.getWorld().getName() + ":" + loc.getX()
-                    + ":" + loc.getBlockY() + ":" + loc.getZ());
-            dataConfig.set("type", type);
-            dataConfig.set("owners", owners);
-            dataConfig.set("members", new ArrayList<String>());
-            dataConfig.save(dataFile);
+            plugin.getServer().getPluginManager().callEvent(new RegionCreatedEvent(loc));
         } catch (Exception ioe) {
             System.out.println("[HeroStronghold] unable to write new region to file " + i + ".yml");
             ioe.printStackTrace();
         }
     }
     
-    public boolean addSuperRegion(String name, Location loc, String type, List<String> owners, Map<String, List<String>> members, int maxpower) {
+    public boolean addSuperRegion(String name, Location loc, String type, List<String> owners, Map<String, List<String>> members, int power) {
         File superRegionFolder = new File(plugin.getDataFolder() + "/superregions");
         File dataFile = new File(superRegionFolder, name + ".yml");
         if (dataFile.exists()) {
@@ -293,7 +299,18 @@ public class RegionManager {
             dataFile.createNewFile();
             dataConfig = new YamlConfiguration();
             System.out.println("[HeroStronghold] saving new superregion to " + name + ".yml");
-            liveSuperRegions.put(name, new SuperRegion(name, loc, type, owners, members, maxpower, 0.0, 0.0, new LinkedList<Double>()));
+            
+            dataConfig.set("location", loc.getWorld().getName() + ":" + loc.getX()
+                    + ":" + loc.getBlockY() + ":" + loc.getZ());
+            dataConfig.set("type", type);
+            dataConfig.set("owners", owners);
+            dataConfig.createSection("members");
+            for (String s : members.keySet()) {
+                dataConfig.set("members." + s, members.get(s));
+            }
+            dataConfig.set("power", power);
+            dataConfig.save(dataFile);
+            liveSuperRegions.put(name, new SuperRegion(name, loc, type, owners, members, power, 0.0, 0.0, new LinkedList<Double>()));
             
             sortedSuperRegions.add(liveSuperRegions.get(name));
             
@@ -308,16 +325,7 @@ public class RegionManager {
                     });
                 }
             }
-            dataConfig.set("location", loc.getWorld().getName() + ":" + loc.getX()
-                    + ":" + loc.getBlockY() + ":" + loc.getZ());
-            dataConfig.set("type", type);
-            dataConfig.set("owners", owners);
-            dataConfig.createSection("members");
-            for (String s : members.keySet()) {
-                dataConfig.set("members." + s, members.get(s));
-            }
-            dataConfig.set("power", maxpower);
-            dataConfig.save(dataFile);
+            plugin.getServer().getPluginManager().callEvent(new SuperRegionCreatedEvent(name));
             return true;
         } catch (Exception ioe) {
             System.out.println("[HeroStronghold] unable to write new superregion to file " + name + ".yml");
@@ -366,11 +374,9 @@ public class RegionManager {
         
         plugin.getServer().getPluginManager().callEvent(new RegionDestroyedEvent(l));
         if (configManager.getExplode()) {
-            l.getWorld().createExplosion(l, 4f);
-            /*l.getBlock().setTypeId(46);
-            if (l.getY()- 1 > 0) {
-                l.getBlock().getRelative(BlockFace.DOWN).setType(Material.REDSTONE_TORCH_ON);
-            }*/
+            l.getBlock().setTypeId(0);
+            TNTPrimed tnt = l.getWorld().spawn(l, TNTPrimed.class); 
+            tnt.setFuseTicks(1);
             
         }
         l.getBlock().setTypeId(0);
@@ -423,32 +429,10 @@ public class RegionManager {
             }
             try {
                 if (!(l.getX() - radius > x1) && l.distanceSquared(loc) < radius) {
-                    SuperRegionType srt = getSuperRegionType(sr.getType());
-                    Integer required = srt.getRequirement(or.getType());
-                    if (required != null && required != 0) {
-                        required++;
-                    
-                        double x = loc.getX();
-                        for (Region r : getSortedRegions()) {
-                            Location rl = r.getLocation();
-                            double rlx = rl.getX();
-                            if (rlx + radius < x) {
-                                return;
-                            }
-                            try {
-                                if (!(rlx - radius > x) && rl.distanceSquared(l) < radius && getRegion(rl).getType().equals(or.getType())) {
-                                    required--;
-                                    if (required <= 0)
-                                        break;
-                                }
-                            } catch (IllegalArgumentException iae) {
-
-                            }
-                        }
-                        if (required > 0) {
-                            regionsToDestroy.add(sr.getName());
-                        }
+                    if (or.getType().equals(getSuperRegionType(sr.getType()).getCentralStructure())) {
+                        regionsToDestroy.add(sr.getName());
                     }
+                    
                 }
             } catch (IllegalArgumentException iae) {
                 
@@ -458,6 +442,39 @@ public class RegionManager {
         for (String s : regionsToDestroy) {
             destroySuperRegion(s, true);
         }
+    }
+    
+    public boolean hasAllRequiredRegions(SuperRegion sr) {
+        Location loc = sr.getLocation();
+        SuperRegionType srt = getSuperRegionType(sr.getType());
+        Map<String, Integer> reqs = new HashMap<String, Integer>();
+        for (String s : srt.getRequirements().keySet()) {
+            reqs.put(new String(s), new Integer(srt.getRequirement(s)));
+        }
+        
+        double x = loc.getX();
+        int radius = getSuperRegionType(sr.getType()).getRadius();
+        for (Region r : getSortedRegions()) {
+            Location l = r.getLocation();
+            if (l.getX() + radius < x) {
+                break;
+            }
+            try {
+                if (!(l.getX() - radius > x) && l.distanceSquared(loc) < radius && reqs.containsKey(r.getType())) {
+                    if (reqs.get(r.getType()) < 2) {
+                        reqs.remove(r.getType());
+                    } else {
+                        reqs.put(r.getType(), reqs.get(r.getType()) - 1);
+                    }
+                }
+            } catch (IllegalArgumentException iae) {
+                
+            }
+        }
+        if (reqs.isEmpty()) {
+            return true;
+        }
+        return false;
     }
     
     public synchronized void reduceRegion(SuperRegion sr) {
@@ -781,7 +798,7 @@ public class RegionManager {
             try {
                 if (!(l.getX() - radius > x) && l.distanceSquared(loc) < radius) {
                     if ((player == null || (!sr.hasOwner(player.getName()) && !sr.hasMember(player.getName())))
-                            && getSuperRegionType(sr.getType()).hasEffect(effectName)) {
+                            && getSuperRegionType(sr.getType()).hasEffect(effectName) && hasAllRequiredRegions(sr)) {
                         return true;
                     }
                 }
