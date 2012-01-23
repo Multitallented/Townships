@@ -97,8 +97,12 @@ public class RegionPlayerInteractListener extends PlayerListener {
     
     @Override
     public void onPlayerInteract(PlayerInteractEvent event) {
-        if (event.isCancelled() || !rm.shouldTakeAction(event.getClickedBlock().getLocation(), event.getPlayer(), 0, "denyplayerinteract"))
+        if (event.isCancelled() || !rm.shouldTakeAction(event.getClickedBlock().getLocation(), event.getPlayer(), 0, "denyplayerinteract", true)) {
             return;
+        }
+        if (event.isCancelled() || !rm.shouldTakeAction(event.getClickedBlock().getLocation(), event.getPlayer(), 0, "denyplayerinteract", false)) {
+            return;
+        }
 
         event.getPlayer().sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
         event.setCancelled(true);
@@ -106,8 +110,12 @@ public class RegionPlayerInteractListener extends PlayerListener {
 
     @Override
     public void onPlayerBedEnter(PlayerBedEnterEvent event) {
-        if (event.isCancelled() || !rm.shouldTakeAction(event.getBed().getLocation(), event.getPlayer(), 0, "denyplayerinteract"))
+        if (event.isCancelled() || !rm.shouldTakeAction(event.getBed().getLocation(), event.getPlayer(), 0, "denyplayerinteract", true)) {
             return;
+        }
+        if (event.isCancelled() || !rm.shouldTakeAction(event.getBed().getLocation(), event.getPlayer(), 0, "denyplayerinteractnoreagent", false)) {
+            return;
+        }
 
         event.getPlayer().sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
         event.setCancelled(true);
@@ -115,8 +123,12 @@ public class RegionPlayerInteractListener extends PlayerListener {
 
     @Override
     public void onPlayerBucketFill(PlayerBucketFillEvent event) {
-        if (event.isCancelled() || !rm.shouldTakeAction(event.getBlockClicked().getLocation(), event.getPlayer(), 0, "denybucketuse"))
+        if (event.isCancelled() || !rm.shouldTakeAction(event.getBlockClicked().getLocation(), event.getPlayer(), 0, "denybucketuse", true)) {
             return;
+        }
+        if (event.isCancelled() || !rm.shouldTakeAction(event.getBlockClicked().getLocation(), event.getPlayer(), 0, "denybucketusenoreagent", false)) {
+            return;
+        }
 
         event.getPlayer().sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
         event.setCancelled(true);
@@ -124,8 +136,12 @@ public class RegionPlayerInteractListener extends PlayerListener {
 
     @Override
     public void onPlayerBucketEmpty(PlayerBucketEmptyEvent event) {
-        if (event.isCancelled() || !rm.shouldTakeAction(event.getBlockClicked().getLocation(), event.getPlayer(), 0, "denybucketuse"))
+        if (event.isCancelled() || !rm.shouldTakeAction(event.getBlockClicked().getLocation(), event.getPlayer(), 0, "denybucketuse", true)) {
             return;
+        }
+        if (event.isCancelled() || !rm.shouldTakeAction(event.getBlockClicked().getLocation(), event.getPlayer(), 0, "denybucketusenoreagent", false)) {
+            return;
+        }
 
         event.getPlayer().sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
         event.setCancelled(true);

@@ -58,7 +58,15 @@ public class RegionBlockListener extends BlockListener {
                     SuperRegionType currentRegionType = regionManager.getSuperRegionType(sr.getType());
                     Player player = event.getPlayer();
                     if ((player == null || (!sr.hasOwner(player.getName()) && !sr.hasMember(player.getName())))
-                            && currentRegionType.hasEffect("denyblockbreak") && regionManager.hasAllRequiredRegions(sr)) {
+                            && currentRegionType.hasEffect("denyblockbreak") && regionManager.hasAllRequiredRegions(sr) &&
+                            sr.getPower() > 0 && sr.getBalance() > 0) {
+                        event.setCancelled(true);
+                        if (player != null)
+                            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
+                        return;
+                    }
+                    if ((player == null || (!sr.hasOwner(player.getName()) && !sr.hasMember(player.getName())))
+                            && currentRegionType.hasEffect("denyblockbreaknoreagent")) {
                         event.setCancelled(true);
                         if (player != null)
                             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
@@ -79,6 +87,13 @@ public class RegionBlockListener extends BlockListener {
                 Effect effect = new Effect(plugin);
                 if ((player == null || (!currentRegion.isOwner(player.getName()) && !currentRegion.isMember(player.getName())))
                         && effect.regionHasEffect(currentRegionType.getEffects(), "denyblockbreak") != 0 && effect.hasReagents(currentLoc)) {
+                    event.setCancelled(true);
+                    if (player != null)
+                        player.sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
+                    return;
+                }
+                if ((player == null || (!currentRegion.isOwner(player.getName()) && !currentRegion.isMember(player.getName())))
+                        && effect.regionHasEffect(currentRegionType.getEffects(), "denyblockbreaknoreagent") != 0) {
                     event.setCancelled(true);
                     if (player != null)
                         player.sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
@@ -148,19 +163,28 @@ public class RegionBlockListener extends BlockListener {
     }
     
     @Override
-        public void onBlockPlace(BlockPlaceEvent event) {
-            if (event.isCancelled() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 0, "denyblockbuild"))
-                return;
-            
-            event.setCancelled(true);
-            event.getPlayer().sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
+    public void onBlockPlace(BlockPlaceEvent event) {
+        if (event.isCancelled() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 0, "denyblockbuild", true)) {
+            return;
         }
+        if (event.isCancelled() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 0, "denyblockbuildnoreagent", false)) {
+            return;
+        }
+
+        event.setCancelled(true);
+        event.getPlayer().sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
+    }
     
     @Override
         public void onBlockDamage(BlockDamageEvent event) {
             if (event.isCancelled() || !event.getBlock().getType().equals(Material.CAKE_BLOCK))
                 return;
-            if (regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 0, "denyblockbreak")) {
+            if (regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 0, "denyblockbreak", true)) {
+                event.getPlayer().sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
+                event.setCancelled(true);
+                return;
+            }
+            if (regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 0, "denyblockbreaknoreagent", false)) {
                 event.getPlayer().sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
                 event.setCancelled(true);
                 return;
@@ -169,8 +193,12 @@ public class RegionBlockListener extends BlockListener {
         
         @Override
         public void onBlockFromTo(BlockFromToEvent event) {
-            if (event.isCancelled() || !regionManager.shouldTakeAction(event.getToBlock().getLocation(), null, 0, "denyliquid"))
+            if (event.isCancelled() || !regionManager.shouldTakeAction(event.getToBlock().getLocation(), null, 0, "denyliquid", true)) {
                 return;
+            }
+            if (event.isCancelled() || !regionManager.shouldTakeAction(event.getToBlock().getLocation(), null, 0, "denyliquidnoreagent", false)) {
+                return;
+            }
             
             Block blockFrom = event.getBlock();
 
@@ -192,26 +220,17 @@ public class RegionBlockListener extends BlockListener {
             }
 
             IgniteCause cause = event.getCause();
-            
-            if (cause == IgniteCause.LIGHTNING && regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyfire")) {
+            if (((cause == IgniteCause.LIGHTNING || cause == IgniteCause.LAVA || cause == IgniteCause.SPREAD) &&
+                    regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyfire", true)) ||
+                    (cause == IgniteCause.FLINT_AND_STEEL && regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 1, "denyfire", true))) {
                 event.setCancelled(true);
                 return;
             }
 
-            if (cause == IgniteCause.LAVA && regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyfire")) {
+            if (((cause == IgniteCause.LIGHTNING || cause == IgniteCause.LAVA || cause == IgniteCause.SPREAD) &&
+                    regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyfirenoreagent", false)) ||
+                    (cause == IgniteCause.FLINT_AND_STEEL && regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 1, "denyfirenoreagent", false))) {
                 event.setCancelled(true);
-                return;
-            }
-
-            if (cause == IgniteCause.SPREAD && regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyfire")) {
-                event.setCancelled(true);
-                return;
-            }
-
-            if (cause == IgniteCause.FLINT_AND_STEEL && regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 1, "denyfire")) {
-                event.setCancelled(true);
-                if (event.getPlayer() != null)
-                    event.getPlayer().sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
                 return;
             }
 
@@ -219,7 +238,10 @@ public class RegionBlockListener extends BlockListener {
         
         @Override
         public void onBlockBurn(BlockBurnEvent event) {
-            if (event.isCancelled() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyblockbreak")) {
+            if (event.isCancelled() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyfire", true)) {
+                return;
+            }
+            if (event.isCancelled() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyfirenoreagent", false)) {
                 return;
             }
             event.setCancelled(true);
@@ -227,8 +249,12 @@ public class RegionBlockListener extends BlockListener {
         
         @Override
         public void onSignChange(SignChangeEvent event) {
-            if (event.isCancelled() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 0, "denyblockbreak"))
+            if (event.isCancelled() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 0, "denyblockbreak", true)) {
                 return;
+            }
+            if (event.isCancelled() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 0, "denyblockbreaknoreagent", false)) {
+                return;
+            }
             event.setCancelled(true);
             if (event.getPlayer() != null)
                 event.getPlayer().sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
@@ -241,7 +267,11 @@ public class RegionBlockListener extends BlockListener {
             }
             
             for (Block b : event.getBlocks()) {
-                if (regionManager.shouldTakeAction(b.getLocation(), null, 0, "denyblockbreak")) {
+                if (regionManager.shouldTakeAction(b.getLocation(), null, 0, "denyblockbreak", true)) {
+                    event.setCancelled(true);
+                    return;
+                }
+                if (regionManager.shouldTakeAction(b.getLocation(), null, 0, "denyblockbreaknoreagent", false)) {
                     event.setCancelled(true);
                     return;
                 }
@@ -250,8 +280,12 @@ public class RegionBlockListener extends BlockListener {
 
         @Override
         public void onBlockPistonRetract(BlockPistonRetractEvent event) {
-            if (event.isCancelled() || !event.isSticky() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyblockbreak"))
+            if (event.isCancelled() || !event.isSticky() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyblockbreak", true)) {
                 return;
+            }
+            if (event.isCancelled() || !event.isSticky() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyblockbreaknoreagent", false)) {
+                return;
+            }
             
             event.setCancelled(true);
         }

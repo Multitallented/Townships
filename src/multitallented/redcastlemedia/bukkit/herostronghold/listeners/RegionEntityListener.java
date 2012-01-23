@@ -99,11 +99,13 @@ public class RegionEntityListener extends EntityListener {
             SuperRegionType srt = rm.getSuperRegionType(sr.getType());
             try {
                 if (!(l.getX() - radius > x1) && l.distanceSquared(loc) < radius) {
-                    if (srt.hasEffect("denypvp")) {
+                    if (rm.shouldTakeAction(player.getLocation(), null, 0, "denypvp", true) ||
+                        rm.shouldTakeAction(player.getLocation(), null, 0, "denypvpnoreagent", false)) {
                         dPlayer.sendMessage(ChatColor.RED + "[HeroStronghold] " + player.getDisplayName() + " is protected in this region.");
                         event.setCancelled(true);
                         return;
-                    } else if (srt.hasEffect("denyfriendlyfire")) {
+                    } else if (rm.shouldTakeAction(player.getLocation(), null, 0, "denyfriendlyfire", true) || 
+                            rm.shouldTakeAction(player.getLocation(), null, 0, "denyfriendlyfirenoreagent", false)) {
                         String playername = player.getName();
                         String dPlayername = dPlayer.getName();
                         if ((sr.hasMember(playername) || sr.hasOwner(playername)) && (sr.hasMember(dPlayername) || sr.hasOwner(dPlayername))) {
@@ -212,8 +214,12 @@ public class RegionEntityListener extends EntityListener {
     
     @Override
     public void onPaintingPlace(PaintingPlaceEvent event) {
-        if (event.isCancelled() || !rm.shouldTakeAction(event.getPainting().getLocation(), event.getPlayer(), 0, "denyblockbuild"))
+        if (event.isCancelled() || !rm.shouldTakeAction(event.getPainting().getLocation(), event.getPlayer(), 0, "denyblockbuild", true)) {
             return;
+        }
+        if (event.isCancelled() || !rm.shouldTakeAction(event.getPainting().getLocation(), event.getPlayer(), 0, "denyblockbuildnoreagent", false)) {
+            return;
+        }
 
         event.setCancelled(true);
         event.getPlayer().sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
@@ -221,8 +227,12 @@ public class RegionEntityListener extends EntityListener {
 
     @Override
     public void onEndermanPlace(EndermanPlaceEvent event) {
-        if (event.isCancelled() || !rm.shouldTakeAction(event.getLocation(), null, 0, "denyblockbuild"))
+        if (event.isCancelled() || !rm.shouldTakeAction(event.getLocation(), null, 0, "denyblockbuild", true)) {
             return;
+        }
+        if (event.isCancelled() || !rm.shouldTakeAction(event.getLocation(), null, 0, "denyblockbuildnoreagent", false)) {
+            return;
+        }
         event.setCancelled(true);
     }
 
@@ -234,8 +244,12 @@ public class RegionEntityListener extends EntityListener {
         if (!(pEvent.getRemover() instanceof Player))
             return;
         Player player = (Player) pEvent.getRemover();
-        if (!rm.shouldTakeAction(event.getPainting().getLocation(), player, 0, "denyblockbreak"))
+        if (!rm.shouldTakeAction(event.getPainting().getLocation(), player, 0, "denyblockbreak", true)) {
             return;
+        }
+        if (!rm.shouldTakeAction(event.getPainting().getLocation(), player, 0, "denyblockbreaknoreagent", false)) {
+            return;
+        }
 
         event.setCancelled(true);
         player.sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
@@ -244,14 +258,17 @@ public class RegionEntityListener extends EntityListener {
 
     @Override
     public void onEntityExplode(EntityExplodeEvent event) {
-        if (event.isCancelled()) {
+        if (event.isCancelled() || !(event.getEntity() instanceof Creeper || event.getEntity() instanceof EnderDragon
+                || event.getEntity() instanceof TNTPrimed || event.getEntity() instanceof Fireball)) {
             return;
         }
         
         Location loc = event.getLocation();
-        Entity ent = event.getEntity();
-        if ((ent instanceof Creeper || ent instanceof EnderDragon || ent instanceof TNTPrimed || ent instanceof Fireball)
-                && !rm.shouldTakeAction(loc, null, 4, "denyexplosion")) {
+        if (rm.shouldTakeAction(loc, null, 4, "denyexplosion", true)) {
+            event.setCancelled(true);
+            return;
+        }
+        if (rm.shouldTakeAction(loc, null, 4, "denyexplosionnoreagent", false)) {
             event.setCancelled(true);
             return;
         }
@@ -281,15 +298,23 @@ public class RegionEntityListener extends EntityListener {
 
     @Override
     public void onExplosionPrime(ExplosionPrimeEvent event) {
-        if (event.isCancelled() || !rm.shouldTakeAction(event.getEntity().getLocation(), null, 0, "denyblockbreak"))
+        if (event.isCancelled() || !rm.shouldTakeAction(event.getEntity().getLocation(), null, 0, "denyblockbreak", true)) {
             return;
+        }
+        if (event.isCancelled() || !rm.shouldTakeAction(event.getEntity().getLocation(), null, 0, "denyblockbreaknoreagent", false)) {
+            return;
+        }
         event.setCancelled(true);
     }
 
     @Override
     public void onEndermanPickup(EndermanPickupEvent event) {
-        if (event.isCancelled() || !rm.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyblockbreak"))
+        if (event.isCancelled() || !rm.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyblockbreak", true)) {
             return;
+        }
+        if (event.isCancelled() || !rm.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyblockbreaknoreagent", false)) {
+            return;
+        }
         event.setCancelled(true);
     }
 }

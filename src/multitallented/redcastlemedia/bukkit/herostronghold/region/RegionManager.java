@@ -139,7 +139,13 @@ public class RegionManager {
                     String type = dataConfig.getString("type");
                     ArrayList<String> owners = (ArrayList<String>) dataConfig.getStringList("owners");
                     ArrayList<String> members = (ArrayList<String>) dataConfig.getStringList("members");
-                    if (location != null && type != null && owners != null && members != null) {
+                    if (owners == null) {
+                        owners = new ArrayList<String>();
+                    }
+                    if (members == null) {
+                        members = new ArrayList<String>();
+                    }
+                    if (location != null && type != null) {
                         liveRegions.put(location, new Region(i, location, type, owners, members));
                         
                         sortedRegions.add(liveRegions.get(location));
@@ -174,7 +180,7 @@ public class RegionManager {
                 FileConfiguration sRegionDataConfig = new YamlConfiguration();
                 sRegionDataConfig.load(sRegionFile);
                 String name = sRegionFile.getName().replace(".yml", "");
-                String locationString = sRegionDataConfig.getString("location");
+                String locationString = sRegionDataConfig.getString("location", "0:64:0");
                 if (locationString != null) {
                     Location location = null;
                     if (locationString != null) {
@@ -182,7 +188,7 @@ public class RegionManager {
                         World world  = plugin.getServer().getWorld(params[0]);
                         location = new Location(world, Double.parseDouble(params[1]),Double.parseDouble(params[2]),Double.parseDouble(params[3]));
                     }
-                    String type = sRegionDataConfig.getString("type");
+                    String type = sRegionDataConfig.getString("type", "shack");
                     ArrayList<String> owners = (ArrayList<String>) sRegionDataConfig.getStringList("owners");
                     ConfigurationSection configMembers = sRegionDataConfig.getConfigurationSection("members");
                     Map<String, List<String>> members = new HashMap<String, List<String>>();
@@ -202,7 +208,7 @@ public class RegionManager {
                             taxRevenue.add(d);
                         }
                     }
-                    if (location != null && type != null && owners != null) {
+                    if (location != null && type != null) {
                         liveSuperRegions.put(name, new SuperRegion(name, location, type, owners, members, power, taxes, balance, taxRevenue));
                         
                         sortedSuperRegions.add(liveSuperRegions.get(name));
@@ -766,19 +772,22 @@ public class RegionManager {
         return newBalance;
     }
     
-    public boolean shouldTakeAction(Location loc, Player player, int modifier, String effectName) {
+    public boolean shouldTakeAction(Location loc, Player player, int modifier, String effectName, boolean useReagents) {
         Effect effect = new Effect(plugin);
         double x = loc.getX();
-        
         for (Region r : getSortedRegions()) {
             int radius = getRegionType(r.getType()).getRadius();
             Location l = r.getLocation();
             if (l.getX() + radius < x) {
-                return false;
+                break;
             }
             try {
                 if (!(l.getX() - radius > x) && l.distanceSquared(loc) < radius) {
-                    if ((player != null && (r.isOwner(player.getName()) || r.isMember(player.getName()))) || effect.regionHasEffect(getRegionType(r.getType()).getEffects(), effectName) == 0 ||
+                    if (!useReagents && (player == null || (!r.isOwner(player.getName()) && !r.isMember(player.getName()))) && 
+                            effect.regionHasEffect(getRegionType(r.getType()).getEffects(), effectName) != 0) {
+                        return true;
+                    }
+                    if (!useReagents && (player != null && (r.isOwner(player.getName()) || r.isMember(player.getName()))) || effect.regionHasEffect(getRegionType(r.getType()).getEffects(), effectName) == 0 ||
                             !effect.hasReagents(l)) {
                         break;
                     }
@@ -788,7 +797,6 @@ public class RegionManager {
                 
             }
         }
-        
         for (SuperRegion sr : getSortedSuperRegions()) {
             int radius = getSuperRegionType(sr.getType()).getRadius();
             Location l = sr.getLocation();
@@ -797,8 +805,21 @@ public class RegionManager {
             }
             try {
                 if (!(l.getX() - radius > x) && l.distanceSquared(loc) < radius) {
-                    if ((player == null || (!sr.hasOwner(player.getName()) && !sr.hasMember(player.getName())))
-                            && getSuperRegionType(sr.getType()).hasEffect(effectName) && hasAllRequiredRegions(sr)) {
+                    boolean nullPlayer = player == null;
+                    boolean notMember = true;
+                    if (!nullPlayer) {
+                        notMember = (!sr.hasOwner(player.getName()) && !sr.hasMember(player.getName()));
+                    }
+                    boolean reqs = hasAllRequiredRegions(sr);
+                    boolean hasEffect = getSuperRegionType(sr.getType()).hasEffect(effectName);
+                    boolean hasPower = sr.getPower() > 0;
+                    boolean hasMoney = sr.getBalance() > 0;
+                    if (useReagents && (nullPlayer || notMember) && hasEffect && reqs && hasPower && hasMoney) {
+                    /*if ((player == null || (!sr.hasOwner(player.getName()) && !sr.hasMember(player.getName())))
+                            && getSuperRegionType(sr.getType()).hasEffect(effectName) && hasAllRequiredRegions(sr)) {*/
+                        return true;
+                    }
+                    if (!useReagents && (nullPlayer || notMember) && hasEffect) {
                         return true;
                     }
                 }
