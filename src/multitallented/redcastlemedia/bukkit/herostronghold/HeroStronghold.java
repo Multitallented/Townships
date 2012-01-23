@@ -273,7 +273,14 @@ public class HeroStronghold extends JavaPlugin {
             }
             
             //Sign Charter
-            List<String> charter = pendingCharters.get(args[1]);
+            List<String> charter = pendingCharters.get(args[1].toLowerCase());
+            
+            //Check if the player has already signed the charter once
+            if (charter.contains(player.getName())) {
+                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You've already signed this charter.");
+                return true;
+            }
+            
             charter.add(player.getName());
             configManager.writeToCharter(args[1], charter);
             pendingCharters.put(args[1], charter);
