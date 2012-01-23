@@ -369,7 +369,8 @@ public class HeroStronghold extends JavaPlugin {
             //Check if in a super region and if has permission to make that region
             String playername = player.getName();
             String currentRegionName = currentRegionType.getName();
-            
+            List<String> reqSuperRegion = currentRegionType.getSuperRegions();
+            boolean meetsReqs = reqSuperRegion == null || reqSuperRegion.isEmpty();
             double x1 = currentLocation.getX();
             for (SuperRegion sr : regionManager.getSortedSuperRegions()) {
                 int radius = regionManager.getSuperRegionType(sr.getType()).getRadius();
@@ -379,6 +380,9 @@ public class HeroStronghold extends JavaPlugin {
                 }
                 try {
                     if (!(l.getX() - radius > x1) && l.distanceSquared(currentLocation) < radius) {
+                        if (!meetsReqs && reqSuperRegion != null && reqSuperRegion.contains(sr.getType())) {
+                            meetsReqs = true;
+                        }
                         if (!sr.hasOwner(playername)) {
                             if (!sr.hasMember(playername) || !sr.getMember(playername).contains(currentRegionName)) {
                                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You dont have permission from an owner of " + sr.getName()
@@ -390,6 +394,27 @@ public class HeroStronghold extends JavaPlugin {
                 } catch (IllegalArgumentException iae) {
 
                 }
+            }
+            if (!meetsReqs) {
+                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You are required to build this " + currentRegionName + " in a:");
+                String message = ChatColor.GOLD + "";
+                int j=0;
+                for (String s : reqSuperRegion) {
+                    if (message.length() + s.length() + 2 > 55) {
+                        player.sendMessage(message);
+                        message = ChatColor.GOLD + "";
+                        j++;
+                    }
+                    if (j > 14) {
+                        break;
+                    } else {
+                        message += s + ", ";
+                    }
+                }
+                if (!reqSuperRegion.isEmpty()) {
+                    player.sendMessage(message.substring(0, message.length() - 2));
+                }
+                return true;
             }
             
             
@@ -1102,21 +1127,19 @@ public class HeroStronghold extends JavaPlugin {
             return true;
         } else if (args.length > 2 && args[0].equalsIgnoreCase("remove")) {
             Player p = getServer().getPlayer(args[1]);
-            String playername = "";
+            String playername = args[1];
             
-            //Check valid player
-            if (p == null) {
-                player.sendMessage(ChatColor.GRAY + "[Herostronghold] There is no player named: " + args[1]);
-                return true;
-            } else {
-                playername = p.getName();
-            }
             
             //Check valid super-region
             SuperRegion sr = regionManager.getSuperRegion(args[2]);
             if (sr == null) {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] There is no super-region named " + args[2]);
                 return true;
+            }
+            
+            //Check valid player
+            if (p != null) {
+                playername = p.getName();
             }
             
             boolean isMember = sr.hasMember(playername); 
@@ -1153,7 +1176,7 @@ public class HeroStronghold extends JavaPlugin {
             
             //Check if player has remove permission
             if (!sr.hasOwner(player.getName()) &&  !(!sr.hasMember(player.getName()) || !sr.getMember(player.getName()).contains("remove"))
-                    && !HeroStronghold.perms.has(player, "herostronghold.admin")) {
+                    && !isAdmin) {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You don't have permission to remove that member.");
                 return true;
             }
@@ -1589,8 +1612,9 @@ public class HeroStronghold extends JavaPlugin {
         } else if (args.length > 1 && args[0].equalsIgnoreCase("remove")) {
             String playername = args[1];
             Player aPlayer = getServer().getPlayer(playername);
-            if (aPlayer != null)
+            if (aPlayer != null) {
                 playername = aPlayer.getName();
+            }
             Location loc = player.getLocation();
             double x = loc.getX();
             for (Region r : regionManager.getSortedRegions()) {

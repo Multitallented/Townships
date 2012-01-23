@@ -142,6 +142,8 @@ shack:
   - COBBLESTONE.12
   - WOOL.1
   - CHEST.2
+  super-regions:
+  - village
   reagents:
   - BREAD.2
   - IRON_INGOT.1

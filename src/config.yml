@@ -1,2 +1,4 @@
 explode-on-destroy: false
 max-tax: 500.0
+destroy-if-no-money: true
+destroy-if-no-power: true

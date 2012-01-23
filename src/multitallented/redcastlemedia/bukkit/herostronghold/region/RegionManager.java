@@ -73,6 +73,7 @@ public class RegionManager {
                         (ArrayList<String>) currentRegion.getStringList("effects"),
                         (int) Math.pow(currentRegion.getInt("radius"), 2),
                         processItemStackList(currentRegion.getStringList("requirements")),
+                        currentRegion.getStringList("super-regions"),
                         processItemStackList(currentRegion.getStringList("reagents")),
                         processItemStackList(currentRegion.getStringList("upkeep")),
                         processItemStackList(currentRegion.getStringList("output")),

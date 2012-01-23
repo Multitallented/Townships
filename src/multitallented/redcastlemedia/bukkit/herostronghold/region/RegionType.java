@@ -1,6 +1,7 @@
 package multitallented.redcastlemedia.bukkit.herostronghold.region;
 
 import java.util.ArrayList;
+import java.util.List;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -21,11 +22,12 @@ public class RegionType {
     private final double moneyRequirement;
     private final double moneyOutput;
     private final double exp;
+    private final List<String> superRegions;
     
     
     public RegionType(String name, ArrayList<String> friendlyClasses,
             ArrayList<String> enemyClasses, ArrayList<String> effects,
-            int radius, ArrayList<ItemStack> requirements,
+            int radius, ArrayList<ItemStack> requirements, List<String> superRegions,
             ArrayList<ItemStack> reagents, ArrayList<ItemStack> upkeep,
             ArrayList<ItemStack> output, double upkeepChance,
             double moneyRequirement, double moneyOutput, double exp) {
@@ -35,6 +37,7 @@ public class RegionType {
         this.effects = effects;
         this.radius = radius;
         this.requirements = requirements;
+        this.superRegions = superRegions;
         this.reagents = reagents;
         this.upkeep = upkeep;
         this.output = output;
@@ -42,6 +45,10 @@ public class RegionType {
         this.moneyRequirement = moneyRequirement;
         this.moneyOutput = moneyOutput;
         this.exp = exp;
+    }
+    
+    public List<String> getSuperRegions() {
+        return superRegions;
     }
     
     public double getExp() {
