@@ -45,7 +45,7 @@ public class DailyTimerTask implements Runnable {
                     double output = rm.getSuperRegionType(sr.getType()).getOutput();
                     total += output;
                     double newBalance = total + sr.getBalance();
-                    if (newBalance < 0) {
+                    if (newBalance < 0 && plugin.getConfigManager().getDestroyNoMoney()) {
                         destroyThese.add(sr);
                         final String st = sr.getName();
                         new Runnable() {
@@ -54,15 +54,16 @@ public class DailyTimerTask implements Runnable {
                                     plugin.getServer().broadcastMessage(ChatColor.RED + "[HeroStronghold] " + st + " ran out of money!");
                               }
                         }.run();
-                    } else
+                    } else {
                         rm.addBalance(sr, total);
+                    }
                     
                 }
             }
             int power = sr.getPower();
             int maxPower = rm.getSuperRegionType(sr.getType()).getMaxPower();
             int dailyPower = rm.getSuperRegionType(sr.getType()).getDailyPower();
-            if (power <= 0) {
+            if (power <= 0 && plugin.getConfigManager().getDestroyNoPower()) {
                 destroyThese.add(sr);
                 final String st = sr.getName();
                 new Runnable() {
