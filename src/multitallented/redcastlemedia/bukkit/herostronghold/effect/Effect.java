@@ -38,6 +38,31 @@ public class Effect {
         plugin.getServer().getPluginManager().registerEvent(type, listener, priority, plugin);
     }
     
+    public Region getContainingRegion(Location currentLocation) {
+        double x1 = currentLocation.getX();
+        Location loc = null;
+        RegionManager rm = plugin.getRegionManager();
+        for (Region r : rm.getSortedRegions()) {
+            int radius = rm.getRegionType(r.getType()).getRadius();
+            Location l = r.getLocation();
+            if (l.getX() + radius < x1) {
+                return null;
+            }
+            try {
+                if (!(l.getX() - radius > x1) && l.distanceSquared(currentLocation) < radius) {
+                    loc = l;
+                    break;
+                }
+            } catch (IllegalArgumentException iae) {
+
+            }
+        }
+        if (loc == null) {
+            return null;
+        }
+        return rm.getRegion(loc);
+    }
+    
     public int regionHasEffect(ArrayList<String> effects, String name) {
         int data = 0;
         if (effects == null || effects.isEmpty())

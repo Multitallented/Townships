@@ -788,11 +788,11 @@ public class RegionManager {
                             effect.regionHasEffect(getRegionType(r.getType()).getEffects(), effectName) != 0) {
                         return true;
                     }
-                    if (!useReagents && (player != null && (r.isOwner(player.getName()) || r.isMember(player.getName()))) || effect.regionHasEffect(getRegionType(r.getType()).getEffects(), effectName) == 0 ||
-                            !effect.hasReagents(l)) {
-                        break;
+                    if (useReagents && (player == null || (!r.isOwner(player.getName()) && !r.isMember(player.getName()))) && 
+                            effect.regionHasEffect(getRegionType(r.getType()).getEffects(), effectName) != 0 && effect.hasReagents(l)) {
+                        return true;
                     }
-                    return true;
+                    break;
                 }
             } catch (IllegalArgumentException iae) {
                 
@@ -807,20 +807,20 @@ public class RegionManager {
             try {
                 if (!(l.getX() - radius > x) && l.distanceSquared(loc) < radius) {
                     boolean nullPlayer = player == null;
-                    boolean notMember = true;
-                    if (!nullPlayer) {
-                        notMember = (!sr.hasOwner(player.getName()) && !sr.hasMember(player.getName()));
+                    boolean notMember = nullPlayer;
+                    if (!notMember) {
+                        notMember = !(sr.hasOwner(player.getName()) || sr.hasMember(player.getName()));
                     }
                     boolean reqs = hasAllRequiredRegions(sr);
                     boolean hasEffect = getSuperRegionType(sr.getType()).hasEffect(effectName);
                     boolean hasPower = sr.getPower() > 0;
                     boolean hasMoney = sr.getBalance() > 0;
-                    if (useReagents && (nullPlayer || notMember) && hasEffect && reqs && hasPower && hasMoney) {
+                    if (useReagents && notMember && hasEffect && reqs && hasPower && hasMoney) {
                     /*if ((player == null || (!sr.hasOwner(player.getName()) && !sr.hasMember(player.getName())))
                             && getSuperRegionType(sr.getType()).hasEffect(effectName) && hasAllRequiredRegions(sr)) {*/
                         return true;
                     }
-                    if (!useReagents && (nullPlayer || notMember) && hasEffect) {
+                    if (!useReagents && notMember && hasEffect) {
                         return true;
                     }
                 }

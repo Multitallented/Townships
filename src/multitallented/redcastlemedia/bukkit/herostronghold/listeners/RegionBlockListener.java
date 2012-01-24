@@ -61,15 +61,17 @@ public class RegionBlockListener extends BlockListener {
                             && currentRegionType.hasEffect("denyblockbreak") && regionManager.hasAllRequiredRegions(sr) &&
                             sr.getPower() > 0 && sr.getBalance() > 0) {
                         event.setCancelled(true);
-                        if (player != null)
+                        if (player != null) {
                             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
+                        }
                         return;
                     }
                     if ((player == null || (!sr.hasOwner(player.getName()) && !sr.hasMember(player.getName())))
                             && currentRegionType.hasEffect("denyblockbreaknoreagent")) {
                         event.setCancelled(true);
-                        if (player != null)
+                        if (player != null) {
                             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
+                        }
                         return;
                     }
                 }
@@ -164,10 +166,8 @@ public class RegionBlockListener extends BlockListener {
     
     @Override
     public void onBlockPlace(BlockPlaceEvent event) {
-        if (event.isCancelled() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 0, "denyblockbuild", true)) {
-            return;
-        }
-        if (event.isCancelled() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 0, "denyblockbuildnoreagent", false)) {
+        if ((event.isCancelled() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 0, "denyblockbuild", true)) &&
+                  (event.isCancelled() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 0, "denyblockbuildnoreagent", false))) {
             return;
         }
 
@@ -193,10 +193,8 @@ public class RegionBlockListener extends BlockListener {
         
         @Override
         public void onBlockFromTo(BlockFromToEvent event) {
-            if (event.isCancelled() || !regionManager.shouldTakeAction(event.getToBlock().getLocation(), null, 0, "denyliquid", true)) {
-                return;
-            }
-            if (event.isCancelled() || !regionManager.shouldTakeAction(event.getToBlock().getLocation(), null, 0, "denyliquidnoreagent", false)) {
+            if ((event.isCancelled() || !regionManager.shouldTakeAction(event.getToBlock().getLocation(), null, 0, "denyliquid", true)) && 
+                    (event.isCancelled() || !regionManager.shouldTakeAction(event.getToBlock().getLocation(), null, 0, "denyliquidnoreagent", false))) {
                 return;
             }
             
@@ -238,10 +236,8 @@ public class RegionBlockListener extends BlockListener {
         
         @Override
         public void onBlockBurn(BlockBurnEvent event) {
-            if (event.isCancelled() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyfire", true)) {
-                return;
-            }
-            if (event.isCancelled() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyfirenoreagent", false)) {
+            if ((event.isCancelled() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyfire", true)) &&
+                    (event.isCancelled() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyfirenoreagent", false))) {
                 return;
             }
             event.setCancelled(true);
@@ -249,10 +245,8 @@ public class RegionBlockListener extends BlockListener {
         
         @Override
         public void onSignChange(SignChangeEvent event) {
-            if (event.isCancelled() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 0, "denyblockbreak", true)) {
-                return;
-            }
-            if (event.isCancelled() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 0, "denyblockbreaknoreagent", false)) {
+            if ((event.isCancelled() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 0, "denyblockbreak", true)) &&
+                    (event.isCancelled() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 0, "denyblockbreaknoreagent", false))) {
                 return;
             }
             event.setCancelled(true);
@@ -267,11 +261,8 @@ public class RegionBlockListener extends BlockListener {
             }
             
             for (Block b : event.getBlocks()) {
-                if (regionManager.shouldTakeAction(b.getLocation(), null, 0, "denyblockbreak", true)) {
-                    event.setCancelled(true);
-                    return;
-                }
-                if (regionManager.shouldTakeAction(b.getLocation(), null, 0, "denyblockbreaknoreagent", false)) {
+                if ((regionManager.shouldTakeAction(b.getLocation(), null, 0, "denyblockbreak", true)) && 
+                        (regionManager.shouldTakeAction(b.getLocation(), null, 0, "denyblockbreaknoreagent", false))) {
                     event.setCancelled(true);
                     return;
                 }
@@ -280,10 +271,8 @@ public class RegionBlockListener extends BlockListener {
 
         @Override
         public void onBlockPistonRetract(BlockPistonRetractEvent event) {
-            if (event.isCancelled() || !event.isSticky() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyblockbreak", true)) {
-                return;
-            }
-            if (event.isCancelled() || !event.isSticky() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyblockbreaknoreagent", false)) {
+            if ((event.isCancelled() || !event.isSticky() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyblockbreak", true)) &&
+                    (event.isCancelled() || !event.isSticky() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyblockbreaknoreagent", false))) {
                 return;
             }
             

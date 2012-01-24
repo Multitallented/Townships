@@ -76,7 +76,7 @@ public class HeroStronghold extends JavaPlugin {
         //Register Listeners Here
         serverListener = new PluginServerListener(this);
         blockListener = new RegionBlockListener(this);
-        dpeListener = new RegionPlayerInteractListener(regionManager);
+        dpeListener = new RegionPlayerInteractListener(this);
         regionEntityListener = new RegionEntityListener(this);
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvent(Type.BLOCK_BREAK, blockListener, Priority.Highest, this);
