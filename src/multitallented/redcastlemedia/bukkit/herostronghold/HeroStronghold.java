@@ -644,8 +644,21 @@ public class HeroStronghold extends JavaPlugin {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] There is already a super-region by that name.");
                 return true;
             }
+            
+            
+            
             List<String> quietDestroy = new ArrayList<String>();
             int radius = currentRegionType.getRadius();
+            
+            
+            //Check if there is an overlapping super-region of the same type
+            for (SuperRegion sr : regionManager.getSortedSuperRegions()) {
+                if (sr.getLocation().distance(currentLocation) < radius + regionManager.getSuperRegionType(sr.getType()).getRadius() &&
+                        sr.getType().equalsIgnoreCase(regionTypeName)) {
+                    player.sendMessage(ChatColor.GRAY + "[HeroStronghold] There is already a " + regionTypeName + " here");
+                    return true;
+                }
+            }
             if (!req.isEmpty()) {
                 
                 double x1 = currentLocation.getX();
@@ -659,11 +672,8 @@ public class HeroStronghold extends JavaPlugin {
                             if (children.contains(sr.getType()) && sr.hasOwner(player.getName())) {
                                 quietDestroy.add(sr.getName());
                             }
+                            
                             String rType = sr.getType();
-                            if (rType.equals(regionTypeName)) {
-                                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] There is already a " + regionTypeName + " here");
-                                return true;
-                            }
                             if (!sr.hasOwner(player.getName()) && (!sr.hasMember(player.getName()) || !sr.getMember(player.getName()).contains(regionTypeName))) {
                                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You are not permitted to build a " + regionTypeName + " inside " + sr.getName());
                                 return true;
@@ -894,6 +904,7 @@ public class HeroStronghold extends JavaPlugin {
             
             //Set the taxes
             regionManager.setTaxes(sr, taxes);
+            player.sendMessage(ChatColor.GOLD + "[HeroStronghold] You've set " + args[2] + "'s taxes to " + args[1]);
             return true;
         } else if (args.length > 2 && args[0].equalsIgnoreCase("listperms")) {
             //Get target player
