@@ -124,7 +124,13 @@ public class RegionBlockListener extends BlockListener {
                             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
                         return;
                     }
-                    
+                    if ((player == null || (!currentRegion.isOwner(player.getName()) && !currentRegion.isMember(player.getName())))
+                            && effect.regionHasEffect(currentRegionType.getEffects(), "denyblockbreaknoreagent") != 0) {
+                        event.setCancelled(true);
+                        if (player != null)
+                            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
+                        return;
+                    }
                     int amountRequired = 0;
                     int i = 0;
                     for (ItemStack currentStack : currentRegionType.getRequirements()) {

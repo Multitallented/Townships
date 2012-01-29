@@ -100,8 +100,8 @@ public class RegionPlayerInteractListener extends PlayerListener {
     
     @Override
     public void onPlayerInteract(PlayerInteractEvent event) {
-        if ((event.isCancelled() || !rm.shouldTakeAction(event.getClickedBlock().getLocation(), event.getPlayer(), 0, "denyplayerinteract", true)) &&
-                (event.isCancelled() || !rm.shouldTakeAction(event.getClickedBlock().getLocation(), event.getPlayer(), 0, "denyplayerinteract", false))) {
+        if (event.isCancelled() || (!rm.shouldTakeAction(event.getClickedBlock().getLocation(), event.getPlayer(), 0, "denyplayerinteract", true) && 
+                !rm.shouldTakeAction(event.getClickedBlock().getLocation(), event.getPlayer(), 0, "denyplayerinteractnoreagent", false))) {
             return;
         }
 
@@ -111,8 +111,8 @@ public class RegionPlayerInteractListener extends PlayerListener {
 
     @Override
     public void onPlayerBedEnter(PlayerBedEnterEvent event) {
-        if ((event.isCancelled() || !rm.shouldTakeAction(event.getBed().getLocation(), event.getPlayer(), 0, "denyplayerinteract", true)) &&
-                (event.isCancelled() || !rm.shouldTakeAction(event.getBed().getLocation(), event.getPlayer(), 0, "denyplayerinteractnoreagent", false))) {
+        if (event.isCancelled() || (!rm.shouldTakeAction(event.getBed().getLocation(), event.getPlayer(), 0, "denyplayerinteract", true) &&
+                !rm.shouldTakeAction(event.getBed().getLocation(), event.getPlayer(), 0, "denyplayerinteractnoreagent", false))) {
             return;
         }
 
@@ -122,8 +122,8 @@ public class RegionPlayerInteractListener extends PlayerListener {
 
     @Override
     public void onPlayerBucketFill(PlayerBucketFillEvent event) {
-        if ((event.isCancelled() || !rm.shouldTakeAction(event.getBlockClicked().getLocation(), event.getPlayer(), 0, "denybucketuse", true)) &&
-                (event.isCancelled() || !rm.shouldTakeAction(event.getBlockClicked().getLocation(), event.getPlayer(), 0, "denybucketusenoreagent", false))) {
+        if (event.isCancelled() || (!rm.shouldTakeAction(event.getBlockClicked().getLocation(), event.getPlayer(), 0, "denybucketuse", true) &&
+                !rm.shouldTakeAction(event.getBlockClicked().getLocation(), event.getPlayer(), 0, "denybucketusenoreagent", false))) {
             return;
         }
 
@@ -133,8 +133,8 @@ public class RegionPlayerInteractListener extends PlayerListener {
 
     @Override
     public void onPlayerBucketEmpty(PlayerBucketEmptyEvent event) {
-        if ((event.isCancelled() || !rm.shouldTakeAction(event.getBlockClicked().getLocation(), event.getPlayer(), 0, "denybucketuse", true)) &&
-                (event.isCancelled() || !rm.shouldTakeAction(event.getBlockClicked().getLocation(), event.getPlayer(), 0, "denybucketusenoreagent", false))) {
+        if (event.isCancelled() || (!rm.shouldTakeAction(event.getBlockClicked().getLocation(), event.getPlayer(), 0, "denybucketuse", true) &&
+                !rm.shouldTakeAction(event.getBlockClicked().getLocation(), event.getPlayer(), 0, "denybucketusenoreagent", false))) {
             return;
         }
         

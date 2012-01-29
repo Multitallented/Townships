@@ -2,7 +2,7 @@ arrowturret:
   friendly-classes: []
   enemy-classes: []
   effects:
-  - shootarrow.5
+  - shootarrow.1
   radius: 10
   requirements:
   - DISPENSER.1
