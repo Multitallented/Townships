@@ -42,22 +42,23 @@ public class DailyTimerTask implements Runnable {
                         }
                     }
                     rm.addTaxRevenue(sr, total);
-                    double output = rm.getSuperRegionType(sr.getType()).getOutput();
-                    total += output;
-                    double newBalance = total + sr.getBalance();
-                    if (newBalance < 0 && plugin.getConfigManager().getDestroyNoMoney()) {
-                        destroyThese.add(sr);
-                        final String st = sr.getName();
-                        new Runnable() {
-                              @Override
-                              public void run() {
-                                    plugin.getServer().broadcastMessage(ChatColor.RED + "[HeroStronghold] " + st + " ran out of money!");
-                              }
-                        }.run();
-                    } else {
-                        rm.addBalance(sr, total);
-                    }
                     
+                    
+                }
+                double output = rm.getSuperRegionType(sr.getType()).getOutput();
+                total += output;
+                double newBalance = total + sr.getBalance();
+                if (newBalance < 0 && plugin.getConfigManager().getDestroyNoMoney()) {
+                    destroyThese.add(sr);
+                    final String st = sr.getName();
+                    new Runnable() {
+                          @Override
+                          public void run() {
+                                plugin.getServer().broadcastMessage(ChatColor.RED + "[HeroStronghold] " + st + " ran out of money!");
+                          }
+                    }.run();
+                } else {
+                    rm.addBalance(sr, total);
                 }
             }
             int power = sr.getPower();
