@@ -104,6 +104,13 @@ public class Effect {
     }
     
     public boolean hasReagents(Location l) {
+        try {
+            if (l.getBlock().getState() == null) {
+                return false;
+            }
+        } catch (NullPointerException npe) {
+            return false;
+        }
         RegionManager rm = getPlugin().getRegionManager();
         RegionType rt = rm.getRegionType(rm.getRegion(l).getType());
         Map<Material, Integer> reagentMap = new EnumMap<Material, Integer>(Material.class);
