@@ -23,11 +23,14 @@ public class RegionType {
     private final double moneyOutput;
     private final double exp;
     private final List<String> superRegions;
+    private final int buildRadius;
+    private final int rawBuildRadius;
+    private final int rawRadius;
     
     
     public RegionType(String name, ArrayList<String> friendlyClasses,
             ArrayList<String> enemyClasses, ArrayList<String> effects,
-            int radius, ArrayList<ItemStack> requirements, List<String> superRegions,
+            int radius, int buildRadius, ArrayList<ItemStack> requirements, List<String> superRegions,
             ArrayList<ItemStack> reagents, ArrayList<ItemStack> upkeep,
             ArrayList<ItemStack> output, double upkeepChance,
             double moneyRequirement, double moneyOutput, double exp) {
@@ -36,6 +39,9 @@ public class RegionType {
         this.enemyClasses = enemyClasses;
         this.effects = effects;
         this.radius = radius;
+        this.rawRadius = (int) Math.sqrt(radius);
+        this.rawBuildRadius = (int) Math.sqrt(buildRadius);
+        this.buildRadius = buildRadius;
         this.requirements = requirements;
         this.superRegions = superRegions;
         this.reagents = reagents;
@@ -45,6 +51,18 @@ public class RegionType {
         this.moneyRequirement = moneyRequirement;
         this.moneyOutput = moneyOutput;
         this.exp = exp;
+    }
+    
+    public int getRawRadius() {
+        return rawRadius;
+    }
+    
+    public int getRawBuildRadius() {
+        return rawBuildRadius;
+    }
+    
+    public int getBuildRadius() {
+        return buildRadius;
     }
     
     public List<String> getSuperRegions() {

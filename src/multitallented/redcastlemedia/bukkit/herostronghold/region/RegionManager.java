@@ -63,6 +63,7 @@ public class RegionManager {
                 }
                 regionConfig.options().copyDefaults(true);
                 regionFile.createNewFile();
+                defRegionConfigStream.close();
             }
             regionConfig.load(regionFile);
             for (String key : regionConfig.getKeys(false)) {
@@ -72,6 +73,7 @@ public class RegionManager {
                         (ArrayList<String>) currentRegion.getStringList("enemy-classes"),
                         (ArrayList<String>) currentRegion.getStringList("effects"),
                         (int) Math.pow(currentRegion.getInt("radius"), 2),
+                        (int) Math.pow(currentRegion.getInt("build-radius", currentRegion.getInt("radius")), 2),
                         processItemStackList(currentRegion.getStringList("requirements")),
                         currentRegion.getStringList("super-regions"),
                         processItemStackList(currentRegion.getStringList("reagents")),
@@ -98,6 +100,7 @@ public class RegionManager {
                 }
                 sRegionConfig.options().copyDefaults(true);
                 sRegionFile.createNewFile();
+                defSRegionConfigStream.close();
             }
             sRegionConfig.load(sRegionFile);
             for (String key : sRegionConfig.getKeys(false)) {
@@ -122,13 +125,11 @@ public class RegionManager {
 
         File playerFolder = new File(plugin.getDataFolder(), "data"); // Setup the Data Folder if it doesn't already exist
         playerFolder.mkdirs();
-        int i = 0;
-        File dataFile = new File(plugin.getDataFolder() + "/data", i + ".yml");
-        while (dataFile.exists()) {
+        for (File regionFile : playerFolder.listFiles()) {
             try {
                 //Load saved region data
                 dataConfig = new YamlConfiguration();
-                dataConfig.load(dataFile);
+                dataConfig.load(regionFile);
                 String locationString = dataConfig.getString("location");
                 if (locationString != null) {
                     Location location = null;
@@ -147,17 +148,15 @@ public class RegionManager {
                         members = new ArrayList<String>();
                     }
                     if (location != null && type != null) {
-                        liveRegions.put(location, new Region(i, location, type, owners, members));
+                        liveRegions.put(location, new Region(Integer.parseInt(regionFile.getName().replace(".yml", "")), location, type, owners, members));
                         
                         sortedRegions.add(liveRegions.get(location));
                     }
                 }
             } catch (Exception e) {
-                System.out.println("[HeroStronghold] failed to load data from " + i + ".yml");
+                System.out.println("[HeroStronghold] failed to load data from " + regionFile.getName());
                 System.out.println(e.getStackTrace());
             }
-            i++;
-            dataFile = new File(plugin.getDataFolder() + "/data", i + ".yml");
         }
         if (sortedRegions.size() > 1) {
             if (sortedRegions.size() > 1) {
@@ -426,23 +425,9 @@ public class RegionManager {
     public void checkIfDestroyedSuperRegion(Location loc) {
         Set<String> regionsToDestroy = new HashSet<String>();
         Region or = getRegion(loc);
-        
-        double x1 = loc.getX();
-        for (SuperRegion sr : getSortedSuperRegions()) {
-            int radius = getSuperRegionType(sr.getType()).getRadius();
-            Location l = sr.getLocation();
-            if (l.getX() + radius < x1) {
-                break;
-            }
-            try {
-                if (!(l.getX() - radius > x1) && l.distanceSquared(loc) < radius) {
-                    if (or.getType().equals(getSuperRegionType(sr.getType()).getCentralStructure())) {
-                        regionsToDestroy.add(sr.getName());
-                    }
-                    
-                }
-            } catch (IllegalArgumentException iae) {
-                
+        for (SuperRegion sr : this.getContainingSuperRegions(loc)) {
+            if (or.getType().equals(getSuperRegionType(sr.getType()).getCentralStructure())) {
+                regionsToDestroy.add(sr.getName());
             }
         }
         
@@ -458,24 +443,13 @@ public class RegionManager {
         for (String s : srt.getRequirements().keySet()) {
             reqs.put(new String(s), new Integer(srt.getRequirement(s)));
         }
-        
-        double x = loc.getX();
-        int radius = getSuperRegionType(sr.getType()).getRadius();
-        for (Region r : getSortedRegions()) {
-            Location l = r.getLocation();
-            if (l.getX() + radius < x) {
-                break;
-            }
-            try {
-                if (!(l.getX() - radius > x) && l.distanceSquared(loc) < radius && reqs.containsKey(r.getType())) {
-                    if (reqs.get(r.getType()) < 2) {
-                        reqs.remove(r.getType());
-                    } else {
-                        reqs.put(r.getType(), reqs.get(r.getType()) - 1);
-                    }
+        for (Region r : this.getContainingRegions(loc)) {
+            if (reqs.containsKey(r.getType())) {
+                if (reqs.get(r.getType()) < 2) {
+                    reqs.remove(r.getType());
+                } else {
+                    reqs.put(r.getType(), reqs.get(r.getType()) - 1);
                 }
-            } catch (IllegalArgumentException iae) {
-                
             }
         }
         if (reqs.isEmpty()) {
@@ -773,59 +747,86 @@ public class RegionManager {
         return newBalance;
     }
     
-    public boolean shouldTakeAction(Location loc, Player player, int modifier, String effectName, boolean useReagents) {
-        Effect effect = new Effect(plugin);
+    public ArrayList<Region> getContainingRegions(Location loc) {
+        ArrayList<Region> tempList = new ArrayList<Region>();
         double x = loc.getX();
+        double y = loc.getY();
+        double z = loc.getZ();
         for (Region r : getSortedRegions()) {
-            int radius = getRegionType(r.getType()).getRadius();
-            Location l = r.getLocation();
-            if (l.getX() + radius < x) {
-                break;
-            }
             try {
-                if (!(l.getX() - radius > x) && l.distanceSquared(loc) < radius) {
-                    if (!useReagents && (player == null || (!r.isOwner(player.getName()) && !r.isMember(player.getName()))) && 
-                            effect.regionHasEffect(getRegionType(r.getType()).getEffects(), effectName) != 0) {
-                        return true;
-                    }
-                    if (useReagents && (player == null || (!r.isOwner(player.getName()) && !r.isMember(player.getName()))) && 
-                            effect.regionHasEffect(getRegionType(r.getType()).getEffects(), effectName) != 0 && effect.hasReagents(l)) {
-                        return true;
-                    }
+                int radius = getRegionType(r.getType()).getRawRadius();
+                Location l = r.getLocation();
+                if (l.getX() + radius < x) {
                     break;
                 }
-            } catch (IllegalArgumentException iae) {
-                
+                //System.out.println("x: " + (l.getX() - radius) + " - " + (l.getX() + radius) + " : " + x);
+                //.out.println("y: " + (l.getY() - radius) + " - " + (l.getY() + radius) + " : " + y);
+                //System.out.println("z: " + (l.getZ() - radius) + " - " + (l.getZ() + radius) + " : " + z);
+                if (l.getX() - radius < x && l.getY() + radius > y && l.getY() - radius < y && 
+                        l.getZ() + radius > z && l.getZ() - radius < z && l.getWorld().equals(loc.getWorld())) {
+                    tempList.add(r);
+                }
+            } catch (NullPointerException npe) {
+                plugin.warning("Region " + r.getID() + " is corrupted");
             }
         }
+        return tempList;
+    }
+    
+    public ArrayList<SuperRegion> getContainingSuperRegions(Location loc) {
+        ArrayList<SuperRegion> tempList = new ArrayList<SuperRegion>();
+        
+        double x = loc.getX();
         for (SuperRegion sr : getSortedSuperRegions()) {
-            int radius = getSuperRegionType(sr.getType()).getRadius();
-            Location l = sr.getLocation();
-            if (l.getX() + radius < x) {
-                return false;
-            }
             try {
-                if (!(l.getX() - radius > x) && l.distanceSquared(loc) < radius) {
-                    boolean nullPlayer = player == null;
-                    boolean notMember = nullPlayer;
-                    if (!notMember) {
-                        notMember = !(sr.hasOwner(player.getName()) || sr.hasMember(player.getName()));
-                    }
-                    boolean reqs = hasAllRequiredRegions(sr);
-                    boolean hasEffect = getSuperRegionType(sr.getType()).hasEffect(effectName);
-                    boolean hasPower = sr.getPower() > 0;
-                    boolean hasMoney = sr.getBalance() > 0;
-                    if (useReagents && notMember && hasEffect && reqs && hasPower && hasMoney) {
-                    /*if ((player == null || (!sr.hasOwner(player.getName()) && !sr.hasMember(player.getName())))
-                            && getSuperRegionType(sr.getType()).hasEffect(effectName) && hasAllRequiredRegions(sr)) {*/
-                        return true;
-                    }
-                    if (!useReagents && notMember && hasEffect) {
-                        return true;
-                    }
+                int radius = getSuperRegionType(sr.getType()).getRadius();
+                Location l = sr.getLocation();
+                if (l.getX() + radius < x) {
+                    break;
                 }
-            } catch (IllegalArgumentException iae) {
-                
+                try {
+                    if (!(l.getX() - radius > x) && l.distanceSquared(loc) < radius) {
+                        tempList.add(sr);
+                    }
+                } catch (IllegalArgumentException iae) {
+
+                }
+            } catch (NullPointerException npe) {
+                plugin.warning("SuperRegion " + sr.getName() + " is corrupted");
+            }
+        }
+        return tempList;
+    }
+    
+    public boolean shouldTakeAction(Location loc, Player player, int modifier, String effectName, boolean useReagents) {
+        Effect effect = new Effect(plugin);
+        for (Region r : this.getContainingRegions(loc)) {
+            if (!useReagents && (player == null || (!r.isOwner(player.getName()) && !r.isMember(player.getName()))) && 
+                    effect.regionHasEffect(getRegionType(r.getType()).getEffects(), effectName) != 0) {
+                return true;
+            }
+            if (useReagents && (player == null || (!r.isOwner(player.getName()) && !r.isMember(player.getName()))) && 
+                    effect.regionHasEffect(getRegionType(r.getType()).getEffects(), effectName) != 0 && effect.hasReagents(r.getLocation())) {
+                return true;
+            }
+        }
+        for (SuperRegion sr : this.getContainingSuperRegions(loc)) {
+            boolean nullPlayer = player == null;
+            boolean notMember = nullPlayer;
+            if (!notMember) {
+                notMember = !(sr.hasOwner(player.getName()) || sr.hasMember(player.getName()));
+            }
+            boolean reqs = hasAllRequiredRegions(sr);
+            boolean hasEffect = getSuperRegionType(sr.getType()).hasEffect(effectName);
+            boolean hasPower = sr.getPower() > 0;
+            boolean hasMoney = sr.getBalance() > 0;
+            if (useReagents && notMember && hasEffect && reqs && hasPower && hasMoney) {
+            /*if ((player == null || (!sr.hasOwner(player.getName()) && !sr.hasMember(player.getName())))
+                    && getSuperRegionType(sr.getType()).hasEffect(effectName) && hasAllRequiredRegions(sr)) {*/
+                return true;
+            }
+            if (!useReagents && notMember && hasEffect) {
+                return true;
             }
         }
         return false;
