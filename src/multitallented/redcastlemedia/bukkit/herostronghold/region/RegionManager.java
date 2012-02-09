@@ -34,6 +34,7 @@ import org.bukkit.inventory.ItemStack;
  */
 public class RegionManager {
     private Map<Location, Region> liveRegions = new HashMap<Location, Region>();
+    private Map<Integer, Region> idRegions = new HashMap<Integer, Region>();
     private ArrayList<Region> sortedRegions = new ArrayList<Region>();
     private Map<String, SuperRegion> liveSuperRegions = new HashMap<String, SuperRegion>();
     private ArrayList<SuperRegion> sortedSuperRegions = new ArrayList<SuperRegion>();
@@ -148,9 +149,16 @@ public class RegionManager {
                         members = new ArrayList<String>();
                     }
                     if (location != null && type != null) {
-                        liveRegions.put(location, new Region(Integer.parseInt(regionFile.getName().replace(".yml", "")), location, type, owners, members));
-                        
-                        sortedRegions.add(liveRegions.get(location));
+                        try {
+                            location.getBlock().getTypeId();
+                            getRegionType(type).getRadius();
+                            liveRegions.put(location, new Region(Integer.parseInt(regionFile.getName().replace(".yml", "")), location, type, owners, members));
+
+                            sortedRegions.add(liveRegions.get(location));
+                            idRegions.put(liveRegions.get(location).getID(), liveRegions.get(location));
+                        } catch (NullPointerException npe) {
+                            System.out.println("[HeroStronghold] failed to load data from " + regionFile.getName());
+                        }
                     }
                 }
             } catch (Exception e) {
@@ -161,10 +169,10 @@ public class RegionManager {
         if (sortedRegions.size() > 1) {
             if (sortedRegions.size() > 1) {
                 Collections.sort(sortedRegions, new Comparator<Region>() {
-
+                    
                     @Override
                     public int compare(Region o1, Region o2) {
-                        return (int) (-1 *(o1.getLocation().getX() + getRegionType(o1.getType()).getRadius() - (o2.getLocation().getX() + getRegionType(o2.getType()).getRadius())));
+                        return (int) (-1 *(o1.getLocation().getX() + getRegionType(o1.getType()).getRawRadius() - (o2.getLocation().getX() + getRegionType(o2.getType()).getRawRadius())));
                     }
                 });
             }
@@ -225,7 +233,7 @@ public class RegionManager {
 
                     @Override
                     public int compare(SuperRegion o1, SuperRegion o2) {
-                        return (int) (-1 *(o1.getLocation().getX() + getSuperRegionType(o1.getType()).getRadius() - (o2.getLocation().getX() + getSuperRegionType(o2.getType()).getRadius())));
+                        return (int) (-1 *(o1.getLocation().getX() + getSuperRegionType(o1.getType()).getRawRadius() - (o2.getLocation().getX() + getSuperRegionType(o2.getType()).getRawRadius())));
                     }
                 });
             }
@@ -278,13 +286,14 @@ public class RegionManager {
             dataConfig.set("members", new ArrayList<String>());
             dataConfig.save(dataFile);
             liveRegions.put(loc, new Region(i, loc, type, owners, new ArrayList<String>()));
+            idRegions.put(i, liveRegions.get(loc));
             sortedRegions.add(liveRegions.get(loc));
             if (sortedRegions.size() > 1) {
                 Collections.sort(sortedRegions, new Comparator<Region>() {
 
                     @Override
                     public int compare(Region o1, Region o2) {
-                        return (int) (-1 *(o1.getLocation().getX() + getRegionType(o1.getType()).getRadius() - (o2.getLocation().getX() + getRegionType(o2.getType()).getRadius())));
+                        return (int) (-1 *(o1.getLocation().getX() + getRegionType(o1.getType()).getRawRadius() - (o2.getLocation().getX() + getRegionType(o2.getType()).getRawRadius())));
                     }
                 });
             }
@@ -326,7 +335,7 @@ public class RegionManager {
 
                         @Override
                         public int compare(SuperRegion o1, SuperRegion o2) {
-                            return (int) (-1 *(o1.getLocation().getX() + getSuperRegionType(o1.getType()).getRadius() - (o2.getLocation().getX() + getSuperRegionType(o2.getType()).getRadius())));
+                            return (int) (-1 *(o1.getLocation().getX() + getSuperRegionType(o1.getType()).getRawRadius() - (o2.getLocation().getX() + getSuperRegionType(o2.getType()).getRawRadius())));
                         }
                     });
                 }
@@ -443,13 +452,23 @@ public class RegionManager {
         for (String s : srt.getRequirements().keySet()) {
             reqs.put(new String(s), new Integer(srt.getRequirement(s)));
         }
-        for (Region r : this.getContainingRegions(loc)) {
-            if (reqs.containsKey(r.getType())) {
-                if (reqs.get(r.getType()) < 2) {
-                    reqs.remove(r.getType());
-                } else {
-                    reqs.put(r.getType(), reqs.get(r.getType()) - 1);
+        double x = loc.getX();
+        int radius = getSuperRegionType(sr.getType()).getRadius();
+        for (Region r : getSortedRegions()) {	  	
+            Location l = r.getLocation();  	
+            if (l.getX() + radius < x) { 	
+                break;	  	
+            }	  	
+            try {	  	
+                if (!(l.getX() - radius > x) && l.distanceSquared(loc) < radius && reqs.containsKey(r.getType())) {	  	
+                    if (reqs.get(r.getType()) < 2) {	  	
+                        reqs.remove(r.getType());	  	
+                    } else {	  	
+                        reqs.put(r.getType(), reqs.get(r.getType()) - 1);	  	
+                    }
                 }
+            } catch (IllegalArgumentException iae) {
+                
             }
         }
         if (reqs.isEmpty()) {
@@ -759,9 +778,6 @@ public class RegionManager {
                 if (l.getX() + radius < x) {
                     break;
                 }
-                //System.out.println("x: " + (l.getX() - radius) + " - " + (l.getX() + radius) + " : " + x);
-                //.out.println("y: " + (l.getY() - radius) + " - " + (l.getY() + radius) + " : " + y);
-                //System.out.println("z: " + (l.getZ() - radius) + " - " + (l.getZ() + radius) + " : " + z);
                 if (l.getX() - radius < x && l.getY() + radius > y && l.getY() - radius < y && 
                         l.getZ() + radius > z && l.getZ() - radius < z && l.getWorld().equals(loc.getWorld())) {
                     tempList.add(r);
@@ -780,12 +796,13 @@ public class RegionManager {
         for (SuperRegion sr : getSortedSuperRegions()) {
             try {
                 int radius = getSuperRegionType(sr.getType()).getRadius();
+                int rawRadius = getSuperRegionType(sr.getType()).getRawRadius();
                 Location l = sr.getLocation();
-                if (l.getX() + radius < x) {
+                if (l.getX() + rawRadius < x) {
                     break;
                 }
                 try {
-                    if (!(l.getX() - radius > x) && l.distanceSquared(loc) < radius) {
+                    if (!(l.getX() - rawRadius > x) && l.distanceSquared(loc) < radius) {
                         tempList.add(sr);
                     }
                 } catch (IllegalArgumentException iae) {
@@ -801,6 +818,23 @@ public class RegionManager {
     public boolean shouldTakeAction(Location loc, Player player, int modifier, String effectName, boolean useReagents) {
         Effect effect = new Effect(plugin);
         for (Region r : this.getContainingRegions(loc)) {
+            boolean notMember = player == null;
+            if (!notMember) {
+                notMember = !(r.isMember(player.getName()) || r.isOwner(player.getName()));
+                if (notMember && r.isMember("all")) {
+                    notMember = false;
+                }
+                if (notMember) {
+                    for (String s : r.getMembers()) {
+                        if (s.contains("sr:")) {
+                            SuperRegion sr = getSuperRegion(s.replace("sr:", ""));
+                            if (sr != null && sr.hasMember(player.getName())) {
+                                notMember = false;
+                            }
+                        }
+                    }
+                }
+            }
             if (!useReagents && (player == null || (!r.isOwner(player.getName()) && !r.isMember(player.getName()))) && 
                     effect.regionHasEffect(getRegionType(r.getType()).getEffects(), effectName) != 0) {
                 return true;
@@ -835,9 +869,14 @@ public class RegionManager {
     
     public void removeRegion(Location l) {
         if (liveRegions.containsKey(l)) {
+            idRegions.remove(liveRegions.get(l).getID());
             sortedRegions.remove(liveRegions.get(l));
             liveRegions.remove(l);
         }
+    }
+    
+    public Region getRegionByID(int id) {
+        return idRegions.get(id);
     }
     
     public Set<String> getRegionTypes() {
