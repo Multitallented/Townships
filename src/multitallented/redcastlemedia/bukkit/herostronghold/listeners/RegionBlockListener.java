@@ -15,7 +15,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockDamageEvent;
-import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
 import org.bukkit.event.block.BlockListener;
@@ -96,7 +95,7 @@ public class RegionBlockListener extends BlockListener {
                     break;
                 }
 
-                int radius = regionManager.getRegionType(r.getType()).getRadius();
+                int radius = regionManager.getRegionType(r.getType()).getRawRadius();
                 Location l = r.getLocation();
                 if (l.getX() + radius < loc.getX()) {
                     return;
@@ -131,7 +130,7 @@ public class RegionBlockListener extends BlockListener {
                     }
                     if (amountRequired == 0)
                         return;
-                    int radius1 = (int) Math.sqrt(regionManager.getRegionType(r.getType()).getBuildRadius()); 
+                    int radius1 = regionManager.getRegionType(r.getType()).getRawBuildRadius(); 
 
                     for (int x= (int) (currentLoc.getX()-radius1); x<radius1 + currentLoc.getX(); x++) {
                         for (int y = currentLoc.getY()- radius1 > 1 ? (int) (currentLoc.getY() - radius1) : 1; y< radius1 + currentLoc.getY() && y < 128; y++) {
@@ -187,7 +186,7 @@ public class RegionBlockListener extends BlockListener {
             }
         }
         
-        @Override
+        /*@Override
         public void onBlockFromTo(BlockFromToEvent event) {
             if ((event.isCancelled() || !regionManager.shouldTakeAction(event.getToBlock().getLocation(), null, 0, "denyliquid", true)) && 
                     (event.isCancelled() || !regionManager.shouldTakeAction(event.getToBlock().getLocation(), null, 0, "denyliquidnoreagent", false))) {
@@ -205,7 +204,7 @@ public class RegionBlockListener extends BlockListener {
                 event.setCancelled(true);
                 return;
             }
-        }
+        }*/
         
         @Override
         public void onBlockIgnite(BlockIgniteEvent event) {

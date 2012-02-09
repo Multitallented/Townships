@@ -356,10 +356,10 @@ public class HeroStronghold extends JavaPlugin {
             }
             
             //Check if too close to other HeroStrongholds
-            int currentRadius = (int) Math.sqrt(currentRegionType.getBuildRadius());
+            int currentRadius = currentRegionType.getRawBuildRadius();
             for (Location loc : regionManager.getRegionLocations()) {
                 try {
-                    if (loc.distance(currentLocation) <= Math.sqrt(regionManager.getRegionType(regionManager.getRegion(loc).getType()).getBuildRadius()) + currentRadius) {
+                    if (loc.distanceSquared(currentLocation) <= regionManager.getRegionType(regionManager.getRegion(loc).getType()).getRawBuildRadius() + currentRadius) {
                         player.sendMessage (ChatColor.GRAY + "[HeroStronghold] You are too close to another HeroStronghold");
                         return true;
                     }
@@ -1236,7 +1236,7 @@ public class HeroStronghold extends JavaPlugin {
             if (p == null && !sr.hasMember(args[1])) {
                 player.sendMessage(ChatColor.GRAY + "[Herostronghold] There is no player named: " + args[1]);
                 return true;
-            } else {
+            } else if (p != null) {
                 playername = p.getName();
             }
             
