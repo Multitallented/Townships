@@ -453,22 +453,22 @@ public class RegionManager {
             reqs.put(new String(s), new Integer(srt.getRequirement(s)));
         }
         double x = loc.getX();
+        double y = loc.getY();
+        double z = loc.getZ();
         int radius = getSuperRegionType(sr.getType()).getRadius();
         for (Region r : getSortedRegions()) {	  	
             Location l = r.getLocation();  	
             if (l.getX() + radius < x) { 	
                 break;	  	
-            }	  	
-            try {	  	
-                if (!(l.getX() - radius > x) && l.distanceSquared(loc) < radius && reqs.containsKey(r.getType())) {	  	
-                    if (reqs.get(r.getType()) < 2) {	  	
-                        reqs.remove(r.getType());	  	
-                    } else {	  	
-                        reqs.put(r.getType(), reqs.get(r.getType()) - 1);	  	
-                    }
+            }
+            
+            if (l.getX() - radius < x && l.getY() + radius > y && l.getY() - radius < y && 
+                    l.getZ() + radius > z && l.getZ() - radius < z && l.getWorld().equals(loc.getWorld()) && reqs.containsKey(r.getType())) {	  	
+                if (reqs.get(r.getType()) < 2) {	  	
+                    reqs.remove(r.getType());	  	
+                } else {	  	
+                    reqs.put(r.getType(), reqs.get(r.getType()) - 1);
                 }
-            } catch (IllegalArgumentException iae) {
-                
             }
         }
         if (reqs.isEmpty()) {
@@ -793,6 +793,8 @@ public class RegionManager {
         ArrayList<SuperRegion> tempList = new ArrayList<SuperRegion>();
         
         double x = loc.getX();
+        double y = loc.getY();
+        double z = loc.getZ();
         for (SuperRegion sr : getSortedSuperRegions()) {
             try {
                 int radius = getSuperRegionType(sr.getType()).getRadius();
@@ -801,12 +803,9 @@ public class RegionManager {
                 if (l.getX() + rawRadius < x) {
                     break;
                 }
-                try {
-                    if (!(l.getX() - rawRadius > x) && l.distanceSquared(loc) < radius) {
-                        tempList.add(sr);
-                    }
-                } catch (IllegalArgumentException iae) {
-
+                if (l.getX() - radius < x && l.getY() + radius > y && l.getY() - radius < y && 
+                        l.getZ() + radius > z && l.getZ() - radius < z && l.getWorld().equals(loc.getWorld())) {
+                    tempList.add(sr);
                 }
             } catch (NullPointerException npe) {
                 plugin.warning("SuperRegion " + sr.getName() + " is corrupted");
