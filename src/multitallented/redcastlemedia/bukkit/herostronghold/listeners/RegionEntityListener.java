@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import multitallented.redcastlemedia.bukkit.herostronghold.HeroStronghold;
+import multitallented.redcastlemedia.bukkit.herostronghold.effect.Effect;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.Region;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionManager;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.SuperRegion;
@@ -90,99 +91,48 @@ public class RegionEntityListener extends EntityListener {
         
         Location loc = player.getLocation();
         for (SuperRegion sr : rm.getContainingSuperRegions(loc)) {
-            if (rm.shouldTakeAction(player.getLocation(), null, 0, "denypvp", true) ||
-                rm.shouldTakeAction(player.getLocation(), null, 0, "denypvpnoreagent", false)) {
+            boolean notMember = player == null;
+            if (!notMember) {
+                notMember = !(sr.hasOwner(player.getName()) || sr.hasMember(player.getName()));
+            }
+            boolean reqs = rm.hasAllRequiredRegions(sr);
+            boolean hasEffect = rm.getSuperRegionType(sr.getType()).hasEffect("denypvp");
+            boolean hasEffect1 = rm.getSuperRegionType(sr.getType()).hasEffect("denypvpnoreagent");
+            boolean hasEffect2 = rm.getSuperRegionType(sr.getType()).hasEffect("denyfriendlyfire");
+            boolean hasEffect3 = rm.getSuperRegionType(sr.getType()).hasEffect("denyfriendlyfirenoreagent");
+            boolean hasPower = sr.getPower() > 0;
+            boolean hasMoney = sr.getBalance() > 0;
+            boolean bothMembers = !notMember && (sr.hasMember(dPlayer.getName()) || sr.hasOwner(dPlayer.getName()));
+            if ((!notMember && hasEffect1) || (!notMember && hasEffect && reqs && hasPower && hasMoney)) {
                 dPlayer.sendMessage(ChatColor.RED + "[HeroStronghold] " + player.getDisplayName() + " is protected in this region.");
                 event.setCancelled(true);
                 return;
-            } else if (rm.shouldTakeAction(player.getLocation(), null, 0, "denyfriendlyfire", true) || 
-                    rm.shouldTakeAction(player.getLocation(), null, 0, "denyfriendlyfirenoreagent", false)) {
-                String playername = player.getName();
-                String dPlayername = dPlayer.getName();
-                if ((sr.hasMember(playername) || sr.hasOwner(playername)) && (sr.hasMember(dPlayername) || sr.hasOwner(dPlayername))) {
-                    dPlayer.sendMessage(ChatColor.RED + "[HeroStronghold] Friendly fire is off in this region.");
-                    event.setCancelled(true);
-                    return;
-                }
+            } else if ((bothMembers && hasEffect3) || (bothMembers && hasEffect2 && reqs && hasPower && hasMoney)) {
+                dPlayer.sendMessage(ChatColor.RED + "[HeroStronghold] Friendly fire is off in this region.");
+                event.setCancelled(true);
+                return;
             }
         }
-        
-        /*for (String s : rm.getSuperRegionNames()) {
-            SuperRegion sr = rm.getSuperRegion(s);
-            Location l = sr.getLocation();
-            
-            SuperRegionType srt = rm.getSuperRegionType(sr.getType());
-            try {
-                if (Math.sqrt(l.distanceSquared(player.getLocation())) < srt.getRadius()) {
-                    if (srt.hasEffect("denypvp")) {
-                        dPlayer.sendMessage(ChatColor.RED + "[HeroStronghold] " + player.getDisplayName() + " is protected in this region.");
-                        event.setCancelled(true);
-                        return;
-                    } else if (srt.hasEffect("denyfriendlyfire")) {
-                        String playername = player.getName();
-                        String dPlayername = dPlayer.getName();
-                        if ((sr.hasMember(playername) || sr.hasOwner(playername)) && (sr.hasMember(dPlayername) || sr.hasOwner(dPlayername))) {
-                            dPlayer.sendMessage(ChatColor.RED + "[HeroStronghold] Friendly fire is off in this region.");
-                            event.setCancelled(true);
-                            return;
-                        }
-                    }
-                }
-            } catch (IllegalArgumentException iae) {
-                
-            }
-        }*/
         for (Region r : rm.getContainingRegions(loc)) {
-            ArrayList<String> effects = rm.getRegionType(r.getType()).getEffects();
-            if (effects != null && !effects.isEmpty()) {
-                for (String effect : effects) {
-                    String[] params = effect.split("\\.");
-                    if (params.length > 1 && params[0].equalsIgnoreCase("denypvp")) {
-                        dPlayer.sendMessage(ChatColor.RED + "[HeroStronghold] " + player.getDisplayName() + " is protected in this region.");
-                        event.setCancelled(true);
-                        return;
-                    } else if (params.length > 1 && params[0].equalsIgnoreCase("denyfriendlyfire")) {
-                        String playername = player.getName();
-                        String dPlayername = dPlayer.getName();
-                        if ((r.isMember(playername) || r.isOwner(playername)) && (r.isMember(dPlayername) || r.isOwner(dPlayername))) {
-                            dPlayer.sendMessage(ChatColor.RED + "[HeroStronghold] Friendly fire is off in this region.");
-                            event.setCancelled(true);
-                            return;
-                        }
-                    }
-                }
+            Effect effect = new Effect(plugin);
+            boolean member = r.isMember(player.getName()) || r.isOwner(player.getName());
+            boolean bothMembers = member && (r.isMember(dPlayer.getName()) || r.isOwner(dPlayer.getName()));
+            boolean hasEffect = effect.regionHasEffect(rm.getRegionType(r.getType()).getEffects(), "denypvp") > 0;
+            boolean hasEffect1 = effect.regionHasEffect(rm.getRegionType(r.getType()).getEffects(), "denypvpnoreagent") > 0;
+            boolean hasEffect2 = effect.regionHasEffect(rm.getRegionType(r.getType()).getEffects(), "denyfriendlyfire") > 0;
+            boolean hasEffect3 = effect.regionHasEffect(rm.getRegionType(r.getType()).getEffects(), "denyfriendlyfirenoreagent") > 0;
+            boolean hasReagents = effect.hasReagents(r.getLocation());
+            
+            if ((member && hasEffect1) || (member && hasEffect && hasReagents)) {
+                dPlayer.sendMessage(ChatColor.RED + "[HeroStronghold] " + player.getDisplayName() + " is protected in this region.");
+                event.setCancelled(true);
+                return;
+            } else if ((bothMembers && hasEffect3) || (bothMembers && hasEffect2 && hasReagents)) {
+                dPlayer.sendMessage(ChatColor.RED + "[HeroStronghold] Friendly fire is off in this region.");
+                event.setCancelled(true);
+                return;
             }
         }
-        
-        /*for (Location l : rm.getRegionLocations()) {
-            Region r = rm.getRegion(l);
-            RegionType rt = rm.getRegionType(r.getType());
-            try {
-                if (Math.sqrt(l.distanceSquared(player.getLocation())) < rt.getRadius()) {
-                    ArrayList<String> effects = rt.getEffects();
-                    if (effects != null && !effects.isEmpty()) {
-                        for (String effect : effects) {
-                            String[] params = effect.split("\\.");
-                            if (params.length > 1 && params[0].equalsIgnoreCase("denypvp")) {
-                                dPlayer.sendMessage(ChatColor.RED + "[HeroStronghold] " + player.getDisplayName() + " is protected in this region.");
-                                event.setCancelled(true);
-                                return;
-                            } else if (params.length > 1 && params[0].equalsIgnoreCase("denyfriendlyfire")) {
-                                String playername = player.getName();
-                                String dPlayername = dPlayer.getName();
-                                if ((r.isMember(playername) || r.isOwner(playername)) && (r.isMember(dPlayername) || r.isOwner(dPlayername))) {
-                                    dPlayer.sendMessage(ChatColor.RED + "[HeroStronghold] Friendly fire is off in this region.");
-                                    event.setCancelled(true);
-                                    return;
-                                }
-                            }
-                        }
-                    }
-                }
-            } catch (IllegalArgumentException iae) {
-                
-            }
-        }*/
     }
     
     @Override
