@@ -463,10 +463,10 @@ public class RegionManager {
             }
             
             if (l.getX() - radius < x && l.getY() + radius > y && l.getY() - radius < y && 
-                    l.getZ() + radius > z && l.getZ() - radius < z && l.getWorld().equals(loc.getWorld()) && reqs.containsKey(r.getType())) {	  	
-                if (reqs.get(r.getType()) < 2) {	  	
-                    reqs.remove(r.getType());	  	
-                } else {	  	
+                    l.getZ() + radius > z && l.getZ() - radius < z && l.getWorld().equals(loc.getWorld()) && reqs.containsKey(r.getType())) {
+                if (reqs.get(r.getType()) < 2) {
+                    reqs.remove(r.getType());
+                } else {
                     reqs.put(r.getType(), reqs.get(r.getType()) - 1);
                 }
             }
