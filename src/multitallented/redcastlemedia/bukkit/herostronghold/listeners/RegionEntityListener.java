@@ -89,34 +89,21 @@ public class RegionEntityListener extends EntityListener {
         Player dPlayer = (Player) damager;
         
         Location loc = player.getLocation();
-        double x1 = loc.getX();
-        for (SuperRegion sr : rm.getSortedSuperRegions()) {
-            int radius = rm.getSuperRegionType(sr.getType()).getRadius();
-            Location l = sr.getLocation();
-            if (l.getX() + radius < x1) {
-                break;
-            }
-            SuperRegionType srt = rm.getSuperRegionType(sr.getType());
-            try {
-                if (!(l.getX() - radius > x1) && l.distanceSquared(loc) < radius) {
-                    if (rm.shouldTakeAction(player.getLocation(), null, 0, "denypvp", true) ||
-                        rm.shouldTakeAction(player.getLocation(), null, 0, "denypvpnoreagent", false)) {
-                        dPlayer.sendMessage(ChatColor.RED + "[HeroStronghold] " + player.getDisplayName() + " is protected in this region.");
-                        event.setCancelled(true);
-                        return;
-                    } else if (rm.shouldTakeAction(player.getLocation(), null, 0, "denyfriendlyfire", true) || 
-                            rm.shouldTakeAction(player.getLocation(), null, 0, "denyfriendlyfirenoreagent", false)) {
-                        String playername = player.getName();
-                        String dPlayername = dPlayer.getName();
-                        if ((sr.hasMember(playername) || sr.hasOwner(playername)) && (sr.hasMember(dPlayername) || sr.hasOwner(dPlayername))) {
-                            dPlayer.sendMessage(ChatColor.RED + "[HeroStronghold] Friendly fire is off in this region.");
-                            event.setCancelled(true);
-                            return;
-                        }
-                    }
+        for (SuperRegion sr : rm.getContainingSuperRegions(loc)) {
+            if (rm.shouldTakeAction(player.getLocation(), null, 0, "denypvp", true) ||
+                rm.shouldTakeAction(player.getLocation(), null, 0, "denypvpnoreagent", false)) {
+                dPlayer.sendMessage(ChatColor.RED + "[HeroStronghold] " + player.getDisplayName() + " is protected in this region.");
+                event.setCancelled(true);
+                return;
+            } else if (rm.shouldTakeAction(player.getLocation(), null, 0, "denyfriendlyfire", true) || 
+                    rm.shouldTakeAction(player.getLocation(), null, 0, "denyfriendlyfirenoreagent", false)) {
+                String playername = player.getName();
+                String dPlayername = dPlayer.getName();
+                if ((sr.hasMember(playername) || sr.hasOwner(playername)) && (sr.hasMember(dPlayername) || sr.hasOwner(dPlayername))) {
+                    dPlayer.sendMessage(ChatColor.RED + "[HeroStronghold] Friendly fire is off in this region.");
+                    event.setCancelled(true);
+                    return;
                 }
-            } catch (IllegalArgumentException iae) {
-                
             }
         }
         
@@ -145,39 +132,25 @@ public class RegionEntityListener extends EntityListener {
                 
             }
         }*/
-        
-        double x = player.getLocation().getX();
-        for (Region r : rm.getSortedRegions()) {
-            int radius = rm.getRegionType(r.getType()).getRadius();
-            Location l = r.getLocation();
-            if (l.getX() + radius < x) {
-                return;
-            }
-            try {
-                if (!(l.getX() - radius > x) && l.distanceSquared(player.getLocation()) < radius) {
-                    ArrayList<String> effects = rm.getRegionType(r.getType()).getEffects();
-                    if (effects != null && !effects.isEmpty()) {
-                        for (String effect : effects) {
-                            String[] params = effect.split("\\.");
-                            if (params.length > 1 && params[0].equalsIgnoreCase("denypvp")) {
-                                dPlayer.sendMessage(ChatColor.RED + "[HeroStronghold] " + player.getDisplayName() + " is protected in this region.");
-                                event.setCancelled(true);
-                                return;
-                            } else if (params.length > 1 && params[0].equalsIgnoreCase("denyfriendlyfire")) {
-                                String playername = player.getName();
-                                String dPlayername = dPlayer.getName();
-                                if ((r.isMember(playername) || r.isOwner(playername)) && (r.isMember(dPlayername) || r.isOwner(dPlayername))) {
-                                    dPlayer.sendMessage(ChatColor.RED + "[HeroStronghold] Friendly fire is off in this region.");
-                                    event.setCancelled(true);
-                                    return;
-                                }
-                            }
+        for (Region r : rm.getContainingRegions(loc)) {
+            ArrayList<String> effects = rm.getRegionType(r.getType()).getEffects();
+            if (effects != null && !effects.isEmpty()) {
+                for (String effect : effects) {
+                    String[] params = effect.split("\\.");
+                    if (params.length > 1 && params[0].equalsIgnoreCase("denypvp")) {
+                        dPlayer.sendMessage(ChatColor.RED + "[HeroStronghold] " + player.getDisplayName() + " is protected in this region.");
+                        event.setCancelled(true);
+                        return;
+                    } else if (params.length > 1 && params[0].equalsIgnoreCase("denyfriendlyfire")) {
+                        String playername = player.getName();
+                        String dPlayername = dPlayer.getName();
+                        if ((r.isMember(playername) || r.isOwner(playername)) && (r.isMember(dPlayername) || r.isOwner(dPlayername))) {
+                            dPlayer.sendMessage(ChatColor.RED + "[HeroStronghold] Friendly fire is off in this region.");
+                            event.setCancelled(true);
+                            return;
                         }
                     }
-                    return;
                 }
-            } catch (IllegalArgumentException iae) {
-                
             }
         }
         
