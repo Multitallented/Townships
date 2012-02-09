@@ -455,7 +455,7 @@ public class RegionManager {
         double x = loc.getX();
         double y = loc.getY();
         double z = loc.getZ();
-        int radius = getSuperRegionType(sr.getType()).getRadius();
+        int radius = getSuperRegionType(sr.getType()).getRawRadius();
         for (Region r : getSortedRegions()) {	  	
             Location l = r.getLocation();  	
             if (l.getX() + radius < x) { 	
