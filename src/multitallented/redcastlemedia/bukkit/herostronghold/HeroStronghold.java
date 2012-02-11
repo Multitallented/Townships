@@ -704,7 +704,26 @@ public class HeroStronghold extends JavaPlugin {
                     }
                 }
                 
-                
+                Location loc = player.getLocation();
+                double x = loc.getX();
+                double y = loc.getY();
+                double z = loc.getZ();
+                int radius1 = currentRegionType.getRawRadius();
+                for (Region r : regionManager.getSortedRegions()) {	  	
+                    Location l = r.getLocation();
+                    if (l.getX() + radius1 < x) {
+                        break;
+                    }
+
+                    if (l.getX() - radius1 < x && l.getY() + radius1 > y && l.getY() - radius1 < y && 
+                            l.getZ() + radius1 > z && l.getZ() - radius1 < z && l.getWorld().equals(loc.getWorld()) && req.containsKey(r.getType())) {
+                        if (req.get(r.getType()) < 2) {
+                            req.remove(r.getType());
+                        } else {
+                            req.put(r.getType(), req.get(r.getType()) - 1);
+                        }
+                    }
+                }
                 if (!req.isEmpty()) {
                     for (Region r : regionManager.getContainingRegions(currentLocation)) {
                         String rType = regionManager.getRegion(r.getLocation()).getType();
