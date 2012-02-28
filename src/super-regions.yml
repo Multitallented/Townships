@@ -22,7 +22,7 @@ village:
   max-power: 500
   daily-power-increase: 50
   charter: 5
-  child-super-regions: []
+  children: []
   exp: 5000
 town:
   effects:
@@ -50,7 +50,7 @@ town:
   max-power: 1000
   daily-power-increase: 150
   charter: 10
-  child-regions:
+  children:
   - village
   exp: 10000
 city:
@@ -79,7 +79,7 @@ city:
   max-power: 3000
   daily-power-increase: 500
   charter: 25
-  child-regions:
+  children:
   - town
   exp: 25000
 militarybase:
@@ -99,7 +99,7 @@ militarybase:
   max-power: 200
   daily-power-increase: 150
   charter: 0
-  child-regions: []
+  children: []
   exp: 2500
 miningcolony:
   effects:
@@ -123,7 +123,7 @@ miningcolony:
   max-power: 300
   daily-power-increase: 30
   charter: 3
-  child-regions: []
+  children: []
   exp: 3000
 ward:
   effects:
@@ -141,7 +141,7 @@ ward:
   max-power: 100.0
   daily-power-increase: 10
   charter: 0
-  child-regions: []
+  children: []
   exp: 500
 admin:
   effects: []
@@ -152,5 +152,5 @@ admin:
   max-power: 99999999
   daily-power-increase: 99999999
   charter: 0
-  child-regions: []
+  children: []
   exp: 0
