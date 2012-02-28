@@ -96,6 +96,7 @@ public class EffectManager {
                 Class<? extends Effect> effectClass = clazz.asSubclass(Effect.class);
                 Constructor<? extends Effect> ctor = effectClass.getConstructor(plugin.getClass());
                 Effect effect = ctor.newInstance(plugin);
+                effect.init(plugin);
                 return effect;
             } else
                 throw new Exception();
