@@ -146,6 +146,11 @@ public class RegionBlockListener extends BlockListener {
                             }
                         }
                     }
+                    if (r.isMember(player.getName()) || r.isOwner(player.getName())) {
+                        player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Breaking this, would destroy your " + r.getType());
+                        event.setCancelled(true);
+                        break;
+                    }
                     regionManager.destroyRegion(currentLoc);
                     delete = true;
                     break;
