@@ -87,12 +87,14 @@ public class Effect {
         Region r = rm.getRegion(l);
         if (r.isMember(p.getName())) {
             return true;
+        } else if (r.isMember("all")) {
+            return true;
         } else {
             for (String s : r.getMembers()) {
                 if (s.contains("sr:")) {
                     String superRegionName = s.replace("sr:", "");
                     SuperRegion sr = rm.getSuperRegion(superRegionName);
-                    if (sr != null && sr.hasMember(p.getName())) {
+                    if (sr != null && (sr.hasMember(p.getName()) || sr.hasOwner(p.getName()))) {
                         return true;
                     } else {
                         return false;
