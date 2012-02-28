@@ -22,7 +22,6 @@ import net.milkbowl.vault.permission.Permission;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
@@ -38,6 +37,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.herocraftonline.dev.heroes.Heroes;
 import com.herocraftonline.dev.heroes.classes.HeroClass.ExperienceType;
 import com.herocraftonline.dev.heroes.hero.Hero;
+import java.util.HashSet;
+import multitallented.redcastlemedia.bukkit.herostronghold.events.CommandEffectEvent;
+import org.bukkit.Bukkit;
 
 public class HeroStronghold extends JavaPlugin {
     private PluginServerListener serverListener;
@@ -53,6 +55,7 @@ public class HeroStronghold extends JavaPlugin {
     private ConfigManager configManager;
     private Map<String, List<String>> pendingCharters = new HashMap<String, List<String>>();
     public static Heroes heroes = null;
+    private HashSet<String> effectCommands = new HashSet<String>();
     
     @Override
     public void onDisable() {
@@ -82,7 +85,6 @@ public class HeroStronghold extends JavaPlugin {
         pm.registerEvent(Type.BLOCK_BREAK, blockListener, Priority.Highest, this);
         pm.registerEvent(Type.BLOCK_PLACE, blockListener, Priority.High, this);
         pm.registerEvent(Type.BLOCK_DAMAGE, blockListener, Priority.High, this);
-        pm.registerEvent(Type.BLOCK_FROMTO, blockListener, Priority.Normal, this);
         pm.registerEvent(Type.BLOCK_IGNITE, blockListener, Priority.High, this);
         pm.registerEvent(Type.BLOCK_BURN, blockListener, Priority.High, this);
         pm.registerEvent(Type.SIGN_CHANGE, blockListener, Priority.High, this);
@@ -95,7 +97,6 @@ public class HeroStronghold extends JavaPlugin {
         pm.registerEvent(Type.PAINTING_PLACE, regionEntityListener, Priority.High, this);
         pm.registerEvent(Type.ENDERMAN_PLACE, regionEntityListener, Priority.High, this);
         pm.registerEvent(Type.PAINTING_BREAK, regionEntityListener, Priority.High, this);
-        pm.registerEvent(Type.EXPLOSION_PRIME, regionEntityListener, Priority.High, this);
         pm.registerEvent(Type.ENTITY_EXPLODE, regionEntityListener, Priority.High, this);
         pm.registerEvent(Type.ENDERMAN_PICKUP, regionEntityListener, Priority.High, this);
         pm.registerEvent(Type.ENTITY_DAMAGE, regionEntityListener, Priority.Normal, this);
@@ -370,7 +371,6 @@ public class HeroStronghold extends JavaPlugin {
             
             //Check if in a super region and if has permission to make that region
             String playername = player.getName();
-            String currentRegionName = currentRegionType.getName();
             List<String> reqSuperRegion = currentRegionType.getSuperRegions();
             boolean meetsReqs = reqSuperRegion == null || reqSuperRegion.isEmpty();
             for (SuperRegion sr : regionManager.getContainingSuperRegions(currentLocation)) {
@@ -378,15 +378,15 @@ public class HeroStronghold extends JavaPlugin {
                     meetsReqs = true;
                 }
                 if (!sr.hasOwner(playername)) {
-                    if (!sr.hasMember(playername) || !sr.getMember(playername).contains(currentRegionName)) {
+                    if (!sr.hasMember(playername) || !sr.getMember(playername).contains(regionName)) {
                         player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You dont have permission from an owner of " + sr.getName()
-                                + " to create a " + currentRegionName + " here");
+                                + " to create a " + regionName + " here");
                         return true;
                     }
                 }
             }
             if (!meetsReqs) {
-                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You are required to build this " + currentRegionName + " in a:");
+                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You are required to build this " + regionName + " in a:");
                 String message = ChatColor.GOLD + "";
                 int j=0;
                 for (String s : reqSuperRegion) {
@@ -929,13 +929,8 @@ public class HeroStronghold extends JavaPlugin {
             if (args.length > 3) {
                 Player currentPlayer = getServer().getPlayer(args[2]);
                 if (currentPlayer == null) {
-                    OfflinePlayer op = getServer().getOfflinePlayer(args[2]);
-                    if (op != null)
-                        playername = op.getName();
-                    else {
-                        player.sendMessage(ChatColor.GOLD + "[HeroStronghold] Could not find " + args[2]);
-                        return true;
-                    }
+                    player.sendMessage(ChatColor.GOLD + "[HeroStronghold] Could not find " + args[2]);
+                    return true;
                 } else {
                     playername = currentPlayer.getName();
                 }
@@ -1028,7 +1023,7 @@ public class HeroStronghold extends JavaPlugin {
             boolean isOwner = sr.hasOwner(playername);
             boolean isMember = sr.hasMember(playername);
             boolean isAdmin = HeroStronghold.perms.has(player, "herostronghold.admin");
-            if (!sr.hasMember(playername) && !isOwner && !isAdmin) {
+            if (!isMember && !isOwner && !isAdmin) {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You arent a member of " + args[2]);
                 return true;
             }
@@ -1054,7 +1049,7 @@ public class HeroStronghold extends JavaPlugin {
             
             //Send an invite
             pendingInvites.put(invitee.getName(), args[2]);
-            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You have invited " + ChatColor.GOLD + args[1] + ChatColor.GRAY + " to join " + ChatColor.GOLD + args[2]);
+            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You have invited " + ChatColor.GOLD + invitee.getDisplayName() + ChatColor.GRAY + " to join " + ChatColor.GOLD + args[2]);
             if (invitee != null)
                 invitee.sendMessage(ChatColor.GOLD + "[HeroStronghold] You have been invited to join " + args[2] + ". /hs accept " + args[2]);
             return true;
@@ -1844,6 +1839,9 @@ public class HeroStronghold extends JavaPlugin {
             
             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Could not find player or super-region by that name");
             return true;
+        } else if (args.length > 0 && effectCommands.contains(args[0])) {
+            Bukkit.getServer().getPluginManager().callEvent(new CommandEffectEvent(args, player));
+            return true;
         } else {
             //TODO add a page 3 to help for more instruction?
             if (args.length > 0 && args[args.length - 1].equals("2")) {
@@ -1876,6 +1874,10 @@ public class HeroStronghold extends JavaPlugin {
             
             return true;
         }
+    }
+    
+    public void addCommand(String command) {
+        effectCommands.add(command);
     }
     
     public boolean setupEconomy() {
