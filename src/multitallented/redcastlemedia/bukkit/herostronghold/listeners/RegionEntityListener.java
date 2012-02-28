@@ -8,7 +8,6 @@ import multitallented.redcastlemedia.bukkit.herostronghold.effect.Effect;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.Region;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionManager;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.SuperRegion;
-import multitallented.redcastlemedia.bukkit.herostronghold.region.SuperRegionType;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Creeper;
@@ -26,7 +25,6 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityListener;
-import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.event.painting.PaintingBreakByEntityEvent;
 import org.bukkit.event.painting.PaintingBreakEvent;
 import org.bukkit.event.painting.PaintingPlaceEvent;
@@ -179,9 +177,22 @@ public class RegionEntityListener extends EntityListener {
                 || event.getEntity() instanceof TNTPrimed || event.getEntity() instanceof Fireball)) {
             return;
         }
+        if (rm.shouldTakeAction(event.getLocation(), null, 4, "denyexplosion", true) ||
+                rm.shouldTakeAction(event.getLocation(), null, 4, "denyexplosionnoreagent", false)) {
+            event.setCancelled(true);
+            return;
+        }
         
         Location loc = event.getLocation();
-        if ((rm.shouldTakeAction(loc, null, 4, "denyexplosion", true)) &&
+        ArrayList<Location> tempArray = new ArrayList<Location>();
+        for (Region r : rm.getContainingRegions(loc, 4)) {
+            tempArray.add(r.getLocation());
+        }
+        for (Location l : tempArray) {
+            rm.destroyRegion(l);
+            rm.removeRegion(l);
+        }
+        /*if ((rm.shouldTakeAction(loc, null, 4, "denyexplosion", true)) &&
                 (rm.shouldTakeAction(loc, null, 4, "denyexplosionnoreagent", false))) {
             event.setCancelled(true);
             return;
@@ -207,16 +218,7 @@ public class RegionEntityListener extends EntityListener {
         if (destroyMe != null) {
             rm.destroyRegion(destroyMe.getLocation());
             rm.removeRegion(destroyMe.getLocation());
-        }
-    }
-
-    @Override
-    public void onExplosionPrime(ExplosionPrimeEvent event) {
-        if ((event.isCancelled() || !rm.shouldTakeAction(event.getEntity().getLocation(), null, 0, "denyblockbreak", true)) &&
-                (event.isCancelled() || !rm.shouldTakeAction(event.getEntity().getLocation(), null, 0, "denyblockbreaknoreagent", false))) {
-            return;
-        }
-        event.setCancelled(true);
+        }*/
     }
 
     @Override
