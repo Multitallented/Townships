@@ -789,6 +789,53 @@ public class RegionManager {
         return tempList;
     }
     
+    public ArrayList<Region> getContainingRegions(Location loc, int modifier) {
+        ArrayList<Region> tempList = new ArrayList<Region>();
+        double x = loc.getX();
+        double y = loc.getY();
+        double z = loc.getZ();
+        for (Region r : getSortedRegions()) {
+            try {
+                int radius = getRegionType(r.getType()).getRawRadius() + modifier;
+                Location l = r.getLocation();
+                if (l.getX() + radius < x) {
+                    break;
+                }
+                if (l.getX() - radius < x && l.getY() + radius > y && l.getY() - radius < y && 
+                        l.getZ() + radius > z && l.getZ() - radius < z && l.getWorld().equals(loc.getWorld())) {
+                    tempList.add(r);
+                }
+            } catch (NullPointerException npe) {
+                plugin.warning("Region " + r.getID() + " is corrupted");
+            }
+        }
+        return tempList;
+    }
+    
+    public Region getClosestRegionType(Location loc, String type) {
+        Region re = null;
+        double distance = 999999999;
+        for (Region r : getSortedRegions()) {
+            try {
+                Location l = r.getLocation();
+                if (r.getType().equalsIgnoreCase(type) &&
+                    l.getWorld().equals(loc.getWorld())) {
+                    double tempDistance=r.getLocation().distance(loc);
+                    if (tempDistance < distance) {
+                        distance=tempDistance;
+                        re=r;
+                    } else {
+                        break;
+                    }
+                    
+                }
+            } catch (NullPointerException npe) {
+                plugin.warning("Region " + r.getID() + " is corrupted");
+            }
+        }
+        return re;
+    }
+    
     public ArrayList<SuperRegion> getContainingSuperRegions(Location loc) {
         ArrayList<SuperRegion> tempList = new ArrayList<SuperRegion>();
         
@@ -815,49 +862,47 @@ public class RegionManager {
     
     public boolean shouldTakeAction(Location loc, Player player, int modifier, String effectName, boolean useReagents) {
         Effect effect = new Effect(plugin);
-        for (Region r : this.getContainingRegions(loc)) {
-            boolean notMember = player == null;
-            if (!notMember) {
-                notMember = !(r.isMember(player.getName()) || r.isOwner(player.getName()));
-                if (notMember && r.isMember("all")) {
-                    notMember = false;
-                }
-                if (notMember) {
+        for (Region r : this.getContainingRegions(loc, modifier)) {
+            boolean nullPlayer = player == null;
+            boolean member = false;
+            if (!nullPlayer) {
+                if ((r.isMember(player.getName()) || r.isOwner(player.getName()))) {
+                    member = true;
+                } else if (r.isMember("all")) {
+                    member = true;
+                } else  {
                     for (String s : r.getMembers()) {
                         if (s.contains("sr:")) {
                             SuperRegion sr = getSuperRegion(s.replace("sr:", ""));
-                            if (sr != null && sr.hasMember(player.getName())) {
-                                notMember = false;
+                            if (sr != null && (sr.hasMember(player.getName()) || sr.hasOwner(player.getName()))) {
+                                member = true;
                             }
                         }
                     }
                 }
             }
-            if (!useReagents && (player == null || (!r.isOwner(player.getName()) && !r.isMember(player.getName()))) && 
-                    effect.regionHasEffect(getRegionType(r.getType()).getEffects(), effectName) != 0) {
+            if (!useReagents && (nullPlayer || !member) && effect.regionHasEffect(getRegionType(r.getType()).getEffects(), effectName) != 0) {
                 return true;
             }
-            if (useReagents && (player == null || (!r.isOwner(player.getName()) && !r.isMember(player.getName()))) && 
-                    effect.regionHasEffect(getRegionType(r.getType()).getEffects(), effectName) != 0 && effect.hasReagents(r.getLocation())) {
+            if (useReagents && (nullPlayer || !member) && effect.regionHasEffect(getRegionType(r.getType()).getEffects(), effectName) != 0
+                    && effect.hasReagents(r.getLocation())) {
                 return true;
             }
         }
         for (SuperRegion sr : this.getContainingSuperRegions(loc)) {
             boolean nullPlayer = player == null;
-            boolean notMember = nullPlayer;
-            if (!notMember) {
-                notMember = !(sr.hasOwner(player.getName()) || sr.hasMember(player.getName()));
+            boolean member = false;
+            if (!nullPlayer) {
+                member = (sr.hasOwner(player.getName()) || sr.hasMember(player.getName()));
             }
             boolean reqs = hasAllRequiredRegions(sr);
             boolean hasEffect = getSuperRegionType(sr.getType()).hasEffect(effectName);
             boolean hasPower = sr.getPower() > 0;
             boolean hasMoney = sr.getBalance() > 0;
-            if (useReagents && notMember && hasEffect && reqs && hasPower && hasMoney) {
-            /*if ((player == null || (!sr.hasOwner(player.getName()) && !sr.hasMember(player.getName())))
-                    && getSuperRegionType(sr.getType()).hasEffect(effectName) && hasAllRequiredRegions(sr)) {*/
+            if (useReagents && (nullPlayer || !member) && hasEffect && reqs && hasPower && hasMoney) {
                 return true;
             }
-            if (!useReagents && notMember && hasEffect) {
+            if (!useReagents && (nullPlayer || !member) && hasEffect) {
                 return true;
             }
         }
