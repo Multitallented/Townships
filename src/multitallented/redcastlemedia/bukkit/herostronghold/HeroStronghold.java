@@ -379,6 +379,7 @@ public class HeroStronghold extends JavaPlugin {
                 }
                 if (!sr.hasOwner(playername)) {
                     if (!sr.hasMember(playername) || !sr.getMember(playername).contains(regionName)) {
+                        //TODO fix toggleperm not working here
                         player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You dont have permission from an owner of " + sr.getName()
                                 + " to create a " + regionName + " here");
                         return true;
@@ -927,9 +928,9 @@ public class HeroStronghold extends JavaPlugin {
             //Get target player
             String playername = "";
             if (args.length > 3) {
-                Player currentPlayer = getServer().getPlayer(args[2]);
+                Player currentPlayer = getServer().getPlayer(args[1]);
                 if (currentPlayer == null) {
-                    player.sendMessage(ChatColor.GOLD + "[HeroStronghold] Could not find " + args[2]);
+                    player.sendMessage(ChatColor.GOLD + "[HeroStronghold] Could not find " + args[1]);
                     return true;
                 } else {
                     playername = currentPlayer.getName();
@@ -938,12 +939,12 @@ public class HeroStronghold extends JavaPlugin {
                 playername = player.getName();
             }
             
-            String message = ChatColor.GRAY + "[HeroStronghold] " + playername + " perms for " + args[3] + ":";
+            String message = ChatColor.GRAY + "[HeroStronghold] " + playername + " perms for " + args[2] + ":";
             String message2 = ChatColor.GOLD + "";
             //Check if the player is a owner or member of the super region
             SuperRegion sr = regionManager.getSuperRegion(args[3]);
             if (sr == null) {
-                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] There is no region called " + args[3]);
+                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] There is no region called " + args[2]);
                 return true;
             }
             if (sr.hasOwner(playername)) {
