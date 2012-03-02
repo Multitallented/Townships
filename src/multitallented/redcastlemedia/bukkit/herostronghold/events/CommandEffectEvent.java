@@ -14,7 +14,6 @@ public class CommandEffectEvent extends Event {
     private final String[] args;
 
     public CommandEffectEvent(String[] args, Player player) {
-        super("CommandEffectEvent");
         this.args=args;
         this.player = player;
         

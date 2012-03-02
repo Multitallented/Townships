@@ -12,14 +12,13 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
-import org.bukkit.event.block.BlockListener;
-import org.bukkit.event.block.BlockPistonExtendEvent;
-import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.inventory.ItemStack;
@@ -28,7 +27,7 @@ import org.bukkit.inventory.ItemStack;
  *
  * @author Multitallented
  */
-public class RegionBlockListener extends BlockListener {
+public class RegionBlockListener implements Listener {
     private final RegionManager regionManager;
     private final HeroStronghold plugin;
     public RegionBlockListener(HeroStronghold plugin) {
@@ -36,7 +35,7 @@ public class RegionBlockListener extends BlockListener {
         this.regionManager = plugin.getRegionManager();
     }
     
-    @Override
+    @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
         if (event.isCancelled())
             return;
@@ -164,7 +163,7 @@ public class RegionBlockListener extends BlockListener {
         }
     }
     
-    @Override
+    @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
         if ((event.isCancelled() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 0, "denyblockbuild", true)) &&
                   (event.isCancelled() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 0, "denyblockbuildnoreagent", false))) {
@@ -175,7 +174,7 @@ public class RegionBlockListener extends BlockListener {
         event.getPlayer().sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
     }
     
-    @Override
+    @EventHandler
         public void onBlockDamage(BlockDamageEvent event) {
             if (event.isCancelled() || !event.getBlock().getType().equals(Material.CAKE_BLOCK))
                 return;
@@ -211,7 +210,7 @@ public class RegionBlockListener extends BlockListener {
             }
         }*/
         
-        @Override
+        @EventHandler
         public void onBlockIgnite(BlockIgniteEvent event) {
             if (event.isCancelled()) {
                 return;
@@ -234,7 +233,7 @@ public class RegionBlockListener extends BlockListener {
 
         }
         
-        @Override
+        @EventHandler
         public void onBlockBurn(BlockBurnEvent event) {
             if ((event.isCancelled() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyfire", true)) &&
                     (event.isCancelled() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyfirenoreagent", false))) {
@@ -243,7 +242,7 @@ public class RegionBlockListener extends BlockListener {
             event.setCancelled(true);
         }
         
-        @Override
+        @EventHandler
         public void onSignChange(SignChangeEvent event) {
             if ((event.isCancelled() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 0, "denyblockbreak", true)) &&
                     (event.isCancelled() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 0, "denyblockbreaknoreagent", false))) {
@@ -254,7 +253,7 @@ public class RegionBlockListener extends BlockListener {
                 event.getPlayer().sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
         }
         
-        @Override
+        /*@Override
         public void onBlockPistonExtend(BlockPistonExtendEvent event) {
             if (event.isCancelled()) {
                 return;
@@ -277,5 +276,5 @@ public class RegionBlockListener extends BlockListener {
             }
             
             event.setCancelled(true);
-        }
+        }*/
 }

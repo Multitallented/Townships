@@ -14,8 +14,6 @@ import org.bukkit.Material;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event.Priority;
-import org.bukkit.event.Event.Type;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 
@@ -34,8 +32,8 @@ public class Effect {
         return plugin;
     }
     
-    protected void registerEvent(Type type, Listener listener, Priority priority) {
-        plugin.getServer().getPluginManager().registerEvent(type, listener, priority, plugin);
+    protected void registerEvent(Listener listener) {
+        plugin.getServer().getPluginManager().registerEvents(listener, plugin);
     }
     
     public Region getContainingRegion(Location currentLocation) {

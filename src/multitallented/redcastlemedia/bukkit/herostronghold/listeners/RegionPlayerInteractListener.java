@@ -6,18 +6,19 @@ import multitallented.redcastlemedia.bukkit.herostronghold.HeroStronghold;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionManager;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerListener;
 
 /**
  *
  * @author Multitallented
  */
-public class RegionPlayerInteractListener extends PlayerListener {
+public class RegionPlayerInteractListener implements Listener {
     private final RegionManager rm;
     private final Map<Player, String> channels = new HashMap<Player, String>();
     private final HeroStronghold plugin;
@@ -26,7 +27,7 @@ public class RegionPlayerInteractListener extends PlayerListener {
         this.plugin = plugin;
     }
     
-    @Override
+    @EventHandler
     public void onPlayerChat(PlayerChatEvent event) {
         Player player = event.getPlayer();
         String channel = channels.get(player);
@@ -98,7 +99,7 @@ public class RegionPlayerInteractListener extends PlayerListener {
         return channels;
     }
     
-    @Override
+    @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         if (event.isCancelled() || (!rm.shouldTakeAction(event.getClickedBlock().getLocation(), event.getPlayer(), 0, "denyplayerinteract", true) && 
                 !rm.shouldTakeAction(event.getClickedBlock().getLocation(), event.getPlayer(), 0, "denyplayerinteractnoreagent", false))) {
@@ -109,7 +110,7 @@ public class RegionPlayerInteractListener extends PlayerListener {
         event.setCancelled(true);
     }
 
-    @Override
+    @EventHandler
     public void onPlayerBedEnter(PlayerBedEnterEvent event) {
         if (event.isCancelled() || (!rm.shouldTakeAction(event.getBed().getLocation(), event.getPlayer(), 0, "denyplayerinteract", true) &&
                 !rm.shouldTakeAction(event.getBed().getLocation(), event.getPlayer(), 0, "denyplayerinteractnoreagent", false))) {
@@ -120,7 +121,7 @@ public class RegionPlayerInteractListener extends PlayerListener {
         event.setCancelled(true);
     }
 
-    @Override
+    @EventHandler
     public void onPlayerBucketFill(PlayerBucketFillEvent event) {
         if (event.isCancelled() || (!rm.shouldTakeAction(event.getBlockClicked().getLocation(), event.getPlayer(), 0, "denybucketuse", true) &&
                 !rm.shouldTakeAction(event.getBlockClicked().getLocation(), event.getPlayer(), 0, "denybucketusenoreagent", false))) {
@@ -131,7 +132,7 @@ public class RegionPlayerInteractListener extends PlayerListener {
         event.setCancelled(true);
     }
 
-    @Override
+    @EventHandler
     public void onPlayerBucketEmpty(PlayerBucketEmptyEvent event) {
         if (event.isCancelled() || (!rm.shouldTakeAction(event.getBlockClicked().getLocation(), event.getPlayer(), 0, "denybucketuse", true) &&
                 !rm.shouldTakeAction(event.getBlockClicked().getLocation(), event.getPlayer(), 0, "denybucketusenoreagent", false))) {

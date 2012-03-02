@@ -17,14 +17,13 @@ import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.TNTPrimed;
-import org.bukkit.event.entity.EndermanPickupEvent;
-import org.bukkit.event.entity.EndermanPlaceEvent;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.event.entity.EntityListener;
 import org.bukkit.event.painting.PaintingBreakByEntityEvent;
 import org.bukkit.event.painting.PaintingBreakEvent;
 import org.bukkit.event.painting.PaintingPlaceEvent;
@@ -33,7 +32,7 @@ import org.bukkit.event.painting.PaintingPlaceEvent;
  *
  * @author Multitallented
  */
-public class RegionEntityListener extends EntityListener {
+public class RegionEntityListener implements Listener {
     private final RegionManager rm;
     private final HeroStronghold plugin;
     public RegionEntityListener(HeroStronghold plugin) {
@@ -41,7 +40,7 @@ public class RegionEntityListener extends EntityListener {
         this.rm = plugin.getRegionManager();
     }
     
-    @Override
+    @EventHandler
     public void onEntityDeath(EntityDeathEvent event) {
         if (!(event.getEntity() instanceof Player))
             return;
@@ -71,7 +70,7 @@ public class RegionEntityListener extends EntityListener {
         }
     }
     
-    @Override
+    @EventHandler
     public void onEntityDamage(EntityDamageEvent event) {
         if (event.isCancelled() || !(event.getEntity() instanceof Player) || !(event instanceof EntityDamageByEntityEvent))
             return;
@@ -133,7 +132,7 @@ public class RegionEntityListener extends EntityListener {
         }
     }
     
-    @Override
+    @EventHandler
     public void onPaintingPlace(PaintingPlaceEvent event) {
         if ((event.isCancelled() || !rm.shouldTakeAction(event.getPainting().getLocation(), event.getPlayer(), 0, "denyblockbuild", true))  &&
                 (event.isCancelled() || !rm.shouldTakeAction(event.getPainting().getLocation(), event.getPlayer(), 0, "denyblockbuildnoreagent", false))) {
@@ -144,16 +143,16 @@ public class RegionEntityListener extends EntityListener {
         event.getPlayer().sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
     }
 
-    @Override
+    /*@EventHandler
     public void onEndermanPlace(EndermanPlaceEvent event) {
         if ((event.isCancelled() || !rm.shouldTakeAction(event.getLocation(), null, 0, "denyblockbuild", true)) &&
                 (event.isCancelled() || !rm.shouldTakeAction(event.getLocation(), null, 0, "denyblockbuildnoreagent", false))) {
             return;
         }
         event.setCancelled(true);
-    }
+    }*/
 
-    @Override
+    @EventHandler
     public void onPaintingBreak(PaintingBreakEvent event) {
         if (event.isCancelled() || !(event instanceof PaintingBreakByEntityEvent))
             return;
@@ -171,7 +170,7 @@ public class RegionEntityListener extends EntityListener {
     }
 
 
-    @Override
+    @EventHandler
     public void onEntityExplode(EntityExplodeEvent event) {
         if (event.isCancelled() || !(event.getEntity() instanceof Creeper || event.getEntity() instanceof EnderDragon
                 || event.getEntity() instanceof TNTPrimed || event.getEntity() instanceof Fireball)) {
@@ -221,12 +220,12 @@ public class RegionEntityListener extends EntityListener {
         }*/
     }
 
-    @Override
+    /*@EventHandler
     public void onEndermanPickup(EndermanPickupEvent event) {
         if ((event.isCancelled() || !rm.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyblockbreak", true)) &&
                 (event.isCancelled() || !rm.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyblockbreaknoreagent", false))) {
             return;
         }
         event.setCancelled(true);
-    }
+    }*/
 }

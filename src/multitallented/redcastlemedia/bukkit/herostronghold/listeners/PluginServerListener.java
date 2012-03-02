@@ -3,16 +3,17 @@ package multitallented.redcastlemedia.bukkit.herostronghold.listeners;
 import com.herocraftonline.dev.heroes.Heroes;
 import java.util.logging.Logger;
 import multitallented.redcastlemedia.bukkit.herostronghold.HeroStronghold;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.event.server.PluginEnableEvent;
-import org.bukkit.event.server.ServerListener;
 import org.bukkit.plugin.Plugin;
 
 /**
  *
  * @author Multitallented
  */
-public class PluginServerListener extends ServerListener {
+public class PluginServerListener implements Listener {
     private HeroStronghold plugin;
     private Heroes heroes;
 
@@ -20,7 +21,7 @@ public class PluginServerListener extends ServerListener {
         this.plugin = p;
     }
 
-    @Override
+    @EventHandler
     public void onPluginDisable(PluginDisableEvent event) {
         Plugin currentPlugin = event.getPlugin();
         String name = currentPlugin.getDescription().getName();
@@ -36,7 +37,7 @@ public class PluginServerListener extends ServerListener {
         }*/
     }
 
-    @Override
+    @EventHandler
     public void onPluginEnable(PluginEnableEvent event) {
         Plugin currentPlugin = event.getPlugin();
         String name = currentPlugin.getDescription().getName();

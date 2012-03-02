@@ -27,8 +27,6 @@ import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event.Priority;
-import org.bukkit.event.Event.Type;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
@@ -82,33 +80,38 @@ public class HeroStronghold extends JavaPlugin {
         dpeListener = new RegionPlayerInteractListener(this);
         regionEntityListener = new RegionEntityListener(this);
         PluginManager pm = getServer().getPluginManager();
-        pm.registerEvent(Type.BLOCK_BREAK, blockListener, Priority.Highest, this);
+        pm.registerEvents(blockListener, this);
+        /*pm.registerEvent(Type.BLOCK_BREAK, blockListener, Priority.Highest, this);
         pm.registerEvent(Type.BLOCK_PLACE, blockListener, Priority.High, this);
         pm.registerEvent(Type.BLOCK_DAMAGE, blockListener, Priority.High, this);
         pm.registerEvent(Type.BLOCK_IGNITE, blockListener, Priority.High, this);
         pm.registerEvent(Type.BLOCK_BURN, blockListener, Priority.High, this);
         pm.registerEvent(Type.SIGN_CHANGE, blockListener, Priority.High, this);
         pm.registerEvent(Type.BLOCK_PISTON_EXTEND, blockListener, Priority.High, this);
-        pm.registerEvent(Type.BLOCK_PISTON_RETRACT, blockListener, Priority.High, this);
+        pm.registerEvent(Type.BLOCK_PISTON_RETRACT, blockListener, Priority.High, this);*/
         
-        pm.registerEvent(Type.PLUGIN_ENABLE, serverListener, Priority.Monitor, this);
-        pm.registerEvent(Type.PLUGIN_DISABLE, serverListener, Priority.Monitor, this);
+        pm.registerEvents(serverListener, this);
+        //pm.registerEvent(Type.PLUGIN_ENABLE, serverListener, Priority.Monitor, this);
+        //pm.registerEvent(Type.PLUGIN_DISABLE, serverListener, Priority.Monitor, this);
         
-        pm.registerEvent(Type.PAINTING_PLACE, regionEntityListener, Priority.High, this);
+        pm.registerEvents(regionEntityListener, this);
+        /*pm.registerEvent(Type.PAINTING_PLACE, regionEntityListener, Priority.High, this);
         pm.registerEvent(Type.ENDERMAN_PLACE, regionEntityListener, Priority.High, this);
         pm.registerEvent(Type.PAINTING_BREAK, regionEntityListener, Priority.High, this);
         pm.registerEvent(Type.ENTITY_EXPLODE, regionEntityListener, Priority.High, this);
         pm.registerEvent(Type.ENDERMAN_PICKUP, regionEntityListener, Priority.High, this);
         pm.registerEvent(Type.ENTITY_DAMAGE, regionEntityListener, Priority.Normal, this);
-        pm.registerEvent(Type.ENTITY_DEATH, regionEntityListener, Priority.Monitor, this);
+        pm.registerEvent(Type.ENTITY_DEATH, regionEntityListener, Priority.Monitor, this);*/
         
-        pm.registerEvent(Type.PLAYER_INTERACT, dpeListener, Priority.High, this);
+        pm.registerEvents(dpeListener, this);
+        /*pm.registerEvent(Type.PLAYER_INTERACT, dpeListener, Priority.High, this);
         pm.registerEvent(Type.PLAYER_BED_ENTER, dpeListener, Priority.High, this);
         pm.registerEvent(Type.PLAYER_BUCKET_FILL, dpeListener, Priority.High, this);
         pm.registerEvent(Type.PLAYER_BUCKET_EMPTY, dpeListener, Priority.High, this);
-        pm.registerEvent(Type.PLAYER_CHAT, dpeListener, Priority.Normal, this);
+        pm.registerEvent(Type.PLAYER_CHAT, dpeListener, Priority.Normal, this);*/
         
-        pm.registerEvent(Type.CUSTOM_EVENT, new CustomListener(regionManager), Priority.Normal, this);
+        pm.registerEvents(new CustomListener(regionManager), this);
+        //pm.registerEvent(Type.CUSTOM_EVENT, new CustomListener(regionManager), Priority.Normal, this);
         log = Logger.getLogger("Minecraft");
         
         //Check for Heroes

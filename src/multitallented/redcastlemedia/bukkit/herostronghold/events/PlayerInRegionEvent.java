@@ -4,18 +4,19 @@ import java.util.ArrayList;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
+import org.bukkit.event.HandlerList;
 
 /**
  *
  * @author Multitallented
  */
 public class PlayerInRegionEvent extends Event {
+    private static final HandlerList handlers = new HandlerList();
     private final Location loc;
     private final Player player;
     private ArrayList<Location> destroyRegions;
 
     public PlayerInRegionEvent(Location loc, Player player) {
-        super("PlayerInRegionEvent");
         this.loc = loc;
         this.player = player;
         
@@ -35,6 +36,15 @@ public class PlayerInRegionEvent extends Event {
     
     public void setRegionsToDestroy(ArrayList<Location> r) {
         this.destroyRegions = r;
+    }
+
+    public static HandlerList getHandlerList() {
+        return handlers;
+    }
+    
+    @Override
+    public HandlerList getHandlers() {
+        return handlers;
     }
     
 }
