@@ -718,6 +718,35 @@ public class RegionManager {
         }
     }
     
+    public void setPrimaryOwner(Region r, String name) {
+        File regionFile = new File(plugin.getDataFolder() + "/data", r.getID() + ".yml");
+        if (!regionFile.exists()) {
+            plugin.warning("Failed to find file " + r.getID() + ".yml");
+            return;
+        }
+        FileConfiguration regionConfig = new YamlConfiguration();
+        try {
+            regionConfig.load(regionFile);
+        } catch (Exception e) {
+            plugin.warning("Failed to load " + r.getID() + ".yml to save owner");
+            return;
+        }
+        List<String> owners = r.getOwners();
+        if (owners.contains(name)) {
+            owners.remove(name);
+            owners.add(0, name);
+        } else {
+            owners.add(0, name);
+        }
+        regionConfig.set("owners", owners);
+        try {
+            regionConfig.save(regionFile);
+        } catch (Exception e) {
+            plugin.warning("Failed to save " + r.getID() + ".yml");
+            return;
+        }
+    }
+    
     /**
      * Adds (or subtracts if negative) the balance from the super-region.
      * It saves that data to sr.getName() + ".yml".

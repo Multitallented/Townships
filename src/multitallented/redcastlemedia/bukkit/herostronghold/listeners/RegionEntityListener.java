@@ -63,7 +63,7 @@ public class RegionEntityListener implements Listener {
                 } catch(Exception e) {
 
                 }
-                if (sr.getPower() < 1) {
+                if (sr.getPower() < 1 && plugin.getConfigManager().getDestroyNoPower()) {
                     rm.destroySuperRegion(s, true);
                 }
             }
@@ -97,15 +97,21 @@ public class RegionEntityListener implements Listener {
             boolean hasEffect1 = rm.getSuperRegionType(sr.getType()).hasEffect("denypvpnoreagent");
             boolean hasEffect2 = rm.getSuperRegionType(sr.getType()).hasEffect("denyfriendlyfire");
             boolean hasEffect3 = rm.getSuperRegionType(sr.getType()).hasEffect("denyfriendlyfirenoreagent");
+            boolean hasEffect4 = rm.getSuperRegionType(sr.getType()).hasEffect("denydamage");
+            boolean hasEffect5 = rm.getSuperRegionType(sr.getType()).hasEffect("denydamagenoreagent");
             boolean hasPower = sr.getPower() > 0;
             boolean hasMoney = sr.getBalance() > 0;
             boolean bothMembers = !notMember && (sr.hasMember(dPlayer.getName()) || sr.hasOwner(dPlayer.getName()));
-            if ((!notMember && hasEffect1) || (!notMember && hasEffect && reqs && hasPower && hasMoney)) {
+            if (hasEffect1 || (hasEffect && reqs && hasPower && hasMoney)) {
                 dPlayer.sendMessage(ChatColor.RED + "[HeroStronghold] " + player.getDisplayName() + " is protected in this region.");
                 event.setCancelled(true);
                 return;
             } else if ((bothMembers && hasEffect3) || (bothMembers && hasEffect2 && reqs && hasPower && hasMoney)) {
                 dPlayer.sendMessage(ChatColor.RED + "[HeroStronghold] Friendly fire is off in this region.");
+                event.setCancelled(true);
+                return;
+            } else if (hasEffect5 || (hasEffect4 && hasPower && hasMoney && reqs)) {
+                dPlayer.sendMessage(ChatColor.RED + "[HeroStronghold] Damage is disabled here.");
                 event.setCancelled(true);
                 return;
             }
@@ -118,14 +124,21 @@ public class RegionEntityListener implements Listener {
             boolean hasEffect1 = effect.regionHasEffect(rm.getRegionType(r.getType()).getEffects(), "denypvpnoreagent") > 0;
             boolean hasEffect2 = effect.regionHasEffect(rm.getRegionType(r.getType()).getEffects(), "denyfriendlyfire") > 0;
             boolean hasEffect3 = effect.regionHasEffect(rm.getRegionType(r.getType()).getEffects(), "denyfriendlyfirenoreagent") > 0;
+            boolean hasEffect4 = effect.regionHasEffect(rm.getRegionType(r.getType()).getEffects(), "denydamage") > 0;
+            boolean hasEffect5 = effect.regionHasEffect(rm.getRegionType(r.getType()).getEffects(), "denydamagenoreagent") > 0;
+            
             boolean hasReagents = effect.hasReagents(r.getLocation());
             
-            if ((member && hasEffect1) || (member && hasEffect && hasReagents)) {
+            if (hasEffect1 || (hasEffect && hasReagents)) {
                 dPlayer.sendMessage(ChatColor.RED + "[HeroStronghold] " + player.getDisplayName() + " is protected in this region.");
                 event.setCancelled(true);
                 return;
             } else if ((bothMembers && hasEffect3) || (bothMembers && hasEffect2 && hasReagents)) {
                 dPlayer.sendMessage(ChatColor.RED + "[HeroStronghold] Friendly fire is off in this region.");
+                event.setCancelled(true);
+                return;
+            } else if (hasEffect5 || (hasEffect4 && hasReagents)) {
+                dPlayer.sendMessage(ChatColor.RED + "[HeroStronghold] Damage is disabled here.");
                 event.setCancelled(true);
                 return;
             }

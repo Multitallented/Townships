@@ -1,6 +1,6 @@
 package multitallented.redcastlemedia.bukkit.herostronghold.listeners;
 
-import com.herocraftonline.dev.heroes.Heroes;
+import com.herocraftonline.heroes.Heroes;
 import java.util.logging.Logger;
 import multitallented.redcastlemedia.bukkit.herostronghold.HeroStronghold;
 import org.bukkit.event.EventHandler;

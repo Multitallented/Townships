@@ -14,7 +14,7 @@ public class PlayerInRegionEvent extends Event {
     private static final HandlerList handlers = new HandlerList();
     private final Location loc;
     private final Player player;
-    private ArrayList<Location> destroyRegions;
+    private ArrayList<Location> destroyRegions = new ArrayList<Location>();
 
     public PlayerInRegionEvent(Location loc, Player player) {
         this.loc = loc;

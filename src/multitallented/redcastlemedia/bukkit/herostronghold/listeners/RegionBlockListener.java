@@ -132,7 +132,7 @@ public class RegionBlockListener implements Listener {
                     int radius1 = regionManager.getRegionType(r.getType()).getRawBuildRadius(); 
 
                     for (int x= (int) (currentLoc.getX()-radius1); x<radius1 + currentLoc.getX(); x++) {
-                        for (int y = currentLoc.getY()- radius1 > 1 ? (int) (currentLoc.getY() - radius1) : 1; y< radius1 + currentLoc.getY() && y < 128; y++) {
+                        for (int y = currentLoc.getY()- radius1 > 1 ? (int) (currentLoc.getY() - radius1) : 1; y< radius1 + currentLoc.getY() && y < 255; y++) {
                             for (int z = (int) (currentLoc.getZ() - radius1); z<radius1 + currentLoc.getZ(); z++) {
                                 Block tempBlock = currentLoc.getWorld().getBlockAt(x, y, z);
                                 if (tempBlock.getTypeId() == event.getBlock().getTypeId()) {

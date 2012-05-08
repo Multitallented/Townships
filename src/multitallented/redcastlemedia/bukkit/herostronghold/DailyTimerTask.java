@@ -2,6 +2,7 @@ package multitallented.redcastlemedia.bukkit.herostronghold;
 
 import java.util.HashSet;
 import java.util.Set;
+import multitallented.redcastlemedia.bukkit.herostronghold.events.DayEvent;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionManager;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.SuperRegion;
 import net.milkbowl.vault.economy.Economy;
@@ -21,7 +22,15 @@ public class DailyTimerTask implements Runnable {
 
     @Override
     public void run() {
-        //TODO throw a new day event?
+        
+        // Throw a new Day Event for Effects
+        new Runnable() {
+            @Override
+            public void run() {
+                plugin.getServer().getPluginManager().callEvent(new DayEvent());
+            }
+        }.run();
+        
         Set<SuperRegion> destroyThese = new HashSet<SuperRegion>();
         Economy econ = HeroStronghold.econ;
         for (SuperRegion sr : rm.getSortedSuperRegions()) {

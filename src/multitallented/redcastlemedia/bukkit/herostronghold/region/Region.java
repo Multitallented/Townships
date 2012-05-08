@@ -62,6 +62,10 @@ public class Region {
         }
     }
     
+    public boolean isPrimaryOwner(String name) {
+        return owners.get(0).equals(name);
+    }
+    
     public boolean isOwner(String name) {
         return owners.contains(name);
     }

@@ -3,6 +3,9 @@ package multitallented.redcastlemedia.bukkit.herostronghold;
  *
  * @author Multitallented
  */
+import com.herocraftonline.heroes.Heroes;
+import com.herocraftonline.heroes.characters.Hero;
+import com.herocraftonline.heroes.characters.classes.HeroClass.ExperienceType;
 import multitallented.redcastlemedia.bukkit.herostronghold.checkregiontask.CheckRegionTask;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionManager;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.Region;
@@ -32,9 +35,6 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
-import com.herocraftonline.dev.heroes.Heroes;
-import com.herocraftonline.dev.heroes.classes.HeroClass.ExperienceType;
-import com.herocraftonline.dev.heroes.hero.Hero;
 import java.util.HashSet;
 import multitallented.redcastlemedia.bukkit.herostronghold.events.CommandEffectEvent;
 import org.bukkit.Bukkit;
@@ -431,7 +431,7 @@ public class HeroStronghold extends JavaPlugin {
 
                 int upperRightX = (int) currentLocation.getX() + radius;
                 int upperRightY = (int) currentLocation.getY() + radius;
-                upperRightY = upperRightY > 128 ? 128 : upperRightY;
+                upperRightY = upperRightY > 255 ? 255 : upperRightY;
                 int upperRightZ = (int) currentLocation.getZ() + radius;
                 
                 World world = currentLocation.getWorld();
@@ -496,7 +496,7 @@ public class HeroStronghold extends JavaPlugin {
             }
             
             if (heroes != null) {
-                heroes.getHeroManager().getHero(player).gainExp(currentRegionType.getExp(), ExperienceType.EXTERNAL);
+                heroes.getCharacterManager().getHero(player).gainExp(currentRegionType.getExp(), ExperienceType.EXTERNAL, player.getLocation());
             }
             regionManager.addRegion(currentLocation, regionName, owners);
             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.WHITE + "You successfully create a " + ChatColor.RED + regionName);
@@ -673,15 +673,19 @@ public class HeroStronghold extends JavaPlugin {
             
             
             List<String> quietDestroy = new ArrayList<String>();
-            int radius = (int) Math.sqrt(currentRegionType.getRadius());
+            int radius = (int) currentRegionType.getRawRadius();
             
             
             //Check if there is an overlapping super-region of the same type
             for (SuperRegion sr : regionManager.getSortedSuperRegions()) {
-                if (sr.getLocation().distance(currentLocation) < radius + Math.sqrt(regionManager.getSuperRegionType(sr.getType()).getRadius()) &&
-                        sr.getType().equalsIgnoreCase(regionTypeName)) {
-                    player.sendMessage(ChatColor.GRAY + "[HeroStronghold] There is already a " + regionTypeName + " here");
-                    return true;
+                try {
+                    if (sr.getLocation().distance(currentLocation) < radius + regionManager.getSuperRegionType(sr.getType()).getRawRadius() &&
+                            (sr.getType().equalsIgnoreCase(regionTypeName) || !sr.hasOwner(player.getName()))) {
+                        player.sendMessage(ChatColor.GRAY + "[HeroStronghold] There is already a " + regionTypeName + " here");
+                        return true;
+                    }
+                } catch (IllegalArgumentException iae) {
+                    
                 }
             }
             if (!req.isEmpty()) {
@@ -792,11 +796,11 @@ public class HeroStronghold extends JavaPlugin {
             }
             
             if (heroes != null) {
-                Hero hero = heroes.getHeroManager().getHero(player);
+                Hero hero = heroes.getCharacterManager().getHero(player);
                 if (hero.hasParty()) {
                     hero.getParty().gainExp(currentRegionType.getExp(), ExperienceType.EXTERNAL, player.getLocation());
                 } else {
-                    heroes.getHeroManager().getHero(player).gainExp(currentRegionType.getExp(), ExperienceType.EXTERNAL);
+                    heroes.getCharacterManager().getHero(player).gainExp(currentRegionType.getExp(), ExperienceType.EXTERNAL, player.getLocation());
                 }
             }
             regionManager.addSuperRegion(args[2], currentLocation, regionTypeName, owners, members, currentRegionType.getMaxPower());
@@ -1529,8 +1533,31 @@ public class HeroStronghold extends JavaPlugin {
                     }
                     return true;
                 } else {
-                    player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You don't own this region.");
-                    return true;
+                    boolean takeover = false;
+                    for (SuperRegion sr : regionManager.getContainingSuperRegions(loc)) {
+                        if (regionManager.getSuperRegionType(sr.getType()).hasEffect("control")) {
+                            takeover = true;
+                            break;
+                        }
+                    }
+                    if (takeover) {
+                        if (r.isOwner(playername)) {
+                            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + playername + " is already an owner of this region.");
+                            return true;
+                        }
+                        if (r.isMember(playername)) {
+                            regionManager.setMember(r, playername);
+                        }
+                        regionManager.setOwner(r, playername);
+                        player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.WHITE + "Added " + playername + " as an owner.");
+                        if (aPlayer != null) {
+                            aPlayer.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.WHITE + "You're now a co-owner of " + player.getDisplayName() + "'s " + r.getType());
+                        }
+                        return true;
+                    } else {
+                        player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You don't own this region.");
+                        return true;
+                    }
                 }
             }
             
@@ -1572,6 +1599,50 @@ public class HeroStronghold extends JavaPlugin {
             
             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You're not standing in a region.");
             return true;
+        } else if (args.length > 1 && args[0].equalsIgnoreCase("setowner")) {
+            String playername = args[1];
+            Player aPlayer = getServer().getPlayer(playername);
+            if (aPlayer != null) {
+                playername = aPlayer.getName();
+            } else {
+                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + playername + " must be online to setowner");
+                return true;
+            }
+            
+            Location loc = player.getLocation();
+            for (Region r : regionManager.getContainingRegions(loc)) {
+                if (r.isOwner(player.getName()) || (perms != null && perms.has(player, "herostronghold.admin"))) {
+                    //Check if too far away
+                    try {
+                        if (player.getLocation().distanceSquared(aPlayer.getLocation()) > regionManager.getRegionType(r.getType()).getRawRadius()) {
+                            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + playername + " must be close by also.");
+                            return true;
+                        }
+                    } catch (IllegalArgumentException iae) {
+                        player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + playername + " must be close by also.");
+                        return true;
+                    }
+                    
+                    if (r.isMember(playername)) {
+                        regionManager.setMember(r, playername);
+                    }
+                    regionManager.setMember(r, player.getName());
+                    regionManager.setOwner(r, player.getName());
+                    regionManager.setPrimaryOwner(r, playername);
+                    player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.WHITE + "Added " + playername + " as an owner.");
+                    if (aPlayer != null) {
+                        aPlayer.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.WHITE + "You're now a co-owner of " + player.getDisplayName() + "'s " + r.getType());
+                    }
+                    return true;
+                } else {
+                    player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You don't own this region.");
+                    return true;
+                }
+            }
+            
+            
+            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You're not standing in a region.");
+            return true;
         } else if (args.length > 1 && args[0].equalsIgnoreCase("remove")) {
             String playername = args[1];
             Player aPlayer = getServer().getPlayer(playername);
@@ -1581,6 +1652,10 @@ public class HeroStronghold extends JavaPlugin {
             Location loc = player.getLocation();
             for (Region r : regionManager.getContainingRegions(loc)) {
                 if (r.isOwner(player.getName()) || (perms != null && perms.has(player, "herostronghold.admin"))) {
+                    if (r.isPrimaryOwner(playername)) {
+                        player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You must use /hs setowner to change the original owner.");
+                        return true;
+                    }
                     if (!r.isMember(playername) && !r.isOwner(playername)) {
                         player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + playername + " doesn't belong to this region");
                         return true;

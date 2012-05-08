@@ -12,7 +12,7 @@ import org.bukkit.event.HandlerList;
 public class UpkeepEvent extends Event {
     private static final HandlerList handlers = new HandlerList();
     private final Location loc;
-    private ArrayList<Location> destroyRegions;
+    private ArrayList<Location> destroyRegions = new ArrayList<Location>();
     public UpkeepEvent(Location loc) {
         this.loc = loc;
     }
