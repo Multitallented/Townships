@@ -2,7 +2,9 @@ package multitallented.redcastlemedia.bukkit.herostronghold.listeners;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Scanner;
 import java.util.Set;
+import multitallented.redcastlemedia.bukkit.herostronghold.ConfigManager;
 import multitallented.redcastlemedia.bukkit.herostronghold.HeroStronghold;
 import multitallented.redcastlemedia.bukkit.herostronghold.effect.Effect;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.Region;
@@ -42,29 +44,76 @@ public class RegionEntityListener implements Listener {
     
     @EventHandler
     public void onEntityDeath(EntityDeathEvent event) {
-        if (!(event.getEntity() instanceof Player))
+        if (!(event.getEntity() instanceof Player)) {
             return;
+        }
+        ConfigManager cm = HeroStronghold.getConfigManager();
+        if (!cm.getUsePower()) {
+            return;
+        }
+        EntityDamageEvent ede = event.getEntity().getLastDamageCause();
+        if (!(ede instanceof EntityDamageByEntityEvent)) {
+            return;
+        }
+        EntityDamageByEntityEvent edby = (EntityDamageByEntityEvent) ede;
+        Entity d = edby.getDamager();
+        if (edby.getCause() == DamageCause.PROJECTILE) {
+            d = ((Projectile) d).getShooter();
+        }
+        if (!(d instanceof Player)) {
+            return;
+        }
+        Player dPlayer = (Player) d;
+        String dPlayername = dPlayer.getName();
         
         Player player = (Player) event.getEntity();
         String playername = player.getName();
-        Set<String> regionsToReduce = new HashSet<String>();
-        for (String s : rm.getSuperRegionNames()) {
-            SuperRegion sr = rm.getSuperRegion(s);
-            if (sr.hasMember(playername) || sr.hasOwner(playername))
-                regionsToReduce.add(s);
-        }
-        if (!regionsToReduce.isEmpty()) {
-            for (String s : regionsToReduce) {
-                SuperRegion sr = rm.getSuperRegion(s);
-                rm.reduceRegion(sr);
-                SendMessageThread smt = new SendMessageThread(plugin, sr.getName(), plugin.getChannels(), null, player, "lost 1 power (" + sr.getPower() + " remaining)");
-                try {
-                    smt.run();
-                } catch(Exception e) {
-
+        if (cm.getUseWar()) {
+            HashSet<SuperRegion> tempSet = new HashSet<SuperRegion>();
+            HashSet<SuperRegion> dTempSet = new HashSet<SuperRegion>();
+            for (SuperRegion sr : rm.getSortedSuperRegions()) {
+                if (sr.hasMember(playername) || sr.hasOwner(playername)) {
+                    tempSet.add(sr);
+                } else if (sr.hasMember(dPlayername) || sr.hasOwner(dPlayername)) {
+                    dTempSet.add(sr);
                 }
-                if (sr.getPower() < 1 && plugin.getConfigManager().getDestroyNoPower()) {
-                    rm.destroySuperRegion(s, true);
+            }
+            for (SuperRegion sr : tempSet) {
+                for (SuperRegion srt : dTempSet) {
+                    if (rm.hasWar(sr, srt)) {
+                        rm.reduceRegion(sr);
+                        SendMessageThread smt = new SendMessageThread(plugin, sr.getName(), plugin.getChannels(), null, player, "lost 1 power (" + sr.getPower() + " remaining)");
+                        try {
+                            smt.run();
+                        } catch(Exception e) {
+
+                        }
+                        if (sr.getPower() < 1 && cm.getDestroyNoPower()) {
+                            rm.destroySuperRegion(sr.getName(), true);
+                        }
+                    }
+                }
+            }
+        } else {
+            Set<String> regionsToReduce = new HashSet<String>();
+            for (String s : rm.getSuperRegionNames()) {
+                SuperRegion sr = rm.getSuperRegion(s);
+                if (sr.hasMember(playername) || sr.hasOwner(playername))
+                    regionsToReduce.add(s);
+            }
+            if (!regionsToReduce.isEmpty()) {
+                for (String s : regionsToReduce) {
+                    SuperRegion sr = rm.getSuperRegion(s);
+                    rm.reduceRegion(sr);
+                    SendMessageThread smt = new SendMessageThread(plugin, sr.getName(), plugin.getChannels(), null, player, "lost 1 power (" + sr.getPower() + " remaining)");
+                    try {
+                        smt.run();
+                    } catch(Exception e) {
+
+                    }
+                    if (sr.getPower() < 1 && cm.getDestroyNoPower()) {
+                        rm.destroySuperRegion(s, true);
+                    }
                 }
             }
         }

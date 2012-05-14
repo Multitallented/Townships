@@ -12,6 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 import multitallented.redcastlemedia.bukkit.herostronghold.ConfigManager;
 import multitallented.redcastlemedia.bukkit.herostronghold.HeroStronghold;
 import multitallented.redcastlemedia.bukkit.herostronghold.events.RegionCreatedEvent;
@@ -44,6 +45,7 @@ public class RegionManager {
     private final FileConfiguration config;
     private FileConfiguration dataConfig;
     private final ConfigManager configManager;
+    private HashMap<SuperRegion, HashSet<SuperRegion>> wars = new HashMap<SuperRegion, HashSet<SuperRegion>>();
     
     
     public RegionManager(HeroStronghold plugin, FileConfiguration config) {
@@ -238,6 +240,33 @@ public class RegionManager {
                 });
             }
         }
+        
+        
+        FileConfiguration warConfig = new YamlConfiguration();
+        try {
+            File warFile = new File(plugin.getDataFolder(), "war.yml");
+            if (!warFile.exists()) {
+                warFile.createNewFile();
+            }
+            warConfig.load(warFile);
+            for (String key : warConfig.getKeys(false)) {
+                if (!liveSuperRegions.containsKey(key)) {
+                    continue;
+                }
+                SuperRegion sr = liveSuperRegions.get(key);
+                HashSet<SuperRegion> tempSet = new HashSet<SuperRegion>();
+                for (String s : warConfig.getStringList(key)) {
+                    if (liveSuperRegions.containsKey(s)) {
+                        tempSet.add(liveSuperRegions.get(s));
+                    }
+                }
+                wars.put(sr, tempSet);
+            }
+        } catch (Exception ioe) {
+            Logger log = plugin.getLogger();
+            log.warning("[HeroStronghold] failed to load war.yml");
+        }
+        
         
     }
     
@@ -478,6 +507,10 @@ public class RegionManager {
     }
     
     public synchronized void reduceRegion(SuperRegion sr) {
+        ConfigManager cm = HeroStronghold.getConfigManager();
+        if (!cm.getUsePower()) {
+            return;
+        }
         int currentPower = sr.getPower() - 1;
         setPower(sr, currentPower);
         final String st = sr.getName();
@@ -509,6 +542,10 @@ public class RegionManager {
     }
     
     public synchronized void setPower(SuperRegion sr, int newPower) {
+        ConfigManager cm = HeroStronghold.getConfigManager();
+        if (!cm.getUsePower()) {
+            return;
+        }
         File superRegionFile = new File(plugin.getDataFolder() + "/superregions", sr.getName() + ".yml");
         if (!superRegionFile.exists()) {
             plugin.warning("Failed to find file " + sr.getName() + ".yml");
@@ -937,6 +974,73 @@ public class RegionManager {
         }
         return false;
     }
+    
+    public void setWar(SuperRegion sr1, SuperRegion sr2) {
+        File warFile = new File(plugin.getDataFolder(), "war.yml");
+        try {
+            if (!warFile.exists()) {
+                System.out.println("[HeroStronghold] failed to load war.yml");
+                return;
+            }
+        } catch (Exception e) {
+            System.out.println("[HeroStronghold] failed to load war.yml");
+            return;
+        }
+        FileConfiguration warConfig = new YamlConfiguration();
+        try {
+            warConfig.load(warFile);
+        } catch (Exception e) {
+            System.out.println("[HeroStronghold] failed to load war.yml");
+            return;
+        }
+        if (hasWar(sr1, sr2)) {
+            try {
+                if (wars.containsKey(sr1)) {
+                    List<String> tempList = warConfig.getStringList(sr1.getName());
+                    tempList.remove(sr2.getName());
+                    warConfig.set(sr1.getName(), tempList);
+                    warConfig.save(warFile);
+                    wars.get(sr1).remove(sr2);
+                } else if (wars.containsKey(sr2)) {
+                    List<String> tempList = warConfig.getStringList(sr2.getName());
+                    tempList.remove(sr1.getName());
+                    warConfig.set(sr2.getName(), tempList);
+                    warConfig.save(warFile);
+                    wars.get(sr2).remove(sr1);
+                }
+            } catch (Exception e) {
+                System.out.println("[HeroStronghold] failed to remove war from war.yml");
+                return;
+            }
+        } else {
+            try {
+                if (wars.containsKey(sr1)) {
+                    List<String> tempList = warConfig.getStringList(sr1.getName());
+                    tempList.add(sr2.getName());
+                    warConfig.set(sr1.getName(), tempList);
+                    warConfig.save(warFile);
+                    wars.get(sr1).add(sr2);
+                } else if (wars.containsKey(sr2)) {
+                    List<String> tempList = warConfig.getStringList(sr2.getName());
+                    tempList.add(sr1.getName());
+                    warConfig.set(sr2.getName(), tempList);
+                    warConfig.save(warFile);
+                    wars.get(sr2).add(sr1);
+                } else {
+                    ArrayList<String> tempSet = new ArrayList<String>();
+                    HashSet<SuperRegion> tempSet2 = new HashSet<SuperRegion>();
+                    tempSet.add(sr2.getName());
+                    tempSet2.add(sr2);
+                    warConfig.set(sr1.getName(), tempSet);
+                    warConfig.save(warFile);
+                    wars.put(sr1, tempSet2);
+                }
+            } catch (Exception e) {
+                System.out.println("[HeroStronghold] failed to save new war to war.yml");
+                return;
+            }
+        }
+    }
 
     
     public void removeRegion(Location l) {
@@ -993,5 +1097,42 @@ public class RegionManager {
     
     public Map<Location, Region> getRegions() {
         return liveRegions;
+    }
+    
+    public boolean hasWar(SuperRegion sr1, SuperRegion sr2) {
+        for (SuperRegion sr : wars.keySet()) {
+            if (sr1.equals(sr)) {
+                for (SuperRegion srt : wars.get(sr)) {
+                    if (srt.equals(sr2)) {
+                        return true;
+                    }
+                }
+            } else if (sr2.equals(sr)) {
+                for (SuperRegion srt : wars.get(sr)) {
+                    if (srt.equals(sr1)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+    
+    public HashSet<SuperRegion> getWars(SuperRegion sr) {
+        HashSet<SuperRegion> tempSet = new HashSet<SuperRegion>();
+        if (wars.containsKey(sr)) {
+            tempSet = wars.get(sr);
+        }
+        for (SuperRegion srt : wars.keySet()) {
+            if (!srt.equals(sr)) {
+                for (SuperRegion srr : wars.get(srt)) {
+                    if (srr.equals(sr)) {
+                        tempSet.add(srt);
+                        break;
+                    }
+                }
+            }
+        }
+        return tempSet;
     }
 }

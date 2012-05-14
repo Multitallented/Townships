@@ -50,7 +50,7 @@ public class HeroStronghold extends JavaPlugin {
     private RegionEntityListener regionEntityListener;
     private RegionPlayerInteractListener dpeListener;
     private Map<String, String> pendingInvites = new HashMap<String, String>();
-    private ConfigManager configManager;
+    private static ConfigManager configManager;
     private Map<String, List<String>> pendingCharters = new HashMap<String, List<String>>();
     public static Heroes heroes = null;
     private HashSet<String> effectCommands = new HashSet<String>();
@@ -81,37 +81,14 @@ public class HeroStronghold extends JavaPlugin {
         regionEntityListener = new RegionEntityListener(this);
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvents(blockListener, this);
-        /*pm.registerEvent(Type.BLOCK_BREAK, blockListener, Priority.Highest, this);
-        pm.registerEvent(Type.BLOCK_PLACE, blockListener, Priority.High, this);
-        pm.registerEvent(Type.BLOCK_DAMAGE, blockListener, Priority.High, this);
-        pm.registerEvent(Type.BLOCK_IGNITE, blockListener, Priority.High, this);
-        pm.registerEvent(Type.BLOCK_BURN, blockListener, Priority.High, this);
-        pm.registerEvent(Type.SIGN_CHANGE, blockListener, Priority.High, this);
-        pm.registerEvent(Type.BLOCK_PISTON_EXTEND, blockListener, Priority.High, this);
-        pm.registerEvent(Type.BLOCK_PISTON_RETRACT, blockListener, Priority.High, this);*/
         
         pm.registerEvents(serverListener, this);
-        //pm.registerEvent(Type.PLUGIN_ENABLE, serverListener, Priority.Monitor, this);
-        //pm.registerEvent(Type.PLUGIN_DISABLE, serverListener, Priority.Monitor, this);
         
         pm.registerEvents(regionEntityListener, this);
-        /*pm.registerEvent(Type.PAINTING_PLACE, regionEntityListener, Priority.High, this);
-        pm.registerEvent(Type.ENDERMAN_PLACE, regionEntityListener, Priority.High, this);
-        pm.registerEvent(Type.PAINTING_BREAK, regionEntityListener, Priority.High, this);
-        pm.registerEvent(Type.ENTITY_EXPLODE, regionEntityListener, Priority.High, this);
-        pm.registerEvent(Type.ENDERMAN_PICKUP, regionEntityListener, Priority.High, this);
-        pm.registerEvent(Type.ENTITY_DAMAGE, regionEntityListener, Priority.Normal, this);
-        pm.registerEvent(Type.ENTITY_DEATH, regionEntityListener, Priority.Monitor, this);*/
         
         pm.registerEvents(dpeListener, this);
-        /*pm.registerEvent(Type.PLAYER_INTERACT, dpeListener, Priority.High, this);
-        pm.registerEvent(Type.PLAYER_BED_ENTER, dpeListener, Priority.High, this);
-        pm.registerEvent(Type.PLAYER_BUCKET_FILL, dpeListener, Priority.High, this);
-        pm.registerEvent(Type.PLAYER_BUCKET_EMPTY, dpeListener, Priority.High, this);
-        pm.registerEvent(Type.PLAYER_CHAT, dpeListener, Priority.Normal, this);*/
         
         pm.registerEvents(new CustomListener(regionManager), this);
-        //pm.registerEvent(Type.CUSTOM_EVENT, new CustomListener(regionManager), Priority.Normal, this);
         log = Logger.getLogger("Minecraft");
         
         //Check for Heroes
@@ -143,6 +120,10 @@ public class HeroStronghold extends JavaPlugin {
         log.info("[HeroStronghold] is now enabled!");
     }
     
+    public static ConfigManager getConfigManager() {
+        return configManager;
+    }
+    
     public Map<Player, String> getChannels() {
         return dpeListener.getChannels();
     }
@@ -154,8 +135,113 @@ public class HeroStronghold extends JavaPlugin {
             return true;
         }
         Player player = (Player) sender;
+    if (args.length > 2 && args[0].equalsIgnoreCase("war")) {
+        //hs war mySR urSR
         
-        if (args.length > 2 && args[0].equalsIgnoreCase("charter")) {
+        //Check for valid super-regions
+        SuperRegion sr1 = regionManager.getSuperRegion(args[1]);
+        SuperRegion sr2 = regionManager.getSuperRegion(args[2]);
+        if (sr1 == null || sr2 == null) {
+            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] That isn't a valid super-region.");
+            return true;
+        }
+        
+        //Check if already at war
+        if (regionManager.hasWar(sr1, sr2)) {
+            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + sr1.getName() + " is already at war!");
+            return true;
+        }
+        
+        //Check owner
+        if (!sr1.hasOwner(player.getName())) {
+            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You are not an owner of " + sr1.getName());
+            return true;
+        }
+        
+        //Calculate Cost
+        ConfigManager cm = getConfigManager();
+        if (!cm.getUseWar()) {
+            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] This command is disabled in config.yml");
+            return true;
+        }
+        double cost = cm.getDeclareWarBase() + cm.getDeclareWarPer() * (sr1.getOwners().size() + sr1.getMembers().size() +
+                sr2.getOwners().size() + sr2.getMembers().size());
+        
+        //Check money
+        if (HeroStronghold.econ != null) {
+            if (sr1.getBalance() < cost) {
+                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + sr1.getName() + " doesn't have enough money to war with " + sr2.getName());
+                return true;
+            } else {
+                regionManager.addBalance(sr1, -1 * cost);
+            }
+        }
+        
+        regionManager.setWar(sr1, sr2);
+        final SuperRegion sr1a = sr1;
+        final SuperRegion sr2a = sr2;
+        new Runnable() {
+              @Override
+              public void run()
+              {
+                getServer().broadcastMessage(ChatColor.RED + "[HeroStronghold] " + sr1a.getName() + " has declared war on " + sr2a.getName() + "!");
+              }
+        }.run();
+        return true;
+    } else if (args.length > 2 && args[0].equalsIgnoreCase("peace")) {
+        //hs peace mySR urSR
+        
+        //Check for valid super-regions
+        SuperRegion sr1 = regionManager.getSuperRegion(args[1]);
+        SuperRegion sr2 = regionManager.getSuperRegion(args[2]);
+        if (sr1 == null || sr2 == null) {
+            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] That isn't a valid super-region.");
+            return true;
+        }
+        
+        //Check if already at war
+        if (!regionManager.hasWar(sr1, sr2)) {
+            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + sr1.getName() + " isn't at war.");
+            return true;
+        }
+        
+        //Check owner
+        if (!sr1.hasOwner(player.getName())) {
+            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You are not an owner of " + sr1.getName());
+            return true;
+        }
+        
+        //Calculate Cost
+        ConfigManager cm = getConfigManager();
+        if (!cm.getUseWar()) {
+            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] This command is disabled in config.yml");
+            return true;
+        }
+        double cost = cm.getMakePeaceBase() + cm.getMakePeacePer() * (sr1.getOwners().size() + sr1.getMembers().size() +
+                sr2.getOwners().size() + sr2.getMembers().size());
+        
+        //Check money
+        if (HeroStronghold.econ != null) {
+            if (sr1.getBalance() < cost) {
+                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + sr1.getName() + " doesn't have enough money to make peace with " + sr2.getName());
+                return true;
+            } else {
+                regionManager.addBalance(sr1, -1 * cost);
+            }
+        }
+        
+        regionManager.setWar(sr1, sr2);
+        final SuperRegion sr1a = sr1;
+        final SuperRegion sr2a = sr2;
+        new Runnable() {
+              @Override
+              public void run()
+              {
+                getServer().broadcastMessage(ChatColor.RED + "[HeroStronghold] " + sr1a.getName() + " has made peace with " + sr2a.getName() + "!");
+              }
+        }.run();
+        return true;
+    } else if (args.length > 2 && args[0].equalsIgnoreCase("charter")) {
             
             //Check if valid super region
             SuperRegionType currentRegionType = regionManager.getSuperRegionType(args[1]);
@@ -1887,6 +1973,25 @@ public class HeroStronghold extends JavaPlugin {
                 } else {
                     player.sendMessage(message);
                 }
+                message = ChatColor.GRAY + "Wars: " + ChatColor.GOLD;
+                for (SuperRegion srr : regionManager.getWars(sr)) {
+                    String s = srr.getName();
+                    if (message.length() + s.length() + 2 > 55) {
+                        player.sendMessage(message);
+                        message = ChatColor.GOLD + "";
+                        j++;
+                    }
+                    if (j > 14) {
+                      break;  
+                    } else {
+                        message += s + ", ";
+                    }
+                }
+                if (!sr.getOwners().isEmpty()) {
+                    player.sendMessage(message.substring(0, message.length() - 2));
+                } else {
+                    player.sendMessage(message);
+                }
                 return true;
             }
             
@@ -1935,7 +2040,13 @@ public class HeroStronghold extends JavaPlugin {
                 sender.sendMessage(ChatColor.GRAY + "/hs toggleperm <playername> <perm> <name>");
                 sender.sendMessage(ChatColor.GRAY + "/hs destroy (name)");
                 sender.sendMessage(ChatColor.GRAY + "/hs ch (channel) -- Use /hs ch for all chat");
-                sender.sendMessage(ChatColor.GRAY + "Google 'HeroStronghold bukkit' for more info | " + ChatColor.GOLD + "Page 2/2");
+                sender.sendMessage(ChatColor.GRAY + "Google 'HeroStronghold bukkit' for more info | " + ChatColor.GOLD + "Page 2/3");
+            } else if (args.length > 0 && args[args.length - 1].equals("3")) {
+                sender.sendMessage(ChatColor.GRAY + "[HeroStronghold] by " + ChatColor.GOLD + "Multitallented" + ChatColor.GRAY + ": <> = required, () = optional" +
+                        ChatColor.GOLD + " Page 3");
+                sender.sendMessage(ChatColor.GRAY + "/hs war <mysuperregion> <enemysuperregion>");
+                sender.sendMessage(ChatColor.GRAY + "/hs peace <mysuperregion> <enemysuperregion>");
+                sender.sendMessage(ChatColor.GRAY + "Google 'HeroStronghold bukkit' for more info | " + ChatColor.GOLD + "Page 3/3");
             } else {
                 sender.sendMessage(ChatColor.GRAY + "[HeroStronghold] by " + ChatColor.GOLD + "Multitallented" + ChatColor.GRAY + ": () = optional" +
                         ChatColor.GOLD + " Page 1");
@@ -1948,7 +2059,7 @@ public class HeroStronghold extends JavaPlugin {
                 sender.sendMessage(ChatColor.GRAY + "/hs create <regiontype> (name)");
                 sender.sendMessage(ChatColor.GRAY + "/hs addowner|addmember|remove <playername> (name)");
                 sender.sendMessage(ChatColor.GRAY + "/hs whatshere");
-                sender.sendMessage(ChatColor.GRAY + "Google 'HeroStronghold bukkit' for more info |" + ChatColor.GOLD + " Page 1/2");
+                sender.sendMessage(ChatColor.GRAY + "Google 'HeroStronghold bukkit' for more info |" + ChatColor.GOLD + " Page 1/3");
             }
             
             return true;
@@ -1989,12 +2100,9 @@ public class HeroStronghold extends JavaPlugin {
     }
     
     public void setConfigManager(ConfigManager cm) {
-        this.configManager = cm;
+        configManager = cm;
     }
     
-    public ConfigManager getConfigManager() {
-        return this.configManager;
-    }
     public void setCharters(Map<String, List<String>> input) {
         this.pendingCharters = input;
     }

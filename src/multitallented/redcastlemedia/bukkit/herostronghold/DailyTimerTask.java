@@ -22,7 +22,7 @@ public class DailyTimerTask implements Runnable {
 
     @Override
     public void run() {
-        
+        ConfigManager cm = plugin.getConfigManager();
         // Throw a new Day Event for Effects
         new Runnable() {
             @Override
@@ -70,24 +70,26 @@ public class DailyTimerTask implements Runnable {
                     rm.addBalance(sr, total);
                 }
             }
-            int power = sr.getPower();
-            int maxPower = rm.getSuperRegionType(sr.getType()).getMaxPower();
-            int dailyPower = rm.getSuperRegionType(sr.getType()).getDailyPower();
-            if (power <= 0 && plugin.getConfigManager().getDestroyNoPower()) {
-                destroyThese.add(sr);
-                final String st = sr.getName();
-                new Runnable() {
-                      @Override
-                      public void run() {
-                            plugin.getServer().broadcastMessage(ChatColor.RED + "[HeroStronghold] " + st + " has no power!");
-                      }
-                }.run();
-            } else if (power >= maxPower) {
-                //Dont need to do anything here apparently
-            } else if (power + dailyPower > maxPower) {
-                rm.setPower(sr, maxPower);
-            } else {
-                rm.setPower(sr, power + dailyPower);
+            if (cm.getUsePower()) {
+                int power = sr.getPower();
+                int maxPower = rm.getSuperRegionType(sr.getType()).getMaxPower();
+                int dailyPower = rm.getSuperRegionType(sr.getType()).getDailyPower();
+                if (power <= 0 && plugin.getConfigManager().getDestroyNoPower()) {
+                    destroyThese.add(sr);
+                    final String st = sr.getName();
+                    new Runnable() {
+                          @Override
+                          public void run() {
+                                plugin.getServer().broadcastMessage(ChatColor.RED + "[HeroStronghold] " + st + " has no power!");
+                          }
+                    }.run();
+                } else if (power >= maxPower) {
+                    //Dont need to do anything here apparently
+                } else if (power + dailyPower > maxPower) {
+                    rm.setPower(sr, maxPower);
+                } else {
+                    rm.setPower(sr, power + dailyPower);
+                }
             }
         }
         for (SuperRegion dsr : destroyThese) {
