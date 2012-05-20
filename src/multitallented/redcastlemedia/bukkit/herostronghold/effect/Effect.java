@@ -94,8 +94,6 @@ public class Effect {
                     SuperRegion sr = rm.getSuperRegion(superRegionName);
                     if (sr != null && (sr.hasMember(p.getName()) || sr.hasOwner(p.getName()))) {
                         return true;
-                    } else {
-                        return false;
                     }
                 }
             }
