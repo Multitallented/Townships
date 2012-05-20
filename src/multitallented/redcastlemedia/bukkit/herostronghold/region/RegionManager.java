@@ -427,7 +427,6 @@ public class RegionManager {
     }
     
     public void destroySuperRegion(String name, boolean sendMessage) {
-        //This method does remove the SuperRegion from liveSuperRegions
         SuperRegion currentRegion = liveSuperRegions.get(name);
         File dataFile = new File(plugin.getDataFolder() + "/superregions", name + ".yml");
         if (!dataFile.exists()) {
@@ -456,6 +455,7 @@ public class RegionManager {
                   }
             }.run();
         }
+        removeWars(name);
         liveSuperRegions.remove(name);
         sortedSuperRegions.remove(currentRegion);
     }
@@ -878,6 +878,29 @@ public class RegionManager {
         return tempList;
     }
     
+    public ArrayList<Region> getContainingBuildRegions(Location loc) {
+        ArrayList<Region> tempList = new ArrayList<Region>();
+        double x = loc.getX();
+        double y = loc.getY();
+        double z = loc.getZ();
+        for (Region r : getSortedRegions()) {
+            try {
+                int radius = getRegionType(r.getType()).getRawBuildRadius();
+                Location l = r.getLocation();
+                if (l.getX() + radius < x) {
+                    break;
+                }
+                if (l.getX() - radius < x && l.getY() + radius > y && l.getY() - radius < y && 
+                        l.getZ() + radius > z && l.getZ() - radius < z && l.getWorld().equals(loc.getWorld())) {
+                    tempList.add(r);
+                }
+            } catch (NullPointerException npe) {
+                plugin.warning("Region " + r.getID() + " is corrupted");
+            }
+        }
+        return tempList;
+    }
+    
     public Region getClosestRegionType(Location loc, String type) {
         Region re = null;
         double distance = 999999999;
@@ -1000,13 +1023,21 @@ public class RegionManager {
                     tempList.remove(sr2.getName());
                     warConfig.set(sr1.getName(), tempList);
                     warConfig.save(warFile);
-                    wars.get(sr1).remove(sr2);
+                    if (tempList.isEmpty()) {
+                        wars.remove(sr1);
+                    } else {
+                        wars.get(sr1).remove(sr2);
+                    }
                 } else if (wars.containsKey(sr2)) {
                     List<String> tempList = warConfig.getStringList(sr2.getName());
                     tempList.remove(sr1.getName());
                     warConfig.set(sr2.getName(), tempList);
                     warConfig.save(warFile);
-                    wars.get(sr2).remove(sr1);
+                    if (tempList.isEmpty()) {
+                        wars.remove(sr2);
+                    } else {
+                        wars.get(sr2).remove(sr1);
+                    }
                 }
             } catch (Exception e) {
                 System.out.println("[HeroStronghold] failed to remove war from war.yml");
@@ -1134,5 +1165,49 @@ public class RegionManager {
             }
         }
         return tempSet;
+    }
+
+    public void removeWars(String name) {
+        FileConfiguration warConfig = new YamlConfiguration();
+        File warFile = new File(plugin.getDataFolder(), "war.yml");
+        try {
+            warConfig.load(warFile);
+        } catch (Exception e) {
+            System.out.println("[HeroStronghold] Failed to load war.yml");
+        }
+        SuperRegion sr = liveSuperRegions.get(name);
+        if (wars.containsKey(sr)) {
+            wars.remove(sr);
+            warConfig.set(name, new ArrayList<String>());
+        }
+        
+        for (SuperRegion srt : wars.keySet()) {
+            if (!srt.equals(sr)) {
+                for (SuperRegion srr : wars.get(srt)) {
+                    if (srr.equals(sr)) {
+                        if (wars.get(srt).size() < 2) {
+                            wars.remove(srt);
+                            warConfig.set(srt.getName(), new ArrayList<String>());
+                        } else {
+                            wars.get(srt).remove(srr);
+                            ArrayList<String> tempList = new ArrayList<String>();
+                            for (SuperRegion ts : wars.get(srt)) {
+                                tempList.add(ts.getName());
+                            }
+                            warConfig.set(srt.getName(), tempList);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        
+        try {
+            warConfig.save(warFile);
+        } catch (Exception e) {
+            System.out.println("[HeroStronghold] Failed to save war.yml");
+        }
+        
+        
     }
 }
