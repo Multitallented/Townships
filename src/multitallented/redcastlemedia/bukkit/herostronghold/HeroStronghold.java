@@ -447,15 +447,9 @@ public class HeroStronghold extends JavaPlugin {
             
             //Check if too close to other HeroStrongholds
             int currentRadius = currentRegionType.getRawBuildRadius();
-            for (Location loc : regionManager.getRegionLocations()) {
-                try {
-                    if (loc.distanceSquared(currentLocation) <= regionManager.getRegionType(regionManager.getRegion(loc).getType()).getRawBuildRadius() + currentRadius) {
-                        player.sendMessage (ChatColor.GRAY + "[HeroStronghold] You are too close to another HeroStronghold");
-                        return true;
-                    }
-                } catch (IllegalArgumentException iae) {
-
-                }
+            if (!regionManager.getContainingRegions(currentLocation, currentRadius).isEmpty()) {
+                player.sendMessage (ChatColor.GRAY + "[HeroStronghold] You are too close to another HeroStronghold");
+                return true;
             }
             
             //Check if in a super region and if has permission to make that region
@@ -468,7 +462,6 @@ public class HeroStronghold extends JavaPlugin {
                 }
                 if (!sr.hasOwner(playername)) {
                     if (!sr.hasMember(playername) || !sr.getMember(playername).contains(regionName)) {
-                        //TODO fix toggleperm not working here
                         player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You dont have permission from an owner of " + sr.getName()
                                 + " to create a " + regionName + " here");
                         return true;
@@ -1603,7 +1596,7 @@ public class HeroStronghold extends JavaPlugin {
             }
             
             Location loc = player.getLocation();
-            for (Region r : regionManager.getContainingRegions(loc)) {
+            for (Region r : regionManager.getContainingBuildRegions(loc)) {
                 if (r.isOwner(player.getName()) || (perms != null && perms.has(player, "herostronghold.admin"))) {
                     if (r.isOwner(playername)) {
                         player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + playername + " is already an owner of this region.");
@@ -1664,13 +1657,13 @@ public class HeroStronghold extends JavaPlugin {
                 playername = aPlayer.getName();
             }
             Location loc = player.getLocation();
-            for (Region r : regionManager.getContainingRegions(loc)) {
+            for (Region r : regionManager.getContainingBuildRegions(loc)) {
                 if (r.isOwner(player.getName()) || (perms != null && perms.has(player, "herostronghold.admin"))) {
                     if (r.isMember(playername)) {
                         player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + playername + " is already a member of this region.");
                         return true;
                     }
-                    if (r.isOwner(playername)) {
+                    if (r.isOwner(playername) && !(playername.equals(player.getName()) && r.getOwners().get(0).equals(player.getName()))) {
                         regionManager.setOwner(r, playername);
                     }
                     regionManager.setMember(r, playername);
@@ -1696,7 +1689,7 @@ public class HeroStronghold extends JavaPlugin {
             }
             
             Location loc = player.getLocation();
-            for (Region r : regionManager.getContainingRegions(loc)) {
+            for (Region r : regionManager.getContainingBuildRegions(loc)) {
                 if (r.isOwner(player.getName()) || (perms != null && perms.has(player, "herostronghold.admin"))) {
                     //Check if too far away
                     try {
@@ -1736,7 +1729,7 @@ public class HeroStronghold extends JavaPlugin {
                 playername = aPlayer.getName();
             }
             Location loc = player.getLocation();
-            for (Region r : regionManager.getContainingRegions(loc)) {
+            for (Region r : regionManager.getContainingBuildRegions(loc)) {
                 if (r.isOwner(player.getName()) || (perms != null && perms.has(player, "herostronghold.admin"))) {
                     if (r.isPrimaryOwner(playername)) {
                         player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You must use /hs setowner to change the original owner.");
