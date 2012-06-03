@@ -2,7 +2,6 @@ package multitallented.redcastlemedia.bukkit.herostronghold.listeners;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Scanner;
 import java.util.Set;
 import multitallented.redcastlemedia.bukkit.herostronghold.ConfigManager;
 import multitallented.redcastlemedia.bukkit.herostronghold.HeroStronghold;
@@ -12,13 +11,7 @@ import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionManager;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.SuperRegion;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.entity.Creeper;
-import org.bukkit.entity.EnderDragon;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Fireball;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
-import org.bukkit.entity.TNTPrimed;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -205,15 +198,6 @@ public class RegionEntityListener implements Listener {
         event.getPlayer().sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
     }
 
-    /*@EventHandler
-    public void onEndermanPlace(EndermanPlaceEvent event) {
-        if ((event.isCancelled() || !rm.shouldTakeAction(event.getLocation(), null, 0, "denyblockbuild", true)) &&
-                (event.isCancelled() || !rm.shouldTakeAction(event.getLocation(), null, 0, "denyblockbuildnoreagent", false))) {
-            return;
-        }
-        event.setCancelled(true);
-    }*/
-
     @EventHandler
     public void onPaintingBreak(PaintingBreakEvent event) {
         if (event.isCancelled() || !(event instanceof PaintingBreakByEntityEvent))
@@ -253,41 +237,6 @@ public class RegionEntityListener implements Listener {
             rm.destroyRegion(l);
             rm.removeRegion(l);
         }
-        /*if ((rm.shouldTakeAction(loc, null, 4, "denyexplosion", true)) &&
-                (rm.shouldTakeAction(loc, null, 4, "denyexplosionnoreagent", false))) {
-            event.setCancelled(true);
-            return;
-        }
-        Region destroyMe = null;
         
-        double x = loc.getX();
-        for (Region r : rm.getSortedRegions()) {
-            int radius = rm.getRegionType(r.getType()).getRadius();
-            Location l = r.getLocation();
-            if (l.getX() + radius < x) {
-                return;
-            }
-            try {
-                if (!(l.getX() - radius > x) && l.distanceSquared(loc) < radius) {
-                    destroyMe = r;
-                }
-            } catch (IllegalArgumentException iae) {
-                
-            }
-        }
-        
-        if (destroyMe != null) {
-            rm.destroyRegion(destroyMe.getLocation());
-            rm.removeRegion(destroyMe.getLocation());
-        }*/
     }
-
-    /*@EventHandler
-    public void onEndermanPickup(EndermanPickupEvent event) {
-        if ((event.isCancelled() || !rm.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyblockbreak", true)) &&
-                (event.isCancelled() || !rm.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyblockbreaknoreagent", false))) {
-            return;
-        }
-        event.setCancelled(true);
-    }*/
 }
