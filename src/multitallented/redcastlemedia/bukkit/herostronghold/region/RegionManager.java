@@ -1,20 +1,12 @@
 package multitallented.redcastlemedia.bukkit.herostronghold.region;
 
-import multitallented.redcastlemedia.bukkit.herostronghold.effect.Effect;
 import java.io.File;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 import multitallented.redcastlemedia.bukkit.herostronghold.ConfigManager;
 import multitallented.redcastlemedia.bukkit.herostronghold.HeroStronghold;
+import multitallented.redcastlemedia.bukkit.herostronghold.effect.Effect;
 import multitallented.redcastlemedia.bukkit.herostronghold.events.RegionCreatedEvent;
 import multitallented.redcastlemedia.bukkit.herostronghold.events.RegionDestroyedEvent;
 import multitallented.redcastlemedia.bukkit.herostronghold.events.SuperRegionCreatedEvent;
@@ -55,7 +47,40 @@ public class RegionManager {
         configManager = new ConfigManager(config, plugin);
         plugin.setConfigManager(configManager);
         
-        FileConfiguration regionConfig = new YamlConfiguration();
+        File regionFolder = new File(plugin.getDataFolder(), "RegionConfig");
+        if (!regionFolder.exists()) {
+            File regionFile = new File(plugin.getDataFolder(), "regions.yml");
+            if (!regionFile.exists()) {
+                DefaultRegions.createDefaultRegionFiles(plugin);
+            } else {
+                DefaultRegions.migrateRegions(regionFile, plugin);
+            }
+        }
+        for (File currentRegionFile : regionFolder.listFiles()) {
+            try {
+                FileConfiguration rConfig = new YamlConfiguration();
+                rConfig.load(currentRegionFile);
+                String regionName = currentRegionFile.getName().replace(".yml", "");
+                regionTypes.put(regionName, new RegionType(regionName,
+                        (ArrayList<String>) rConfig.getStringList("friendly-classes"),
+                        (ArrayList<String>) rConfig.getStringList("enemy-classes"),
+                        (ArrayList<String>) rConfig.getStringList("effects"),
+                        (int) Math.pow(rConfig.getInt("radius"), 2),
+                        (int) Math.pow(rConfig.getInt("build-radius", rConfig.getInt("radius")), 2),
+                        processItemStackList(rConfig.getStringList("requirements")),
+                        rConfig.getStringList("super-regions"),
+                        processItemStackList(rConfig.getStringList("reagents")),
+                        processItemStackList(rConfig.getStringList("upkeep")),
+                        processItemStackList(rConfig.getStringList("output")),
+                        rConfig.getDouble("upkeep-chance"),
+                        rConfig.getDouble("money-requirement"),
+                        rConfig.getDouble("upkeep-money-output"),
+                        rConfig.getDouble("exp")));
+            } catch (Exception e) {
+                plugin.warning("[HeroStronghold] failed to load " + currentRegionFile.getName());
+            }
+        }
+        /*FileConfiguration regionConfig = new YamlConfiguration();
         try {
             File regionFile = new File(plugin.getDataFolder(), "regions.yml");
             if (!regionFile.exists()) {
@@ -91,8 +116,41 @@ public class RegionManager {
         } catch (Exception ex) {
             plugin.warning("Unable to load regions.yml");
             plugin.getServer().getPluginManager().disablePlugin(plugin);
+        }*/
+        
+        File suRegionFolder = new File(plugin.getDataFolder(), "SuperRegionConfig");
+        if (!suRegionFolder.exists()) {
+            File sRegionFile = new File(plugin.getDataFolder(), "super-regions.yml");
+            if (!sRegionFile.exists()) {
+                DefaultRegions.createDefaultSuperRegionFiles(plugin);
+            } else {
+                DefaultRegions.migrateSuperRegions(sRegionFile, plugin);
+            }
         }
-        FileConfiguration sRegionConfig = new YamlConfiguration();
+        for (File currentRegionFile : suRegionFolder.listFiles()) {
+            try {
+                FileConfiguration rConfig = new YamlConfiguration();
+                rConfig.load(currentRegionFile);
+                String regionName = currentRegionFile.getName().replace(".yml", "");
+                superRegionTypes.put(regionName, new SuperRegionType(regionName,
+                        rConfig.getStringList("effects"),
+                        (int) Math.pow(rConfig.getInt("radius"), 2),
+                        processRegionTypeMap(rConfig.getStringList("requirements")),
+                        rConfig.getDouble("money-requirement", 0),
+                        rConfig.getDouble("money-output-daily", 0),
+                        rConfig.getStringList("children"),
+                        rConfig.getInt("max-power", 100),
+                        rConfig.getInt("daily-power-increase", 10),
+                        rConfig.getInt("charter", 0),
+                        rConfig.getDouble("exp", 0),
+                        rConfig.getString("central-structure")));
+            } catch (Exception e) {
+                plugin.warning("[HeroStronghold] failed to load " + currentRegionFile.getName());
+            }
+        }
+        
+        
+        /*FileConfiguration sRegionConfig = new YamlConfiguration();
         try {
             File sRegionFile = new File(plugin.getDataFolder(), "super-regions.yml");
             if (!sRegionFile.exists()) {
@@ -124,7 +182,7 @@ public class RegionManager {
         } catch (Exception e) {
             plugin.warning("Unable to load super-regions.yml");
             plugin.getServer().getPluginManager().disablePlugin(plugin);
-        }
+        }*/
 
         File playerFolder = new File(plugin.getDataFolder(), "data"); // Setup the Data Folder if it doesn't already exist
         playerFolder.mkdirs();

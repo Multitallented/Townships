@@ -165,8 +165,19 @@ public class Effect {
             return;
         Chest chest = (Chest) bs;
         
+        if (chest.getInventory().firstEmpty() < 0) {
+            return;
+        }
         
         //Remove the upkeep items from the region chest and add items from output
+        /*for (ItemStack is : rt.getUpkeep()) {
+            if (chest.getInventory().contains(is)) {
+                chest.getInventory().removeItem(is);
+            }
+        }
+        for (ItemStack is : rt.getOutput()) {
+            chest.getInventory().addItem(is);
+        }*/
         Map<Material, Integer> upkeepMap = new EnumMap<Material, Integer>(Material.class);
         Map<Material, Integer> outputMap = new EnumMap<Material, Integer>(Material.class);
         for (ItemStack is : rt.getUpkeep()) {
@@ -180,6 +191,7 @@ public class Effect {
         ItemStack[] is = chest.getInventory().getContents();
         ItemStack[] realIS = is.clone();
         for (int i = 0 ; i<realIS.length; i++) {
+            int maxSize = realIS[i].getMaxStackSize();
             Material mat = Material.AIR;
             if (realIS[i] != null)
                 mat = realIS[i].getType();
@@ -197,26 +209,27 @@ public class Effect {
                     is[i].setAmount(amount);
                 }
             //chest has an item and its an item in output
-            } else if (!mat.equals(Material.AIR) && outputMap.containsKey(mat) && realIS[i].getAmount() < 64) {
-                //chest amount + output amount is <= 64
-                if (realIS[i].getAmount() + outputMap.get(mat) <= 64) {
+            } else if (!mat.equals(Material.AIR) && outputMap.containsKey(mat) && realIS[i].getAmount() < maxSize) {
+                //chest amount + output amount is <= maxSize
+                if (realIS[i].getAmount() + outputMap.get(mat) <= maxSize) {
                     is[i].setAmount(is[i].getAmount() + outputMap.get(mat));
                     outputMap.remove(mat);
-                //chest amount + output amount is > 64
+                //chest amount + output amount is > maxSize
                 } else {
-                    int excess = is[i].getAmount() + outputMap.get(mat) - 64;
-                    is[i].setAmount(64);
+                    int excess = is[i].getAmount() + outputMap.get(mat) - maxSize;
+                    is[i].setAmount(maxSize);
                     outputMap.put(mat, excess);
                 }
             //chest slot is empty and output isn't empty
             } else if (mat.equals(Material.AIR) && !outputMap.isEmpty()) {
                 for (Material currentMat : outputMap.keySet()) {
-                    if (outputMap.get(currentMat) <= 64) {
+                    int maxSize2 = new ItemStack(currentMat).getMaxStackSize();
+                    if (outputMap.get(currentMat) <= maxSize2) {
                         is[i] = new ItemStack(currentMat, outputMap.get(currentMat));
                         outputMap.remove(currentMat);
                     } else {
-                        is[i] = new ItemStack(currentMat, 64);
-                        outputMap.put(currentMat, outputMap.get(currentMat) - 64);
+                        is[i] = new ItemStack(currentMat, maxSize2);
+                        outputMap.put(currentMat, outputMap.get(currentMat) - maxSize2);
                     }
                     break;
                 }
@@ -257,8 +270,19 @@ public class Effect {
             return false;
         Chest chest = (Chest) bs;
         
+        if (chest.getInventory().firstEmpty() < 0) {
+            return false;
+        }
         
         //Remove the upkeep items from the region chest and add items from output
+        /*for (ItemStack is : rt.getUpkeep()) {
+            if (chest.getInventory().contains(is)) {
+                chest.getInventory().removeItem(is);
+            }
+        }
+        for (ItemStack is : rt.getOutput()) {
+            chest.getInventory().addItem(is);
+        }*/
         Map<Material, Integer> upkeepMap = new EnumMap<Material, Integer>(Material.class);
         Map<Material, Integer> outputMap = new EnumMap<Material, Integer>(Material.class);
         for (ItemStack is : rt.getUpkeep()) {
@@ -272,6 +296,7 @@ public class Effect {
         ItemStack[] is = chest.getInventory().getContents();
         ItemStack[] realIS = is.clone();
         for (int i = 0 ; i<realIS.length; i++) {
+            int maxSize = realIS[i].getMaxStackSize();
             Material mat = Material.AIR;
             if (realIS[i] != null)
                 mat = realIS[i].getType();
@@ -287,23 +312,24 @@ public class Effect {
                     upkeepMap.remove(mat);
                     is[i].setAmount(amount);
                 }
-            } else if (!mat.equals(Material.AIR) && outputMap.containsKey(mat) && realIS[i].getAmount() < 64) {
-                if (realIS[i].getAmount() + outputMap.get(mat) <= 64) {
+            } else if (!mat.equals(Material.AIR) && outputMap.containsKey(mat) && realIS[i].getAmount() < maxSize) {
+                if (realIS[i].getAmount() + outputMap.get(mat) <= maxSize) {
                     is[i].setAmount(is[i].getAmount() + outputMap.get(mat));
                     outputMap.remove(mat);
                 } else {
-                    int excess = is[i].getAmount() + outputMap.get(mat) - 64;
-                    is[i].setAmount(64);
+                    int excess = is[i].getAmount() + outputMap.get(mat) - maxSize;
+                    is[i].setAmount(maxSize);
                     outputMap.put(mat, excess);
                 }
             } else if (mat.equals(Material.AIR) && !outputMap.isEmpty()) {
                 for (Material currentMat : outputMap.keySet()) {
-                    if (outputMap.get(currentMat) <= 64) {
+                    int maxSize2 = new ItemStack(currentMat).getMaxStackSize();
+                    if (outputMap.get(currentMat) <= maxSize2) {
                         is[i] = new ItemStack(currentMat, outputMap.get(currentMat));
                         outputMap.remove(currentMat);
                     } else {
-                        is[i] = new ItemStack(currentMat, 64);
-                        outputMap.put(currentMat, outputMap.get(currentMat) - 64);
+                        is[i] = new ItemStack(currentMat, maxSize2);
+                        outputMap.put(currentMat, outputMap.get(currentMat) - maxSize2);
                     }
                     break;
                 }
