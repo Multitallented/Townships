@@ -1,12 +1,8 @@
 package multitallented.redcastlemedia.bukkit.herostronghold.listeners;
 
-import multitallented.redcastlemedia.bukkit.herostronghold.effect.Effect;
 import multitallented.redcastlemedia.bukkit.herostronghold.HeroStronghold;
-import multitallented.redcastlemedia.bukkit.herostronghold.region.Region;
-import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionManager;
-import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionType;
-import multitallented.redcastlemedia.bukkit.herostronghold.region.SuperRegion;
-import multitallented.redcastlemedia.bukkit.herostronghold.region.SuperRegionType;
+import multitallented.redcastlemedia.bukkit.herostronghold.effect.Effect;
+import multitallented.redcastlemedia.bukkit.herostronghold.region.*;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -14,13 +10,8 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockBurnEvent;
-import org.bukkit.event.block.BlockDamageEvent;
-import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
-import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.block.*;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -175,106 +166,113 @@ public class RegionBlockListener implements Listener {
     }
     
     @EventHandler
-        public void onBlockDamage(BlockDamageEvent event) {
-            if (event.isCancelled() || !event.getBlock().getType().equals(Material.CAKE_BLOCK))
-                return;
-            if (regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 0, "denyblockbreak", true)) {
-                event.getPlayer().sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
-                event.setCancelled(true);
-                return;
-            }
-            if (regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 0, "denyblockbreaknoreagent", false)) {
-                event.getPlayer().sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
-                event.setCancelled(true);
-                return;
-            }
+    public void onBlockDamage(BlockDamageEvent event) {
+        if (event.isCancelled() || !event.getBlock().getType().equals(Material.CAKE_BLOCK))
+            return;
+        if (regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 0, "denyblockbreak", true)) {
+            event.getPlayer().sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
+            event.setCancelled(true);
+            return;
         }
-        
-        /*@Override
-        public void onBlockFromTo(BlockFromToEvent event) {
-            if ((event.isCancelled() || !regionManager.shouldTakeAction(event.getToBlock().getLocation(), null, 0, "denyliquid", true)) && 
-                    (event.isCancelled() || !regionManager.shouldTakeAction(event.getToBlock().getLocation(), null, 0, "denyliquidnoreagent", false))) {
-                return;
-            }
-            
-            Block blockFrom = event.getBlock();
-
-            // Check the fluid block (from) whether it is air.
-           if (blockFrom.getTypeId() == 0 || blockFrom.getTypeId() == 8 || blockFrom.getTypeId() == 9) {
-                event.setCancelled(true);
-                return;
-            }
-            if (blockFrom.getTypeId() == 10 || blockFrom.getTypeId() == 11) {
-                event.setCancelled(true);
-                return;
-            }
-        }*/
-        
-        @EventHandler
-        public void onBlockIgnite(BlockIgniteEvent event) {
-            if (event.isCancelled()) {
-                return;
-            }
-
-            IgniteCause cause = event.getCause();
-            if (((cause == IgniteCause.LIGHTNING || cause == IgniteCause.LAVA || cause == IgniteCause.SPREAD) &&
-                    regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyfire", true)) ||
-                    (cause == IgniteCause.FLINT_AND_STEEL && regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 1, "denyfire", true))) {
-                event.setCancelled(true);
-                return;
-            }
-
-            if (((cause == IgniteCause.LIGHTNING || cause == IgniteCause.LAVA || cause == IgniteCause.SPREAD) &&
-                    regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyfirenoreagent", false)) ||
-                    (cause == IgniteCause.FLINT_AND_STEEL && regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 1, "denyfirenoreagent", false))) {
-                event.setCancelled(true);
-                return;
-            }
-
-        }
-        
-        @EventHandler
-        public void onBlockBurn(BlockBurnEvent event) {
-            if ((event.isCancelled() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyfire", true)) &&
-                    (event.isCancelled() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyfirenoreagent", false))) {
-                return;
-            }
+        if (regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 0, "denyblockbreaknoreagent", false)) {
+            event.getPlayer().sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
             event.setCancelled(true);
         }
+    }
         
-        @EventHandler
-        public void onSignChange(SignChangeEvent event) {
-            if ((event.isCancelled() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 0, "denyblockbreak", true)) &&
-                    (event.isCancelled() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 0, "denyblockbreaknoreagent", false))) {
-                return;
-            }
-            event.setCancelled(true);
-            if (event.getPlayer() != null)
-                event.getPlayer().sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
-        }
-        
-        /*@Override
-        public void onBlockPistonExtend(BlockPistonExtendEvent event) {
-            if (event.isCancelled()) {
-                return;
-            }
-            
-            for (Block b : event.getBlocks()) {
-                if ((regionManager.shouldTakeAction(b.getLocation(), null, 0, "denyblockbreak", true)) && 
-                        (regionManager.shouldTakeAction(b.getLocation(), null, 0, "denyblockbreaknoreagent", false))) {
-                    event.setCancelled(true);
-                    return;
-                }
-            }
+    
+    
+    /*@Override
+    public void onBlockFromTo(BlockFromToEvent event) {
+        if ((event.isCancelled() || !regionManager.shouldTakeAction(event.getToBlock().getLocation(), null, 0, "denyliquid", true)) && 
+                (event.isCancelled() || !regionManager.shouldTakeAction(event.getToBlock().getLocation(), null, 0, "denyliquidnoreagent", false))) {
+            return;
         }
 
-        @Override
-        public void onBlockPistonRetract(BlockPistonRetractEvent event) {
-            if ((event.isCancelled() || !event.isSticky() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyblockbreak", true)) &&
-                    (event.isCancelled() || !event.isSticky() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyblockbreaknoreagent", false))) {
+        Block blockFrom = event.getBlock();
+
+        // Check the fluid block (from) whether it is air.
+        if (blockFrom.getTypeId() == 0 || blockFrom.getTypeId() == 8 || blockFrom.getTypeId() == 9) {
+            event.setCancelled(true);
+            return;
+        }
+        if (blockFrom.getTypeId() == 10 || blockFrom.getTypeId() == 11) {
+            event.setCancelled(true);
+            return;
+        }
+    }*/
+
+    @EventHandler
+    public void onBlockIgnite(BlockIgniteEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
+
+        IgniteCause cause = event.getCause();
+        if (((cause == IgniteCause.LIGHTNING || cause == IgniteCause.LAVA || cause == IgniteCause.SPREAD) &&
+                regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyfire", true)) ||
+                (cause == IgniteCause.FLINT_AND_STEEL && regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 1, "denyfire", true))) {
+            event.setCancelled(true);
+            return;
+        }
+
+        if (((cause == IgniteCause.LIGHTNING || cause == IgniteCause.LAVA || cause == IgniteCause.SPREAD) &&
+                regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyfirenoreagent", false)) ||
+                (cause == IgniteCause.FLINT_AND_STEEL && regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 1, "denyfirenoreagent", false))) {
+            event.setCancelled(true);
+        }
+
+    }
+
+    @EventHandler
+    public void onBlockBurn(BlockBurnEvent event) {
+        if ((event.isCancelled() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyfire", true)) &&
+                (event.isCancelled() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyfirenoreagent", false))) {
+            return;
+        }
+        event.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onSignChange(SignChangeEvent event) {
+        if ((event.isCancelled() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 0, "denyblockbreak", true)) &&
+                (event.isCancelled() || !regionManager.shouldTakeAction(event.getBlock().getLocation(), event.getPlayer(), 0, "denyblockbreaknoreagent", false))) {
+            return;
+        }
+        event.setCancelled(true);
+        if (event.getPlayer() != null) {
+            event.getPlayer().sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
+        }
+    }
+
+    @EventHandler
+    public void onBlockPistonExtend(BlockPistonExtendEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
+        if (regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyblockbuild", true) ||
+                regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyblockbuildnoreagent", false)) {
+            return;
+        }
+        for (Block b : event.getBlocks()) {
+            if ((regionManager.shouldTakeAction(b.getLocation(), null, 0, "denyblockbuild", true)) ||
+                    (regionManager.shouldTakeAction(b.getLocation(), null, 0, "denyblockbuildnoreagent", false))) {
+                event.setCancelled(true);
                 return;
             }
-            
+        }
+    }
+
+    @EventHandler
+    public void onBlockPistonRetract(BlockPistonRetractEvent event) {
+        if (event.isCancelled() || !event.isSticky() ||
+                regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyblockbreak", true) ||
+                regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyblockbreaknoreagent", false)) {
+            return;
+        }
+        if (regionManager.shouldTakeAction(event.getRetractLocation(), null, 0, "denyblockbreak", true) ||
+                regionManager.shouldTakeAction(event.getRetractLocation(), null, 0, "denyblockbreaknoreagent", false)) {
             event.setCancelled(true);
-        }*/
+        }
+    }
 }
