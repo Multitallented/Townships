@@ -182,25 +182,17 @@ public class RegionBlockListener implements Listener {
         
     
     
-    /*@Override
+    @EventHandler
     public void onBlockFromTo(BlockFromToEvent event) {
-        if ((event.isCancelled() || !regionManager.shouldTakeAction(event.getToBlock().getLocation(), null, 0, "denyliquid", true)) && 
-                (event.isCancelled() || !regionManager.shouldTakeAction(event.getToBlock().getLocation(), null, 0, "denyliquidnoreagent", false))) {
+        if (event.isCancelled() || event.getBlock().getTypeId() == 0 ||
+                regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyliquid", false)) {
             return;
         }
-
-        Block blockFrom = event.getBlock();
-
-        // Check the fluid block (from) whether it is air.
-        if (blockFrom.getTypeId() == 0 || blockFrom.getTypeId() == 8 || blockFrom.getTypeId() == 9) {
+        
+        if (regionManager.shouldTakeAction(event.getToBlock().getLocation(), null, 0, "denyliquid", false)) {
             event.setCancelled(true);
-            return;
         }
-        if (blockFrom.getTypeId() == 10 || blockFrom.getTypeId() == 11) {
-            event.setCancelled(true);
-            return;
-        }
-    }*/
+    }
 
     @EventHandler
     public void onBlockIgnite(BlockIgniteEvent event) {
