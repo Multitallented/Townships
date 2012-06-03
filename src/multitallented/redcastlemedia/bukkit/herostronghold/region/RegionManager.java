@@ -1,7 +1,6 @@
 package multitallented.redcastlemedia.bukkit.herostronghold.region;
 
 import java.io.File;
-import java.io.InputStream;
 import java.util.*;
 import java.util.logging.Logger;
 import multitallented.redcastlemedia.bukkit.herostronghold.ConfigManager;
@@ -344,7 +343,13 @@ public class RegionManager {
         for (String current : input) {
             String[] params = current.split("\\.");
             if (Material.getMaterial(params[0]) != null) {
-                returnList.add(new ItemStack(Material.getMaterial(params[0]),Integer.parseInt(params[1])));
+                ItemStack is;
+                if (params.length > 2) {
+                    is = new ItemStack(Material.getMaterial(params[0]),Integer.parseInt(params[1]));
+                } else {
+                    is = new ItemStack(Material.getMaterial(params[0]),Integer.parseInt(params[1]), Short.parseShort(params[2]));
+                }
+                returnList.add(is);
             } else {
                 plugin.warning("[HeroStronghold] could not find item " + params[0]);
             }
