@@ -445,6 +445,11 @@ public class HeroStronghold extends JavaPlugin {
                 
             }
             
+            //Check if over max number of regions of that type
+            if (!regionManager.isAtMaxRegions(player, currentRegionType)) {
+                return true;
+            }
+            
             //Check if too close to other HeroStrongholds
             int currentRadius = currentRegionType.getRawBuildRadius();
             if (!regionManager.getContainingRegions(currentLocation, currentRadius).isEmpty()) {

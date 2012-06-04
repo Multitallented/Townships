@@ -5,6 +5,7 @@ import java.util.*;
 import java.util.logging.Logger;
 import multitallented.redcastlemedia.bukkit.herostronghold.ConfigManager;
 import multitallented.redcastlemedia.bukkit.herostronghold.HeroStronghold;
+import multitallented.redcastlemedia.bukkit.herostronghold.PermSet;
 import multitallented.redcastlemedia.bukkit.herostronghold.effect.Effect;
 import multitallented.redcastlemedia.bukkit.herostronghold.events.RegionCreatedEvent;
 import multitallented.redcastlemedia.bukkit.herostronghold.events.RegionDestroyedEvent;
@@ -37,6 +38,8 @@ public class RegionManager {
     private FileConfiguration dataConfig;
     private final ConfigManager configManager;
     private HashMap<SuperRegion, HashSet<SuperRegion>> wars = new HashMap<SuperRegion, HashSet<SuperRegion>>();
+    private HashMap<String, HashMap<String, Integer>> permSets = new HashMap<String, HashMap<String, Integer>>();
+    private HashSet<String> possiblePermSets = new HashSet<String>();
     
     
     public RegionManager(HeroStronghold plugin, FileConfiguration config) {
@@ -45,6 +48,13 @@ public class RegionManager {
         
         configManager = new ConfigManager(config, plugin);
         plugin.setConfigManager(configManager);
+        
+        PermSet ps = new PermSet();
+        
+        permSets = ps.loadPermSets(plugin);
+        for (String s : permSets.keySet()) {
+            possiblePermSets.add(s);
+        }
         
         File regionFolder = new File(plugin.getDataFolder(), "RegionConfig");
         if (!regionFolder.exists()) {
@@ -1270,7 +1280,44 @@ public class RegionManager {
         } catch (Exception e) {
             System.out.println("[HeroStronghold] Failed to save war.yml");
         }
+    }
+    
+    public boolean isAtMaxRegions(Player p, RegionType rt) {
+        //Find permSet
+        String s = getPermSet(p);
         
+        //Find total regions of that type
+        int max = 9999999;
+        try {
+            max = permSets.get(s).get(rt.getName());
+        } catch (NullPointerException npe) {
+            return false;
+        }
+        if (max < 1) {
+            return true;
+        }
         
+        //Find all regions of that type and count them
+        int i = 0;
+        for (Region r : sortedRegions) {
+            if (!r.getType().equals(rt.getName()) || !r.isOwner(p.getName())) {
+                continue;
+            }
+            i++;
+            if (max <= i) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    public String getPermSet(Player p) {
+        for (String s : possiblePermSets) {
+            if (HeroStronghold.perms.has(p, "herostronghold.group." + s)) {
+                return s;
+            }
+        }
+        return null;
     }
 }

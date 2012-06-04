@@ -1,0 +1,10 @@
+group1:
+  shack: 1
+  house: 0
+  arrowturret: 2
+  landmine: 4
+group2:
+  shack: 2
+  house: 1
+  arrowturret: 4
+  landmine: 8
