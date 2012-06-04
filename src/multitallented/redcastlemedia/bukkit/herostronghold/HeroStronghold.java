@@ -6,26 +6,16 @@ package multitallented.redcastlemedia.bukkit.herostronghold;
 import com.herocraftonline.heroes.Heroes;
 import com.herocraftonline.heroes.characters.Hero;
 import com.herocraftonline.heroes.characters.classes.HeroClass.ExperienceType;
-import multitallented.redcastlemedia.bukkit.herostronghold.checkregiontask.CheckRegionTask;
-import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionManager;
-import multitallented.redcastlemedia.bukkit.herostronghold.region.Region;
-import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionType;
-import multitallented.redcastlemedia.bukkit.herostronghold.region.SuperRegionType;
-import multitallented.redcastlemedia.bukkit.herostronghold.region.SuperRegion;
-import multitallented.redcastlemedia.bukkit.herostronghold.effect.EffectManager;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
+import multitallented.redcastlemedia.bukkit.herostronghold.checkregiontask.CheckRegionTask;
+import multitallented.redcastlemedia.bukkit.herostronghold.effect.EffectManager;
+import multitallented.redcastlemedia.bukkit.herostronghold.events.CommandEffectEvent;
 import multitallented.redcastlemedia.bukkit.herostronghold.listeners.*;
+import multitallented.redcastlemedia.bukkit.herostronghold.region.*;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -35,9 +25,6 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
-import java.util.HashSet;
-import multitallented.redcastlemedia.bukkit.herostronghold.events.CommandEffectEvent;
-import org.bukkit.Bukkit;
 
 public class HeroStronghold extends JavaPlugin {
     private PluginServerListener serverListener;
@@ -1406,8 +1393,29 @@ public class HeroStronghold extends JavaPlugin {
                 player.sendMessage(ChatColor.GRAY + "Cost: " + ChatColor.GOLD + rt.getMoneyRequirement() + ChatColor.GRAY +
                         ", Payout: " + ChatColor.GOLD + rt.getMoneyOutput() + ChatColor.GRAY + ", Radius: " + ChatColor.GOLD + (int) Math.sqrt(rt.getRadius()));
                 
-                String message = ChatColor.GRAY + "Effects: " + ChatColor.GOLD;
+                String message = ChatColor.GRAY + "Description: " + ChatColor.GOLD;
                 int j=0;
+                if (rt.getDescription() != null) {
+                    String tempMess = rt.getDescription();
+                    if (tempMess.length() + message.length() <= 55) {
+                        player.sendMessage(message + tempMess);
+                        tempMess = null;
+                    }
+                    while (tempMess != null && j<12) {
+                        if (tempMess.length() > 55) {
+                            message += tempMess.substring(0, 54);
+                            tempMess = tempMess.substring(55);
+                            message = ChatColor.GOLD + "";
+                            j++;
+                        } else {
+                            player.sendMessage(message + tempMess);
+                            tempMess = null;
+                            j++;
+                        }
+                    }
+                }
+                
+                message = ChatColor.GRAY + "Effects: " + ChatColor.GOLD;
                 if (rt.getEffects() != null) {
                     for (String is : rt.getEffects()) {
                         String addLine = is.split("\\.")[0] + ", ";
@@ -1524,8 +1532,28 @@ public class HeroStronghold extends JavaPlugin {
                 player.sendMessage(ChatColor.GRAY + "Power: " + ChatColor.GOLD + srt.getMaxPower() + " (+" + srt.getDailyPower() + "), " +
                         ChatColor.GRAY + "Charter: " + ChatColor.GOLD + srt.getCharter() + ChatColor.GRAY + ", Radius: " + ChatColor.GOLD + (int) Math.sqrt(srt.getRadius()));
                 
-                String message = ChatColor.GRAY + "Effects: " + ChatColor.GOLD;
+                String message = ChatColor.GRAY + "Description: " + ChatColor.GOLD;
                 int j=0;
+                if (srt.getDescription() != null) {
+                    String tempMess = srt.getDescription();
+                    if (tempMess.length() + message.length() <= 55) {
+                        player.sendMessage(message + tempMess);
+                        tempMess = null;
+                    }
+                    while (tempMess != null && j<12) {
+                        if (tempMess.length() > 55) {
+                            message += tempMess.substring(0, 54);
+                            tempMess = tempMess.substring(55);
+                            message = ChatColor.GOLD + "";
+                            j++;
+                        } else {
+                            player.sendMessage(message + tempMess);
+                            tempMess = null;
+                            j++;
+                        }
+                    }
+                }
+                message = ChatColor.GRAY + "Effects: " + ChatColor.GOLD;
                 if (srt.getEffects() != null) {
                     for (String is : srt.getEffects()) {
                         String addLine = is + ", ";

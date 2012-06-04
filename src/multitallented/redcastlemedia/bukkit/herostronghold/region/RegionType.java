@@ -26,6 +26,7 @@ public class RegionType {
     private final int buildRadius;
     private final int rawBuildRadius;
     private final int rawRadius;
+    private final String description;
     
     
     public RegionType(String name, ArrayList<String> friendlyClasses,
@@ -33,7 +34,8 @@ public class RegionType {
             int radius, int buildRadius, ArrayList<ItemStack> requirements, List<String> superRegions,
             ArrayList<ItemStack> reagents, ArrayList<ItemStack> upkeep,
             ArrayList<ItemStack> output, double upkeepChance,
-            double moneyRequirement, double moneyOutput, double exp) {
+            double moneyRequirement, double moneyOutput, double exp,
+            String description) {
         this.name = name;
         this.friendlyClasses = friendlyClasses;
         this.enemyClasses = enemyClasses;
@@ -51,6 +53,7 @@ public class RegionType {
         this.moneyRequirement = moneyRequirement;
         this.moneyOutput = moneyOutput;
         this.exp = exp;
+        this.description = description;
     }
     
     public int getRawRadius() {
@@ -119,5 +122,9 @@ public class RegionType {
     
     public boolean containsEnemyClass(String name) {
         return this.enemyClasses.contains(name);
+    }
+    
+    public String getDescription() {
+        return this.description;
     }
 }

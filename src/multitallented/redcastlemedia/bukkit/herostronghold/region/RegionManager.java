@@ -84,7 +84,8 @@ public class RegionManager {
                         rConfig.getDouble("upkeep-chance"),
                         rConfig.getDouble("money-requirement"),
                         rConfig.getDouble("upkeep-money-output"),
-                        rConfig.getDouble("exp")));
+                        rConfig.getDouble("exp"),
+                        rConfig.getString("description")));
             } catch (Exception e) {
                 plugin.warning("[HeroStronghold] failed to load " + currentRegionFile.getName());
             }
@@ -152,7 +153,8 @@ public class RegionManager {
                         rConfig.getInt("daily-power-increase", 10),
                         rConfig.getInt("charter", 0),
                         rConfig.getDouble("exp", 0),
-                        rConfig.getString("central-structure")));
+                        rConfig.getString("central-structure"),
+                        rConfig.getString("description")));
             } catch (Exception e) {
                 plugin.warning("[HeroStronghold] failed to load " + currentRegionFile.getName());
             }
