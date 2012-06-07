@@ -191,10 +191,16 @@ public class Effect {
         ItemStack[] is = chest.getInventory().getContents();
         ItemStack[] realIS = is.clone();
         for (int i = 0 ; i<realIS.length; i++) {
-            int maxSize = realIS[i].getMaxStackSize();
+            int maxSize;
+            try {
+                maxSize = realIS[i].getMaxStackSize();
+            } catch (NullPointerException npe) {
+                maxSize = 64;
+            }
             Material mat = Material.AIR;
-            if (realIS[i] != null)
+            if (realIS[i] != null) {
                 mat = realIS[i].getType();
+            }
             
             //chest has an item and item is in upkeep
             if (!mat.equals(Material.AIR) && upkeepMap.containsKey(mat)) {
@@ -296,7 +302,12 @@ public class Effect {
         ItemStack[] is = chest.getInventory().getContents();
         ItemStack[] realIS = is.clone();
         for (int i = 0 ; i<realIS.length; i++) {
-            int maxSize = realIS[i].getMaxStackSize();
+            int maxSize;
+            try {
+                maxSize = realIS[i].getMaxStackSize();
+            } catch (NullPointerException npe) {
+                maxSize = 64;
+            }
             Material mat = Material.AIR;
             if (realIS[i] != null)
                 mat = realIS[i].getType();

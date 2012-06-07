@@ -23,7 +23,6 @@ public class DefaultRegions {
         try {
             folder.mkdirs();
             File shackFile = new File(folder, "shack.yml");
-            shackFile.mkdirs();
             shackFile.createNewFile();
             FileConfiguration config = new YamlConfiguration();
             config.load(shackFile);
