@@ -255,7 +255,7 @@ public class RegionBlockListener implements Listener {
         }
     }
 
-    @EventHandler
+    /*@EventHandler
     public void onBlockPistonRetract(BlockPistonRetractEvent event) {
         if (event.isCancelled() || !event.isSticky() ||
                 regionManager.shouldTakeAction(event.getBlock().getLocation(), null, 0, "denyblockbreak", true) ||
@@ -266,5 +266,5 @@ public class RegionBlockListener implements Listener {
                 regionManager.shouldTakeAction(event.getRetractLocation(), null, 0, "denyblockbreaknoreagent", false)) {
             event.setCancelled(true);
         }
-    }
+    }*/
 }

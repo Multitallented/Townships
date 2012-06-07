@@ -88,6 +88,7 @@ public class RegionManager {
                         rConfig.getString("description")));
             } catch (Exception e) {
                 plugin.warning("[HeroStronghold] failed to load " + currentRegionFile.getName());
+                e.printStackTrace();
             }
         }
         /*FileConfiguration regionConfig = new YamlConfiguration();
@@ -356,7 +357,7 @@ public class RegionManager {
             String[] params = current.split("\\.");
             if (Material.getMaterial(params[0]) != null) {
                 ItemStack is;
-                if (params.length > 2) {
+                if (params.length < 3) {
                     is = new ItemStack(Material.getMaterial(params[0]),Integer.parseInt(params[1]));
                 } else {
                     is = new ItemStack(Material.getMaterial(params[0]),Integer.parseInt(params[1]), Short.parseShort(params[2]));

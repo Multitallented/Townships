@@ -433,7 +433,8 @@ public class HeroStronghold extends JavaPlugin {
             }
             
             //Check if over max number of regions of that type
-            if (!regionManager.isAtMaxRegions(player, currentRegionType)) {
+            if (regionManager.isAtMaxRegions(player, currentRegionType)) {
+                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You dont have permission to build more " + currentRegionType);
                 return true;
             }
             
@@ -1404,6 +1405,7 @@ public class HeroStronghold extends JavaPlugin {
                     while (tempMess != null && j<12) {
                         if (tempMess.length() > 55) {
                             message += tempMess.substring(0, 54);
+                            player.sendMessage(message);
                             tempMess = tempMess.substring(55);
                             message = ChatColor.GOLD + "";
                             j++;
@@ -1543,6 +1545,7 @@ public class HeroStronghold extends JavaPlugin {
                     while (tempMess != null && j<12) {
                         if (tempMess.length() > 55) {
                             message += tempMess.substring(0, 54);
+                            player.sendMessage(message);
                             tempMess = tempMess.substring(55);
                             message = ChatColor.GOLD + "";
                             j++;
