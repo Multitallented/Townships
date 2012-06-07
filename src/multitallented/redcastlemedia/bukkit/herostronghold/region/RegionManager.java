@@ -40,6 +40,7 @@ public class RegionManager {
     private HashMap<SuperRegion, HashSet<SuperRegion>> wars = new HashMap<SuperRegion, HashSet<SuperRegion>>();
     private HashMap<String, HashMap<String, Integer>> permSets = new HashMap<String, HashMap<String, Integer>>();
     private HashSet<String> possiblePermSets = new HashSet<String>();
+    private ArrayList<Region> sortedBuildRegions = new ArrayList<Region>();
     
     
     public RegionManager(HeroStronghold plugin, FileConfiguration config) {
@@ -227,6 +228,7 @@ public class RegionManager {
                             liveRegions.put(location, new Region(Integer.parseInt(regionFile.getName().replace(".yml", "")), location, type, owners, members));
 
                             sortedRegions.add(liveRegions.get(location));
+                            sortedBuildRegions.add(liveRegions.get(location));
                             idRegions.put(liveRegions.get(location).getID(), liveRegions.get(location));
                         } catch (NullPointerException npe) {
                             System.out.println("[HeroStronghold] failed to load data from " + regionFile.getName());
@@ -239,15 +241,22 @@ public class RegionManager {
             }
         }
         if (sortedRegions.size() > 1) {
-            if (sortedRegions.size() > 1) {
-                Collections.sort(sortedRegions, new Comparator<Region>() {
-                    
-                    @Override
-                    public int compare(Region o1, Region o2) {
-                        return (int) (-1 *(o1.getLocation().getX() + getRegionType(o1.getType()).getRawRadius() - (o2.getLocation().getX() + getRegionType(o2.getType()).getRawRadius())));
-                    }
-                });
-            }
+            Collections.sort(sortedRegions, new Comparator<Region>() {
+
+                @Override
+                public int compare(Region o1, Region o2) {
+                    return (int) (-1 *(o1.getLocation().getX() + getRegionType(o1.getType()).getRawRadius() - (o2.getLocation().getX() + getRegionType(o2.getType()).getRawRadius())));
+                }
+            });
+        }
+        if (sortedBuildRegions.size() > 1) {
+            Collections.sort(sortedBuildRegions, new Comparator<Region>() {
+
+                @Override
+                public int compare(Region o1, Region o2) {
+                    return (int) (-1 *(o1.getLocation().getX() + getRegionType(o1.getType()).getRawBuildRadius() - (o2.getLocation().getX() + getRegionType(o2.getType()).getRawBuildRadius())));
+                }
+            });
         }
         
         //Load super regions
@@ -959,7 +968,8 @@ public class RegionManager {
         double x = loc.getX();
         double y = loc.getY();
         double z = loc.getZ();
-        for (Region r : getSortedRegions()) {
+        for (Iterator<Region> it = sortedBuildRegions.iterator(); it.hasNext();) {
+            Region r = it.next();
             try {
                 int radius = getRegionType(r.getType()).getRawBuildRadius();
                 Location l = r.getLocation();
@@ -1154,6 +1164,7 @@ public class RegionManager {
         if (liveRegions.containsKey(l)) {
             idRegions.remove(liveRegions.get(l).getID());
             sortedRegions.remove(liveRegions.get(l));
+            sortedBuildRegions.remove(liveRegions.get(l));
             liveRegions.remove(l);
         }
     }

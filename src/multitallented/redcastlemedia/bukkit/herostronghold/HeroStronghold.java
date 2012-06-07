@@ -1403,10 +1403,10 @@ public class HeroStronghold extends JavaPlugin {
                         tempMess = null;
                     }
                     while (tempMess != null && j<12) {
-                        if (tempMess.length() > 55) {
-                            message += tempMess.substring(0, 54);
+                        if (tempMess.length() > 53) {
+                            message += tempMess.substring(0, 53);
                             player.sendMessage(message);
-                            tempMess = tempMess.substring(55);
+                            tempMess = tempMess.substring(53);
                             message = ChatColor.GOLD + "";
                             j++;
                         } else {
@@ -1543,10 +1543,10 @@ public class HeroStronghold extends JavaPlugin {
                         tempMess = null;
                     }
                     while (tempMess != null && j<12) {
-                        if (tempMess.length() > 55) {
-                            message += tempMess.substring(0, 54);
+                        if (tempMess.length() > 53) {
+                            message += tempMess.substring(0, 53);
                             player.sendMessage(message);
-                            tempMess = tempMess.substring(55);
+                            tempMess = tempMess.substring(53);
                             message = ChatColor.GOLD + "";
                             j++;
                         } else {
