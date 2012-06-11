@@ -234,6 +234,14 @@ public class RegionEntityListener implements Listener {
             tempArray.add(r.getLocation());
         }
         for (Location l : tempArray) {
+            for (SuperRegion sr : rm.getContainingSuperRegions(l)) {
+                if ((rm.getSuperRegionType(sr.getType()).hasEffect("denyexplosion") && sr.getPower() > 0 &&
+                        sr.getBalance() > 0 && rm.hasAllRequiredRegions(sr)) ||
+                        (rm.getSuperRegionType(sr.getType())).hasEffect("denyexplosionnoreagent")) {
+                    event.setCancelled(true);
+                    return;
+                }
+            }
             rm.destroyRegion(l);
             rm.removeRegion(l);
         }
