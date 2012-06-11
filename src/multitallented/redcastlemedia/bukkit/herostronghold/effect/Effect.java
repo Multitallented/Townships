@@ -119,7 +119,12 @@ public class Effect {
         if (!(bs instanceof Chest)) {
             return false;
         }
-        for (ItemStack is : ((Chest) bs).getInventory().getContents()) {
+        //Check if chest is full and region has output
+        Chest chest = ((Chest) bs);
+        if (!rt.getOutput().isEmpty() && chest.getInventory().firstEmpty() < 0) {
+            return false;
+        }
+        for (ItemStack is : chest.getInventory().getContents()) {
             Material mat = Material.AIR;
             if (is != null) {
                 mat = is.getType();
