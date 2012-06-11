@@ -5,9 +5,11 @@ import java.util.Map;
 import multitallented.redcastlemedia.bukkit.herostronghold.HeroStronghold;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionManager;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.player.*;
 
 /**
@@ -97,8 +99,24 @@ public class RegionPlayerInteractListener implements Listener {
     
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
-        if (event.isCancelled() || (!rm.shouldTakeAction(event.getClickedBlock().getLocation(), event.getPlayer(), 0, "denyplayerinteract", true) && 
-                !rm.shouldTakeAction(event.getClickedBlock().getLocation(), event.getPlayer(), 0, "denyplayerinteractnoreagent", false))) {
+        if (event.isCancelled()) {
+            return;
+        }
+        if (event.getAction() == Action.PHYSICAL) {
+            if (event.getClickedBlock().getType() == Material.CROPS && (
+                    rm.shouldTakeAction(event.getClickedBlock().getLocation(), event.getPlayer(), 0, "denyblockbreak", true) ||
+                    rm.shouldTakeAction(event.getClickedBlock().getLocation(), event.getPlayer(), 0, "denyblockbreaknoreagent", false))) {
+                event.setCancelled(true);
+                return;
+            } else if (rm.shouldTakeAction(event.getClickedBlock().getLocation(), event.getPlayer(), 0, "denyplayerinteract", true) || 
+                    rm.shouldTakeAction(event.getClickedBlock().getLocation(), event.getPlayer(), 0, "denyplayerinteractnoreagent", false)) {
+                event.setCancelled(true);
+                return;
+            }
+        }
+        
+        if (!rm.shouldTakeAction(event.getClickedBlock().getLocation(), event.getPlayer(), 0, "denyplayerinteract", true) && 
+                !rm.shouldTakeAction(event.getClickedBlock().getLocation(), event.getPlayer(), 0, "denyplayerinteractnoreagent", false)) {
             return;
         }
 
