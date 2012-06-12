@@ -6,6 +6,7 @@ package multitallented.redcastlemedia.bukkit.herostronghold;
 import com.herocraftonline.heroes.Heroes;
 import com.herocraftonline.heroes.characters.Hero;
 import com.herocraftonline.heroes.characters.classes.HeroClass.ExperienceType;
+import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
 import multitallented.redcastlemedia.bukkit.herostronghold.checkregiontask.CheckRegionTask;
@@ -25,6 +26,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.hidendra.bukkit.metrics.Metrics;
 
 public class HeroStronghold extends JavaPlugin {
     private PluginServerListener serverListener;
@@ -50,6 +52,13 @@ public class HeroStronghold extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        try {
+            Metrics metrics = new Metrics(this);
+            metrics.start();
+        } catch (IOException e) {
+            // Failed to submit the stats :-(
+        }
+      
         //setup configs
         config = getConfig();
         config.options().copyDefaults(true);
