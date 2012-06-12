@@ -76,7 +76,7 @@ public class RegionManager {
                         (ArrayList<String>) rConfig.getStringList("enemy-classes"),
                         (ArrayList<String>) rConfig.getStringList("effects"),
                         (int) Math.pow(rConfig.getInt("radius"), 2),
-                        (int) Math.pow(rConfig.getInt("build-radius", rConfig.getInt("radius")), 2),
+                        (int) Math.pow(rConfig.getInt("build-radius", rConfig.getInt("radius", 2)), 2),
                         processItemStackList(rConfig.getStringList("requirements")),
                         rConfig.getStringList("super-regions"),
                         processItemStackList(rConfig.getStringList("reagents")),
@@ -968,10 +968,10 @@ public class RegionManager {
         double x = loc.getX();
         double y = loc.getY();
         double z = loc.getZ();
-        for (Iterator<Region> it = sortedBuildRegions.iterator(); it.hasNext();) {
-            Region r = it.next();
+        for (Region r : sortedBuildRegions) {
             try {
                 int radius = getRegionType(r.getType()).getRawBuildRadius();
+                radius = radius < 1 ? getRegionType(r.getType()).getRawRadius() : radius;
                 Location l = r.getLocation();
                 if (l.getX() + radius < x) {
                     break;

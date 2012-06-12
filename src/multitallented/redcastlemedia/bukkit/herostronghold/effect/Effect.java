@@ -252,7 +252,12 @@ public class Effect {
         }
         
         //Check and remove money from the player
-        String playername = r.getOwners().get(0);
+        String playername = "";
+        try {
+            playername = r.getOwners().get(0);
+        } catch (IndexOutOfBoundsException ioobe) {
+            return;
+        }
         double output = rt.getMoneyOutput();
         if (rt.getMoneyOutput() != 0 && HeroStronghold.econ != null) {
             if (r.getOwners().isEmpty()) {
@@ -382,7 +387,12 @@ public class Effect {
         
         
         //Check and remove money from the player
-        String playername = r.getOwners().get(0);
+        String playername = "";
+        try {
+            playername = r.getOwners().get(0);
+        } catch (IndexOutOfBoundsException ioobe) {
+            return false;
+        }
         double output = rt.getMoneyOutput();
         if (output != 0 && HeroStronghold.econ != null) {
             Economy econ = HeroStronghold.econ;
