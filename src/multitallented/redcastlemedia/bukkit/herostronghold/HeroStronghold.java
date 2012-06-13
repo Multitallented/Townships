@@ -281,8 +281,13 @@ public class HeroStronghold extends JavaPlugin {
             }
             
             //Make sure the name isn't too long
-            if (args[2].length() > 25) {
-                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Sorry but that name is too long. (25 max)");
+            if (args[2].length() > 16) {
+                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Sorry but that name is too long. (16 max)");
+                return true;
+            }
+            //Check if valid filename
+            if (!Util.validateFileName(args[2])) {
+                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Sorry but that is an invalid filename.");
                 return true;
             }
             
