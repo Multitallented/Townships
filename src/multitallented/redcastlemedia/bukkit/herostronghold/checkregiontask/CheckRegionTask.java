@@ -1,8 +1,9 @@
 package multitallented.redcastlemedia.bukkit.herostronghold.checkregiontask;
 
-import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionManager;
 import java.util.HashSet;
 import java.util.Set;
+import multitallented.redcastlemedia.bukkit.herostronghold.region.Region;
+import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionManager;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
@@ -16,6 +17,7 @@ public class CheckRegionTask implements Runnable {
     private final transient Server server;
     private final RegionManager regionManager;
     private final Set<Location> regionsToDestroy = new HashSet<Location>();
+    private final HashSet<Region> regionsToCreate = new HashSet<Region>();
     private int i= 0;
     
     public CheckRegionTask(Server server, RegionManager regionManager) {
@@ -29,8 +31,16 @@ public class CheckRegionTask implements Runnable {
         }
     }
     
+    public synchronized void addRegionToCreate(Region r) {
+        regionsToCreate.add(r);
+    }
+    
     public boolean containsRegionToDestory(Location l) {
         return regionsToDestroy.contains(l);
+    }
+    
+    public HashSet<Region> getRegiosToCreate(Region r) {
+        return regionsToCreate;
     }
 
     @Override
@@ -58,11 +68,16 @@ public class CheckRegionTask implements Runnable {
 
                 }
             }
-        } else
+        } else {
             i++;
+        }
         
         for (Location l : regionsToDestroy) {
-            addOrDestroyRegionToDestroy(l);
+            regionManager.removeRegion(l);
+        }
+        regionsToDestroy.clear();
+        for (Region r : regionsToCreate) {
+            regionManager.addRegion(r.getLocation(), r.getType(), r.getOwners(), r.getMembers());
         }
     }
 }

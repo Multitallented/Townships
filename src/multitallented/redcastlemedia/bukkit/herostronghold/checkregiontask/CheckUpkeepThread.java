@@ -1,6 +1,7 @@
 package multitallented.redcastlemedia.bukkit.herostronghold.checkregiontask;
 
 import multitallented.redcastlemedia.bukkit.herostronghold.events.UpkeepEvent;
+import multitallented.redcastlemedia.bukkit.herostronghold.region.Region;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionManager;
 import org.bukkit.Location;
 import org.bukkit.plugin.PluginManager;
@@ -36,6 +37,9 @@ public class CheckUpkeepThread implements Runnable {
                         if (!crt.containsRegionToDestory(dl)) {
                             crt.addOrDestroyRegionToDestroy(dl);
                         }
+                    }
+                    for (Region r : uEvent.getRegionsToCreate()) {
+                        crt.addRegionToCreate(r);
                     }
                 } catch (NullPointerException npe) {
 
