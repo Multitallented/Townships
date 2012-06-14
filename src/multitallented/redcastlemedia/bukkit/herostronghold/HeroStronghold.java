@@ -6,8 +6,15 @@ package multitallented.redcastlemedia.bukkit.herostronghold;
 import com.herocraftonline.heroes.Heroes;
 import com.herocraftonline.heroes.characters.Hero;
 import com.herocraftonline.heroes.characters.classes.HeroClass.ExperienceType;
+import com.massivecraft.factions.*;
+import com.massivecraft.factions.struct.Role;
+import com.palmergames.bukkit.towny.Towny;
+import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
+import com.palmergames.bukkit.towny.object.Resident;
+import com.palmergames.bukkit.towny.object.TownyUniverse;
 import java.io.IOException;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import multitallented.redcastlemedia.bukkit.herostronghold.checkregiontask.CheckRegionTask;
 import multitallented.redcastlemedia.bukkit.herostronghold.effect.EffectManager;
@@ -36,6 +43,8 @@ public class HeroStronghold extends JavaPlugin {
     private RegionBlockListener blockListener;
     public static Economy econ;
     public static Permission perms;
+    public static Towny towny;
+    public static Factions factions;
     private RegionEntityListener regionEntityListener;
     private RegionPlayerInteractListener dpeListener;
     private Map<String, String> pendingInvites = new HashMap<String, String>();
@@ -69,6 +78,7 @@ public class HeroStronghold extends JavaPlugin {
         
         setupPermissions();
         setupEconomy();
+        setupTowny();
         
         //Register Listeners Here
         serverListener = new PluginServerListener(this);
@@ -281,7 +291,7 @@ public class HeroStronghold extends JavaPlugin {
             }
             
             //Make sure the name isn't too long
-            if (args[2].length() > 16) {
+            if (args[2].length() > 15) {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Sorry but that name is too long. (16 max)");
                 return true;
             }
@@ -1647,7 +1657,39 @@ public class HeroStronghold extends JavaPlugin {
             
             Location loc = player.getLocation();
             for (Region r : regionManager.getContainingBuildRegions(loc)) {
-                if (r.isOwner(player.getName()) || (perms != null && perms.has(player, "herostronghold.admin"))) {
+                Resident res = null;
+                boolean townyOverride = false;
+                boolean factionsOverride = false;
+                if (HeroStronghold.towny != null) {
+                    try {
+                      res = TownyUniverse.getDataSource().getResident(player.getName());
+                      if (TownyUniverse.getTownBlock(loc) != null &&
+                              (TownyUniverse.getTownBlock(loc).getTown().getMayor().equals(res) ||
+                              TownyUniverse.getTownBlock(loc).getTown().hasAssistant(res))) {
+                          townyOverride = true;
+                      }
+                    } catch (Exception ex) {
+                        
+                    }
+                }
+                if (HeroStronghold.factions != null) {
+                    Faction f = Board.getFactionAt(new FLocation(loc));
+                    if (f != null) {
+                        if (f.getFPlayerAdmin().getPlayer().getName().equals(player.getName())) {
+                            factionsOverride = true;
+                        } else {
+                            for (FPlayer fp : f.getFPlayersWhereRole(Role.MODERATOR)) {
+                                if (fp.getPlayer().getName().equals(player.getName())) {
+                                    factionsOverride = true;
+                                    break;
+                                }
+                            }
+                        }
+                        
+                    }
+                }
+                if (r.isOwner(player.getName()) || (perms != null && perms.has(player, "herostronghold.admin")) ||
+                        townyOverride || factionsOverride) {
                     if (r.isOwner(playername)) {
                         player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + playername + " is already an owner of this region.");
                         return true;
@@ -2122,7 +2164,7 @@ public class HeroStronghold extends JavaPlugin {
         }
         return econ != null;
     }
-    private Boolean setupPermissions()
+    private boolean setupPermissions()
     {
         RegisteredServiceProvider<Permission> permissionProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.permission.Permission.class);
         if (permissionProvider != null) {
@@ -2131,6 +2173,15 @@ public class HeroStronghold extends JavaPlugin {
                 System.out.println("[HeroStronghold] Hooked into " + perms.getName());
         }
         return (perms != null);
+    }
+    private void setupTowny() {
+        if (Bukkit.getPluginManager().isPluginEnabled("Towny")) {
+            try {
+                HeroStronghold.towny = (Towny) Bukkit.getPluginManager().getPlugin("Towny");
+            } catch (Exception e) {
+                return;
+            }
+        }
     }
     
     public RegionManager getRegionManager() {
