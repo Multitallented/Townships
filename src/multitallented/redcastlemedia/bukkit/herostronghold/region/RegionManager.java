@@ -401,7 +401,66 @@ public class RegionManager {
             dataConfig.save(dataFile);
             liveRegions.put(loc, new Region(i, loc, type, owners, new ArrayList<String>()));
             idRegions.put(i, liveRegions.get(loc));
+            sortedBuildRegions.add(liveRegions.get(loc));
+            if (sortedBuildRegions.size() > 1) {
+                Collections.sort(sortedBuildRegions, new Comparator<Region>() {
+
+                    @Override
+                    public int compare(Region o1, Region o2) {
+                        return (int) (-1 *(o1.getLocation().getX() + getRegionType(o1.getType()).getRawBuildRadius() - (o2.getLocation().getX() + getRegionType(o2.getType()).getRawBuildRadius())));
+                    }
+                });
+            }
+            sortedBuildRegions.add(liveRegions.get(loc));
+            if (sortedRegions.size() > 1) {
+                Collections.sort(sortedRegions, new Comparator<Region>() {
+
+                    @Override
+                    public int compare(Region o1, Region o2) {
+                        return (int) (-1 *(o1.getLocation().getX() + getRegionType(o1.getType()).getRawRadius() - (o2.getLocation().getX() + getRegionType(o2.getType()).getRawRadius())));
+                    }
+                });
+            }
+            plugin.getServer().getPluginManager().callEvent(new RegionCreatedEvent(loc));
+        } catch (Exception ioe) {
+            System.out.println("[HeroStronghold] unable to write new region to file " + i + ".yml");
+            ioe.printStackTrace();
+        }
+    }
+    
+    public void addRegion(Location loc, String type, ArrayList<String> owners, ArrayList<String> members) {
+        int i = 0;
+        File dataFile = new File(plugin.getDataFolder() + "/data", i + ".yml");
+        while (dataFile.exists()) {
+            i++;
+            dataFile = new File(plugin.getDataFolder() + "/data", i + ".yml");
+        }
+        try {
+            dataFile.createNewFile();
+            dataConfig = new YamlConfiguration();
+            System.out.println("[HeroStronghold] saving new region to " + i + ".yml");
+            //dataConfig.load(dataFile);
+            
+            
+            dataConfig.set("location", loc.getWorld().getName() + ":" + loc.getX()
+                    + ":" + loc.getBlockY() + ":" + loc.getZ());
+            dataConfig.set("type", type);
+            dataConfig.set("owners", owners);
+            dataConfig.set("members", members);
+            dataConfig.save(dataFile);
+            liveRegions.put(loc, new Region(i, loc, type, owners, members));
+            idRegions.put(i, liveRegions.get(loc));
             sortedRegions.add(liveRegions.get(loc));
+            sortedBuildRegions.add(liveRegions.get(loc));
+            if (sortedBuildRegions.size() > 1) {
+                Collections.sort(sortedBuildRegions, new Comparator<Region>() {
+
+                    @Override
+                    public int compare(Region o1, Region o2) {
+                        return (int) (-1 *(o1.getLocation().getX() + getRegionType(o1.getType()).getRawBuildRadius() - (o2.getLocation().getX() + getRegionType(o2.getType()).getRawBuildRadius())));
+                    }
+                });
+            }
             if (sortedRegions.size() > 1) {
                 Collections.sort(sortedRegions, new Comparator<Region>() {
 
