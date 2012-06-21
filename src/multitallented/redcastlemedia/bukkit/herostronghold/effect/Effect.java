@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Map;
 import multitallented.redcastlemedia.bukkit.herostronghold.HeroStronghold;
-import multitallented.redcastlemedia.bukkit.herostronghold.events.UpkeepEvent;
+import multitallented.redcastlemedia.bukkit.herostronghold.events.HSEvent;
 import multitallented.redcastlemedia.bukkit.herostronghold.events.UpkeepSuccessEvent;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.Region;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionManager;
@@ -209,7 +209,13 @@ public class Effect {
         }
         //Check if chest is full and region has output
         Chest chest = ((Chest) bs);
-        for (ItemStack is : chest.getInventory().getContents()) {
+        for (ItemStack is : rt.getReagents()) {
+            if (!chest.getInventory().contains(is.getType(), is.getAmount())) {
+                return false;
+            }
+        }
+        return true;
+        /*for (ItemStack is : chest.getInventory().getContents()) {
             Material mat = Material.AIR;
             if (is != null) {
                 mat = is.getType();
@@ -222,17 +228,18 @@ public class Effect {
                 }
             }
         }
-        if (reagentMap.isEmpty())
+        if (reagentMap.isEmpty()) {
             return true;
+        }
         
-        return false;
+        return false;*/
     }
     
     /**
      * Forces the region to consume upkeep items and output money and items
      * regardless of the upkeep-chance.
      * 
-     * @deprecated please use forceUpkeep(UpkeepEvent)
+     * @see forceUpkeep(HSEvent) Use this instead if possible
      * @param location the location of the center of the region region.getLocation()
      */
     public void forceUpkeep(Location l) {
@@ -251,7 +258,7 @@ public class Effect {
         //Remove the upkeep items from the region chest and add items from output
         boolean hasUpkeep = true;
         for (ItemStack is : rt.getUpkeep()) {
-            if (chest.getInventory().contains(is)) {
+            if (!chest.getInventory().contains(is.getType(), is.getAmount())) {
                 hasUpkeep = false;
             }
         }
@@ -268,9 +275,6 @@ public class Effect {
         }
         double output = rt.getMoneyOutput();
         if (rt.getMoneyOutput() != 0 && HeroStronghold.econ != null) {
-            if (r.getOwners().isEmpty()) {
-                return;
-            }
             if (output < 0  && HeroStronghold.econ.getBalance(playername) < Math.abs(output)) {
                 return;
             }
@@ -294,72 +298,6 @@ public class Effect {
         for (ItemStack is : rt.getOutput()) {
             chest.getInventory().addItem(is);
         }
-        
-        
-        /*Map<Material, Integer> upkeepMap = new EnumMap<Material, Integer>(Material.class);
-        Map<Material, Integer> outputMap = new EnumMap<Material, Integer>(Material.class);
-        for (ItemStack is : rt.getUpkeep()) {
-            if (is != null)
-                upkeepMap.put(is.getType(), is.getAmount());
-        }
-        for (ItemStack is: rt.getOutput()) {
-            if (is != null)
-                outputMap.put(is.getType(), is.getAmount());
-        }
-        ItemStack[] is = chest.getInventory().getContents();
-        ItemStack[] realIS = is.clone();
-        for (int i = 0 ; i<realIS.length; i++) {
-            int maxSize;
-            try {
-                maxSize = realIS[i].getMaxStackSize();
-            } catch (NullPointerException npe) {
-                maxSize = 64;
-            }
-            Material mat = Material.AIR;
-            if (realIS[i] != null) {
-                mat = realIS[i].getType();
-            }
-            
-            //chest has an item and item is in upkeep
-            if (!mat.equals(Material.AIR) && upkeepMap.containsKey(mat)) {
-                //chest amount is <= upkeep amount
-                if (realIS[i].getAmount() <= upkeepMap.get(mat)) {
-                    upkeepMap.put(mat, upkeepMap.get(mat) - realIS[i].getAmount());
-                    is[i] = null;
-                //chest amount is > upkeep amount
-                } else {
-                    int amount = realIS[i].getAmount() - upkeepMap.get(mat);
-                    upkeepMap.remove(mat);
-                    is[i].setAmount(amount);
-                }
-            //chest has an item and its an item in output
-            } else if (!mat.equals(Material.AIR) && outputMap.containsKey(mat) && realIS[i].getAmount() < maxSize) {
-                //chest amount + output amount is <= maxSize
-                if (realIS[i].getAmount() + outputMap.get(mat) <= maxSize) {
-                    is[i].setAmount(is[i].getAmount() + outputMap.get(mat));
-                    outputMap.remove(mat);
-                //chest amount + output amount is > maxSize
-                } else {
-                    int excess = is[i].getAmount() + outputMap.get(mat) - maxSize;
-                    is[i].setAmount(maxSize);
-                    outputMap.put(mat, excess);
-                }
-            //chest slot is empty and output isn't empty
-            } else if (mat.equals(Material.AIR) && !outputMap.isEmpty()) {
-                for (Material currentMat : outputMap.keySet()) {
-                    int maxSize2 = new ItemStack(currentMat).getMaxStackSize();
-                    if (outputMap.get(currentMat) <= maxSize2) {
-                        is[i] = new ItemStack(currentMat, outputMap.get(currentMat));
-                        outputMap.remove(currentMat);
-                    } else {
-                        is[i] = new ItemStack(currentMat, maxSize2);
-                        outputMap.put(currentMat, outputMap.get(currentMat) - maxSize2);
-                    }
-                    break;
-                }
-            }
-        }
-        chest.getInventory().setContents(is);*/
         chest.update(true);
     }
     /**
@@ -368,8 +306,8 @@ public class Effect {
      * 
      * @param location the location of the center of the region region.getLocation()
      */
-    public void forceUpkeep(UpkeepEvent event) {
-        Location l = event.getRegionLocation();
+    public void forceUpkeep(HSEvent event) {
+        Location l = event.getLocation();
         RegionManager rm = getPlugin().getRegionManager();
         Region r = rm.getRegion(l);
         RegionType rt = rm.getRegionType(r.getType());
@@ -385,7 +323,7 @@ public class Effect {
         //Remove the upkeep items from the region chest and add items from output
         boolean hasUpkeep = true;
         for (ItemStack is : rt.getUpkeep()) {
-            if (chest.getInventory().contains(is)) {
+            if (!chest.getInventory().contains(is.getType(), is.getAmount())) {
                 hasUpkeep = false;
             }
         }
@@ -402,9 +340,6 @@ public class Effect {
         }
         double output = rt.getMoneyOutput();
         if (rt.getMoneyOutput() != 0 && HeroStronghold.econ != null) {
-            if (r.getOwners().isEmpty()) {
-                return;
-            }
             if (output < 0  && HeroStronghold.econ.getBalance(playername) < Math.abs(output)) {
                 return;
             }
@@ -436,7 +371,7 @@ public class Effect {
      * Forces the region to consume upkeep items and output money and items
      * if a random number is lower than the upkeep-chance.
      * 
-     * @deprecated please use upkeep(UpkeepEvent)
+     * @see upkeep(HSEvent) Use this instead if possible
      * @param location the location of the center of the region region.getLocation()
      */
     public boolean upkeep(Location l) {
@@ -455,7 +390,7 @@ public class Effect {
         //Remove the upkeep items from the region chest and add items from output
         boolean hasUpkeep = true;
         for (ItemStack is : rt.getUpkeep()) {
-            if (chest.getInventory().contains(is)) {
+            if (!chest.getInventory().contains(is.getType(), is.getAmount())) {
                 hasUpkeep = false;
             }
         }
@@ -500,64 +435,7 @@ public class Effect {
         for (ItemStack is : rt.getOutput()) {
             chest.getInventory().addItem(is);
         }
-        /*Map<Material, Integer> upkeepMap = new EnumMap<Material, Integer>(Material.class);
-        Map<Material, Integer> outputMap = new EnumMap<Material, Integer>(Material.class);
-        for (ItemStack is : rt.getUpkeep()) {
-            if (is != null)
-                upkeepMap.put(is.getType(), is.getAmount());
-        }
-        for (ItemStack is: rt.getOutput()) {
-            if (is != null)
-                outputMap.put(is.getType(), is.getAmount());
-        }
-        ItemStack[] is = chest.getInventory().getContents();
-        ItemStack[] realIS = is.clone();
-        for (int i = 0 ; i<realIS.length; i++) {
-            int maxSize;
-            try {
-                maxSize = realIS[i].getMaxStackSize();
-            } catch (NullPointerException npe) {
-                maxSize = 64;
-            }
-            Material mat = Material.AIR;
-            if (realIS[i] != null)
-                mat = realIS[i].getType();
-            //chest has an item and item is in upkeep
-            if (!mat.equals(Material.AIR) && upkeepMap.containsKey(mat)) {
-                //chest amount is <= upkeep amount
-                if (realIS[i].getAmount() <= upkeepMap.get(mat)) {
-                    upkeepMap.put(mat, upkeepMap.get(mat) - realIS[i].getAmount());
-                    is[i] = null;
-                //chest amount is > upkeep amount
-                } else {
-                    int amount = realIS[i].getAmount() - upkeepMap.get(mat);
-                    upkeepMap.remove(mat);
-                    is[i].setAmount(amount);
-                }
-            } else if (!mat.equals(Material.AIR) && outputMap.containsKey(mat) && realIS[i].getAmount() < maxSize) {
-                if (realIS[i].getAmount() + outputMap.get(mat) <= maxSize) {
-                    is[i].setAmount(is[i].getAmount() + outputMap.get(mat));
-                    outputMap.remove(mat);
-                } else {
-                    int excess = is[i].getAmount() + outputMap.get(mat) - maxSize;
-                    is[i].setAmount(maxSize);
-                    outputMap.put(mat, excess);
-                }
-            } else if (mat.equals(Material.AIR) && !outputMap.isEmpty()) {
-                for (Material currentMat : outputMap.keySet()) {
-                    int maxSize2 = new ItemStack(currentMat).getMaxStackSize();
-                    if (outputMap.get(currentMat) <= maxSize2) {
-                        is[i] = new ItemStack(currentMat, outputMap.get(currentMat));
-                        outputMap.remove(currentMat);
-                    } else {
-                        is[i] = new ItemStack(currentMat, maxSize2);
-                        outputMap.put(currentMat, outputMap.get(currentMat) - maxSize2);
-                    }
-                    break;
-                }
-            }
-        }
-        chest.getInventory().setContents(is);*/
+        
         chest.update(true);
         return true;
     }
@@ -568,8 +446,8 @@ public class Effect {
      * 
      * @param location the location of the center of the region region.getLocation()
      */
-    public boolean upkeep(UpkeepEvent event) {
-        Location l = event.getRegionLocation();
+    public boolean upkeep(HSEvent event) {
+        Location l = event.getLocation();
         RegionManager rm = getPlugin().getRegionManager();
         Region r = rm.getRegion(l);
         RegionType rt = rm.getRegionType(r.getType());
@@ -585,7 +463,7 @@ public class Effect {
         //Remove the upkeep items from the region chest and add items from output
         boolean hasUpkeep = true;
         for (ItemStack is : rt.getUpkeep()) {
-            if (chest.getInventory().contains(is)) {
+            if (!chest.getInventory().contains(is.getType(), is.getAmount())) {
                 hasUpkeep = false;
             }
         }
