@@ -9,12 +9,10 @@ import com.herocraftonline.heroes.characters.classes.HeroClass.ExperienceType;
 import com.massivecraft.factions.*;
 import com.massivecraft.factions.struct.Role;
 import com.palmergames.bukkit.towny.Towny;
-import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
 import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.TownyUniverse;
 import java.io.IOException;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import multitallented.redcastlemedia.bukkit.herostronghold.checkregiontask.CheckRegionTask;
 import multitallented.redcastlemedia.bukkit.herostronghold.effect.EffectManager;
@@ -463,8 +461,7 @@ public class HeroStronghold extends JavaPlugin {
             }
             
             //Check if too close to other HeroStrongholds
-            int currentRadius = currentRegionType.getRawBuildRadius();
-            if (!regionManager.getContainingRegions(currentLocation, currentRadius).isEmpty()) {
+            if (!regionManager.getContainingBuildRegions(currentLocation).isEmpty()) {
                 player.sendMessage (ChatColor.GRAY + "[HeroStronghold] You are too close to another HeroStronghold");
                 return true;
             }
@@ -625,8 +622,8 @@ public class HeroStronghold extends JavaPlugin {
             return true;
         } else if (args.length > 2 && args[0].equalsIgnoreCase("create")) {
             //Check if valid name (further name checking later)
-            if (args[2].length() > 25) {
-                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] That name is too long.");
+            if (args[2].length() > 16 || !Util.validateFileName(args[2])) {
+                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] That name is invalid.");
                 return true;
             }
             if (getServer().getPlayerExact(args[2]) != null) {
@@ -1930,8 +1927,8 @@ public class HeroStronghold extends JavaPlugin {
             }
             
             //Check if valid name
-            if (args[2].length() > 30) {
-                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] That name is too long. Use 30 characters or less");
+            if (args[2].length() > 16 && Util.validateFileName(args[2])) {
+                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] That name is too long. Use 15 characters or less");
                 return true;
             }
             
@@ -1939,6 +1936,16 @@ public class HeroStronghold extends JavaPlugin {
             if (!sr.hasOwner(player.getName()) && !HeroStronghold.perms.has(player, "herostronghold.admin")) {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You don't have permission to rename that super-region.");
                 return true;
+            }
+            
+            double cost = configManager.getRenameCost();
+            if (HeroStronghold.econ != null && cost > 0) {
+                if (!HeroStronghold.econ.has(player.getName(), cost)) {
+                    player.sendMessage(ChatColor.GRAY + "[HeroStronghold] It costs " + ChatColor.RED + cost + " to rename that.");
+                    return true;
+                } else {
+                    HeroStronghold.econ.withdrawPlayer(player.getName(), cost);
+                }
             }
             
             regionManager.destroySuperRegion(args[1], false);
