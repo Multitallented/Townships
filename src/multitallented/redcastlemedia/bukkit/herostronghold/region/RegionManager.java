@@ -72,6 +72,7 @@ public class RegionManager {
                 rConfig.load(currentRegionFile);
                 String regionName = currentRegionFile.getName().replace(".yml", "");
                 regionTypes.put(regionName, new RegionType(regionName,
+                        rConfig.getString("group", regionName),
                         (ArrayList<String>) rConfig.getStringList("friendly-classes"),
                         (ArrayList<String>) rConfig.getStringList("enemy-classes"),
                         (ArrayList<String>) rConfig.getStringList("effects"),
@@ -411,7 +412,7 @@ public class RegionManager {
                     }
                 });
             }
-            sortedBuildRegions.add(liveRegions.get(loc));
+            sortedRegions.add(liveRegions.get(loc));
             if (sortedRegions.size() > 1) {
                 Collections.sort(sortedRegions, new Comparator<Region>() {
 
@@ -583,11 +584,6 @@ public class RegionManager {
         } else {
             System.out.println("[HeroStronghold] Successfully destroyed superregion " + name + ".yml");
         }
-        if (sendMessage) {
-            for (Player p : plugin.getServer().getOnlinePlayers()) {
-                p.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.WHITE + name + " was destroyed!");
-            }
-        }
         
         if (sendMessage) {
             final String regionName = name;
@@ -595,7 +591,7 @@ public class RegionManager {
                   @Override
                   public void run()
                   {
-                    plugin.getServer().broadcastMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.RED + regionName + "was destroyed!");
+                    plugin.getServer().broadcastMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.RED + regionName + " was destroyed!");
                   }
             }.run();
         }
@@ -636,11 +632,12 @@ public class RegionManager {
             }
             
             if (l.getX() - radius < x && l.getY() + radius > y && l.getY() - radius < y && 
-                    l.getZ() + radius > z && l.getZ() - radius < z && l.getWorld().equals(loc.getWorld()) && reqs.containsKey(r.getType())) {
-                if (reqs.get(r.getType()) < 2) {
-                    reqs.remove(r.getType());
+                    l.getZ() + radius > z && l.getZ() - radius < z && l.getWorld().equals(loc.getWorld()) && reqs.containsKey(getRegionType(r.getType()).getGroup())) {
+                String group = getRegionType(r.getType()).getGroup();
+                if (reqs.get(group) < 2) {
+                    reqs.remove(group);
                 } else {
-                    reqs.put(r.getType(), reqs.get(r.getType()) - 1);
+                    reqs.put(group, reqs.get(group) - 1);
                 }
             }
         }
