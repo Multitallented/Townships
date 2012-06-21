@@ -25,6 +25,7 @@ public class ConfigManager {
     private final double declareWarPer;
     private final double makePeaceBase;
     private final double makePeacePer;
+    private final double renameCost;
     
     public ConfigManager(FileConfiguration config, HeroStronghold plugin) {
         this.config = config;
@@ -41,6 +42,7 @@ public class ConfigManager {
         declareWarPer = config.getDouble("war.declare-war-cost-per-member", 500.0);
         makePeaceBase = config.getDouble("war.make-peace-base-cost", 1000.0);
         makePeacePer = config.getDouble("war.make-peace-cost-per-member", 500.0);
+        renameCost = config.getDouble("rename-cost", 1000.0);
         loadCharters();
     }
     
@@ -127,6 +129,10 @@ public class ConfigManager {
     
     public double getMakePeacePer() {
         return makePeacePer;
+    }
+    
+    public double getRenameCost() {
+        return renameCost;
     }
     
     public synchronized void removeCharter(String name) {

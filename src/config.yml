@@ -3,6 +3,7 @@ max-tax: 500.0
 destroy-if-no-money: true
 destroy-if-no-power: true
 use-power: true
+rename-cost: 500.0
 war:
   use-war: false
   declare-war-base-cost: 2000.0
