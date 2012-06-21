@@ -103,7 +103,7 @@ public class RegionPlayerInteractListener implements Listener {
             return;
         }
         if (event.getAction() == Action.PHYSICAL) {
-            if (event.getClickedBlock().getType() == Material.CROPS && (
+            if ((event.getClickedBlock().getType() == Material.CROPS || event.getClickedBlock().getTypeId() == 60) && (
                     rm.shouldTakeAction(event.getClickedBlock().getLocation(), event.getPlayer(), 0, "denyblockbreak", true) ||
                     rm.shouldTakeAction(event.getClickedBlock().getLocation(), event.getPlayer(), 0, "denyblockbreaknoreagent", false))) {
                 event.setCancelled(true);
