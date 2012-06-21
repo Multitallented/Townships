@@ -7,6 +7,8 @@
         <fileset dir="../../Heroes/lastSuccessful/archive/build" includes="**/*.jar" />
         <fileset dir="../../Vault/lastSuccessful/archive" includes="**/*.jar" />
         <fileset dir="libs" includes="*craftbukkit*.jar"/>
+        <fileset dir="libs" includes="*Towny*.jar"/>
+        <fileset dir="libs" includes="*Factions*.jar"/>
     </path>
     
     <target name="main" depends="clean, compile, compress" description="Main target">
