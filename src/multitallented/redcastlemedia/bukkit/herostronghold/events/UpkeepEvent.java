@@ -10,7 +10,7 @@ import org.bukkit.event.HandlerList;
  *
  * @author Multitallented
  */
-public class UpkeepEvent extends Event {
+public class UpkeepEvent extends Event implements HSEvent {
     private static final HandlerList handlers = new HandlerList();
     private final Location loc;
     private ArrayList<Location> destroyRegions = new ArrayList<Location>();
@@ -19,22 +19,27 @@ public class UpkeepEvent extends Event {
         this.loc = loc;
     }
     
-    public Location getRegionLocation() {
+    @Override
+    public Location getLocation() {
         return loc;
     }
     
+    @Override
     public ArrayList<Location> getRegionsToDestroy() {
         return destroyRegions;
     }
     
+    @Override
     public void setRegionsToDestroy(ArrayList<Location> r) {
         this.destroyRegions = r;
     }
     
+    @Override
     public ArrayList<Region> getRegionsToCreate() {
         return createRegions;
     }
     
+    @Override
     public void setRegionsToCreate(ArrayList<Region> r) {
         this.createRegions = r;
     } 

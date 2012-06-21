@@ -51,6 +51,13 @@ public class CheckPlayerInRegionThread implements Runnable {
                     } catch (NullPointerException npe) {
 
                     }
+                    try {
+                        for (Region re : pIREvent.getRegionsToCreate()) {
+                            crt.addRegionToCreate(re);
+                        }
+                    } catch (Exception e) {
+                        
+                    }
                     return;
                 }
             } catch (IllegalArgumentException iae) {

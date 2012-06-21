@@ -27,24 +27,23 @@ public class CheckUpkeepThread implements Runnable {
     public void run() {
         double upkeepChance = rm.getRegionType(rm.getRegion(l).getType()).getUpkeepChance();
         if (Math.random() < upkeepChance) {
-                //Dispatch event to be caught by effects of the region
-                UpkeepEvent uEvent = new UpkeepEvent(l);
-                pm.callEvent(uEvent);
-                
-                //Add any regions that need to be destroyed to the list
-                try {
-                    for (Location dl : uEvent.getRegionsToDestroy()) {
-                        if (!crt.containsRegionToDestory(dl)) {
-                            crt.addOrDestroyRegionToDestroy(dl);
-                        }
-                    }
-                    for (Region r : uEvent.getRegionsToCreate()) {
-                        crt.addRegionToCreate(r);
-                    }
-                } catch (NullPointerException npe) {
+            //Dispatch event to be caught by effects of the region
+            UpkeepEvent uEvent = new UpkeepEvent(l);
+            pm.callEvent(uEvent);
 
+            //Add any regions that need to be destroyed to the list
+            try {
+                for (Location dl : uEvent.getRegionsToDestroy()) {
+                    if (!crt.containsRegionToDestory(dl)) {
+                        crt.addOrDestroyRegionToDestroy(dl);
+                    }
                 }
+                for (Region r : uEvent.getRegionsToCreate()) {
+                    crt.addRegionToCreate(r);
+                }
+            } catch (NullPointerException npe) {
             }
+        }
     }
     
 }

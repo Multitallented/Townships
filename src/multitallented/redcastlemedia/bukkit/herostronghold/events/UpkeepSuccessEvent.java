@@ -13,10 +13,10 @@ import org.bukkit.event.HandlerList;
 public class UpkeepSuccessEvent extends Event {
     private static final HandlerList handlers = new HandlerList();
     private final Location loc;
-    private UpkeepEvent upkeep;
-    public UpkeepSuccessEvent(UpkeepEvent upkeep) {
-        this.loc = upkeep.getRegionLocation();
-        this.upkeep = upkeep;
+    private HSEvent event;
+    public UpkeepSuccessEvent(HSEvent event) {
+        this.loc = event.getLocation();
+        this.event = event;
     }
     
     public Location getRegionLocation() {
@@ -27,20 +27,20 @@ public class UpkeepSuccessEvent extends Event {
         return handlers;
     }
     
-    public UpkeepEvent getEvent() {
-        return this.upkeep;
+    public HSEvent getEvent() {
+        return this.event;
     }
     
-    public void setEvent(UpkeepEvent event) {
-        this.upkeep = event;
+    public void setEvent(HSEvent event) {
+        this.event = event;
     }
     
     public void setRegionsToCreate(ArrayList<Region> r) {
-        upkeep.setRegionsToCreate(r);
+        event.setRegionsToCreate(r);
     }
     
     public ArrayList<Region> getRegionsToCreate() {
-        return upkeep.getRegionsToCreate();
+        return event.getRegionsToCreate();
     }
     
     @Override

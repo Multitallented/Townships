@@ -65,7 +65,6 @@ public class CheckRegionTask implements Runnable {
                 try {
                     thread.run();
                 } catch (Exception e) {
-
                 }
             }
         } else {
@@ -73,11 +72,13 @@ public class CheckRegionTask implements Runnable {
         }
         
         for (Location l : regionsToDestroy) {
+            regionManager.destroyRegion(l);
             regionManager.removeRegion(l);
         }
         regionsToDestroy.clear();
         for (Region r : regionsToCreate) {
             regionManager.addRegion(r.getLocation(), r.getType(), r.getOwners(), r.getMembers());
         }
+        regionsToCreate.clear();
     }
 }
