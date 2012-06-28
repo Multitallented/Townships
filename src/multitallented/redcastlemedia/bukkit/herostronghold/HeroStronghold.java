@@ -1042,7 +1042,7 @@ public class HeroStronghold extends JavaPlugin {
             String message = ChatColor.GRAY + "[HeroStronghold] " + playername + " perms for " + args[2] + ":";
             String message2 = ChatColor.GOLD + "";
             //Check if the player is a owner or member of the super region
-            SuperRegion sr = regionManager.getSuperRegion(args[3]);
+            SuperRegion sr = regionManager.getSuperRegion(args[2]);
             if (sr == null) {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] There is no region called " + args[2]);
                 return true;
@@ -1767,6 +1767,42 @@ public class HeroStronghold extends JavaPlugin {
             
             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You're not standing in a region.");
             return true;
+        } else if (args.length > 2 && args[0].equals("addmemberid")) {
+            String playername = args[1];
+            Player aPlayer = getServer().getPlayer(playername);
+            if (aPlayer == null) {
+                SuperRegion sr = regionManager.getSuperRegion(args[1]);
+                if (sr == null) {
+                    playername = args[1];
+                } else {
+                    playername = "sr:" + sr.getName();
+                }
+            } else {
+                playername = aPlayer.getName();
+            }
+            Region r = null;
+            try {
+                r = regionManager.getRegionByID(Integer.parseInt(args[2]));
+                r.getType();
+            } catch (Exception e) {
+                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + args[1] + " is not a valid id");
+                return true;
+            }
+            if (r.isOwner(player.getName()) || (perms != null && perms.has(player, "herostronghold.admin"))) {
+                if (r.isMember(playername)) {
+                    player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + playername + " is already a member of this region.");
+                    return true;
+                }
+                if (r.isOwner(playername) && !(playername.equals(player.getName()) && r.getOwners().get(0).equals(player.getName()))) {
+                    regionManager.setOwner(r, playername);
+                }
+                regionManager.setMember(r, playername);
+                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.WHITE + "Added " + playername + " to the region.");
+                return true;
+            } else {
+                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You don't own this region.");
+                return true;
+            }
         } else if (args.length > 1 && args[0].equalsIgnoreCase("setowner")) {
             String playername = args[1];
             Player aPlayer = getServer().getPlayer(playername);
