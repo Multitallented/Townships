@@ -614,6 +614,29 @@ public class RegionManager {
         }
     }
     
+    public ArrayList<Region> getContainedRegions(SuperRegion sr) {
+        ArrayList<Region> tempRegions = new ArrayList<Region>();
+        Location loc = sr.getLocation();
+        double x = loc.getX();
+        double y = loc.getY();
+        double z = loc.getZ();
+        int radius = getSuperRegionType(sr.getType()).getRawRadius();
+        for (Region r : getSortedRegions()) {	  	
+            Location l = r.getLocation();  	
+            if (l.getX() + radius < x) { 	
+                break;	  	
+            }
+            
+            if (l.getX() - radius < x && l.getY() + radius > y && l.getY() - radius < y && 
+                    l.getZ() + radius > z && l.getZ() - radius < z &&
+                    l.getWorld().equals(loc.getWorld())) {
+                tempRegions.add(r);
+            }
+        }
+        
+        return tempRegions;
+    }
+    
     public boolean hasAllRequiredRegions(SuperRegion sr) {
         Location loc = sr.getLocation();
         SuperRegionType srt = getSuperRegionType(sr.getType());
