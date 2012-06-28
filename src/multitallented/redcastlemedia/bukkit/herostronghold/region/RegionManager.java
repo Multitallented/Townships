@@ -78,11 +78,11 @@ public class RegionManager {
                         (ArrayList<String>) rConfig.getStringList("effects"),
                         (int) Math.pow(rConfig.getInt("radius"), 2),
                         (int) Math.pow(rConfig.getInt("build-radius", rConfig.getInt("radius", 2)), 2),
-                        processItemStackList(rConfig.getStringList("requirements")),
+                        processItemStackList(rConfig.getStringList("requirements"), currentRegionFile.getName()),
                         rConfig.getStringList("super-regions"),
-                        processItemStackList(rConfig.getStringList("reagents")),
-                        processItemStackList(rConfig.getStringList("upkeep")),
-                        processItemStackList(rConfig.getStringList("output")),
+                        processItemStackList(rConfig.getStringList("reagents"), currentRegionFile.getName()),
+                        processItemStackList(rConfig.getStringList("upkeep"), currentRegionFile.getName()),
+                        processItemStackList(rConfig.getStringList("output"), currentRegionFile.getName()),
                         rConfig.getDouble("upkeep-chance"),
                         rConfig.getDouble("money-requirement"),
                         rConfig.getDouble("upkeep-money-output"),
@@ -361,7 +361,7 @@ public class RegionManager {
         return tempMap;
     }
     
-    private ArrayList<ItemStack> processItemStackList(List<String> input) {
+    private ArrayList<ItemStack> processItemStackList(List<String> input, String filename) {
         ArrayList<ItemStack> returnList = new ArrayList<ItemStack>();
         for (String current : input) {
             String[] params = current.split("\\.");
@@ -374,7 +374,7 @@ public class RegionManager {
                 }
                 returnList.add(is);
             } else {
-                plugin.warning("[HeroStronghold] could not find item " + params[0]);
+                plugin.warning("[HeroStronghold] could not find item " + params[0] + " in " + filename);
             }
         }
         return returnList;
