@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Map;
 import multitallented.redcastlemedia.bukkit.herostronghold.HeroStronghold;
+import multitallented.redcastlemedia.bukkit.herostronghold.Util;
 import multitallented.redcastlemedia.bukkit.herostronghold.events.HSEvent;
 import multitallented.redcastlemedia.bukkit.herostronghold.events.UpkeepSuccessEvent;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.Region;
@@ -199,22 +200,24 @@ public class Effect {
         }
         RegionManager rm = getPlugin().getRegionManager();
         RegionType rt = rm.getRegionType(rm.getRegion(l).getType());
-        Map<Material, Integer> reagentMap = new EnumMap<Material, Integer>(Material.class);
+        /*Map<Material, Integer> reagentMap = new EnumMap<Material, Integer>(Material.class);
         for (ItemStack is : rt.getReagents()) {
             reagentMap.put(is.getType(), is.getAmount());
-        }
+        }*/
         BlockState bs = l.getBlock().getState();
         if (!(bs instanceof Chest)) {
             return false;
         }
         //Check if chest is full and region has output
         Chest chest = ((Chest) bs);
-        for (ItemStack is : rt.getReagents()) {
+        return Util.containsItems(rt.getReagents(), chest.getInventory());
+        
+        /*for (ItemStack is : rt.getReagents()) {
             if (!chest.getInventory().contains(is.getType(), is.getAmount())) {
                 return false;
             }
         }
-        return true;
+        return true;*/
         /*for (ItemStack is : chest.getInventory().getContents()) {
             Material mat = Material.AIR;
             if (is != null) {
@@ -256,7 +259,13 @@ public class Effect {
         
         
         //Remove the upkeep items from the region chest and add items from output
-        boolean hasUpkeep = true;
+        if (chest.getInventory().firstEmpty() < 0 && !rt.getOutput().isEmpty()) {
+            return;
+        }
+        if (!Util.containsItems(rt.getUpkeep(), chest.getInventory())) {
+            return;
+        }
+        /*boolean hasUpkeep = true;
         for (ItemStack is : rt.getUpkeep()) {
             if (!chest.getInventory().contains(is.getType(), is.getAmount())) {
                 hasUpkeep = false;
@@ -264,7 +273,7 @@ public class Effect {
         }
         if (!hasUpkeep) {
             return;
-        }
+        }*/
         
         //Check and remove money from the player
         String playername = "";
@@ -280,13 +289,10 @@ public class Effect {
             }
         }
         
-        
-        for (ItemStack is : rt.getUpkeep()) {
+        Util.removeItems(rt.getUpkeep(), chest.getInventory());
+        /*for (ItemStack is : rt.getUpkeep()) {
             chest.getInventory().removeItem(is);
-        }
-        if (chest.getInventory().firstEmpty() < 0) {
-            return;
-        }
+        }*/
         
         if (HeroStronghold.econ != null) {
             if (output < 0) {
@@ -295,9 +301,10 @@ public class Effect {
                 HeroStronghold.econ.depositPlayer(playername, output);
             }
         }
-        for (ItemStack is : rt.getOutput()) {
+        Util.addItems(rt.getOutput(), chest.getInventory());
+        /*for (ItemStack is : rt.getOutput()) {
             chest.getInventory().addItem(is);
-        }
+        }*/
         chest.update(true);
     }
     /**
@@ -321,7 +328,14 @@ public class Effect {
         
         
         //Remove the upkeep items from the region chest and add items from output
-        boolean hasUpkeep = true;
+        
+        if (chest.getInventory().firstEmpty() < 0 && !rt.getOutput().isEmpty()) {
+            return;
+        }
+        if (!Util.containsItems(rt.getUpkeep(), chest.getInventory())) {
+            return;
+        }
+        /*boolean hasUpkeep = true;
         for (ItemStack is : rt.getUpkeep()) {
             if (!chest.getInventory().contains(is.getType(), is.getAmount())) {
                 hasUpkeep = false;
@@ -329,7 +343,7 @@ public class Effect {
         }
         if (!hasUpkeep) {
             return;
-        }
+        }*/
         
         //Check and remove money from the player
         String playername = "";
@@ -346,12 +360,10 @@ public class Effect {
         }
         
         
-        for (ItemStack is : rt.getUpkeep()) {
+        /*for (ItemStack is : rt.getUpkeep()) {
             chest.getInventory().removeItem(is);
-        }
-        if (chest.getInventory().firstEmpty() < 0) {
-            return;
-        }
+        }*/
+        Util.removeItems(rt.getUpkeep(), chest.getInventory());
         
         if (HeroStronghold.econ != null) {
             if (output < 0) {
@@ -360,9 +372,10 @@ public class Effect {
                 HeroStronghold.econ.depositPlayer(playername, output);
             }
         }
-        for (ItemStack is : rt.getOutput()) {
+        Util.addItems(rt.getOutput(), chest.getInventory());
+        /*for (ItemStack is : rt.getOutput()) {
             chest.getInventory().addItem(is);
-        }
+        }*/
         Bukkit.getPluginManager().callEvent(new UpkeepSuccessEvent(event));
         chest.update();
     }
@@ -388,7 +401,13 @@ public class Effect {
         Chest chest = (Chest) bs;
         
         //Remove the upkeep items from the region chest and add items from output
-        boolean hasUpkeep = true;
+        if (chest.getInventory().firstEmpty() < 0 && !rt.getOutput().isEmpty()) {
+            return false;
+        }
+        if (!Util.containsItems(rt.getUpkeep(), chest.getInventory())) {
+            return false;
+        }
+        /*boolean hasUpkeep = true;
         for (ItemStack is : rt.getUpkeep()) {
             if (!chest.getInventory().contains(is.getType(), is.getAmount())) {
                 hasUpkeep = false;
@@ -396,7 +415,7 @@ public class Effect {
         }
         if (!hasUpkeep) {
             return false;
-        }
+        }*/
         
         
         //Check and remove money from the player
@@ -417,13 +436,10 @@ public class Effect {
             }
         }
         
-        
-        for (ItemStack is : rt.getUpkeep()) {
+        Util.removeItems(rt.getUpkeep(), chest.getInventory());
+        /*for (ItemStack is : rt.getUpkeep()) {
             chest.getInventory().removeItem(is);
-        }
-        if (chest.getInventory().firstEmpty() < 0) {
-            return false;
-        }
+        }*/
         
         if (HeroStronghold.econ != null) {
             if (output < 0) {
@@ -432,9 +448,10 @@ public class Effect {
                 HeroStronghold.econ.depositPlayer(playername, output);
             }
         }
-        for (ItemStack is : rt.getOutput()) {
+        /*for (ItemStack is : rt.getOutput()) {
             chest.getInventory().addItem(is);
-        }
+        }*/
+        Util.addItems(rt.getOutput(), chest.getInventory());
         
         chest.update(true);
         return true;
@@ -461,7 +478,13 @@ public class Effect {
         Chest chest = (Chest) bs;
         
         //Remove the upkeep items from the region chest and add items from output
-        boolean hasUpkeep = true;
+        if (chest.getInventory().firstEmpty() < 0 && !rt.getOutput().isEmpty()) {
+            return false;
+        }
+        if (!Util.containsItems(rt.getUpkeep(), chest.getInventory())) {
+            return false;
+        }
+        /*boolean hasUpkeep = true;
         for (ItemStack is : rt.getUpkeep()) {
             if (!chest.getInventory().contains(is.getType(), is.getAmount())) {
                 hasUpkeep = false;
@@ -469,7 +492,7 @@ public class Effect {
         }
         if (!hasUpkeep) {
             return false;
-        }
+        }*/
         
         
         //Check and remove money from the player
@@ -490,13 +513,10 @@ public class Effect {
             }
         }
         
-        
-        for (ItemStack is : rt.getUpkeep()) {
+        Util.removeItems(rt.getUpkeep(), chest.getInventory());
+        /*for (ItemStack is : rt.getUpkeep()) {
             chest.getInventory().removeItem(is);
-        }
-        if (chest.getInventory().firstEmpty() < 0) {
-            return false;
-        }
+        }*/
         
         if (HeroStronghold.econ != null) {
             if (output < 0) {
@@ -505,9 +525,10 @@ public class Effect {
                 HeroStronghold.econ.depositPlayer(playername, output);
             }
         }
-        for (ItemStack is : rt.getOutput()) {
+        Util.addItems(rt.getOutput(), chest.getInventory());
+        /*for (ItemStack is : rt.getOutput()) {
             chest.getInventory().addItem(is);
-        }
+        }*/
         Bukkit.getPluginManager().callEvent(new UpkeepSuccessEvent(event));
         chest.update(true);
         return true;
