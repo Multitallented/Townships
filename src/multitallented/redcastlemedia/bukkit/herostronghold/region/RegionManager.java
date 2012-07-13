@@ -157,7 +157,8 @@ public class RegionManager {
                         rConfig.getInt("charter", 0),
                         rConfig.getDouble("exp", 0),
                         rConfig.getString("central-structure"),
-                        rConfig.getString("description")));
+                        rConfig.getString("description"),
+                        rConfig.getInt("population", 0)));
             } catch (Exception e) {
                 plugin.warning("[HeroStronghold] failed to load " + currentRegionFile.getName());
             }
@@ -478,7 +479,7 @@ public class RegionManager {
         }
     }
     
-    public boolean addSuperRegion(String name, Location loc, String type, List<String> owners, Map<String, List<String>> members, int power) {
+    public boolean addSuperRegion(String name, Location loc, String type, List<String> owners, Map<String, List<String>> members, int power, double balance) {
         File superRegionFolder = new File(plugin.getDataFolder() + "/superregions");
         File dataFile = new File(superRegionFolder, name + ".yml");
         if (dataFile.exists()) {
@@ -498,6 +499,7 @@ public class RegionManager {
                 dataConfig.set("members." + s, members.get(s));
             }
             dataConfig.set("power", power);
+            dataConfig.set("balance", balance);
             dataConfig.save(dataFile);
             liveSuperRegions.put(name, new SuperRegion(name, loc, type, owners, members, power, 0.0, 0.0, new LinkedList<Double>()));
             

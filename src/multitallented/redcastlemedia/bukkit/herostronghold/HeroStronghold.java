@@ -864,6 +864,7 @@ public class HeroStronghold extends JavaPlugin {
             
             //Assimulate any child super regions
             List<String> owners = new ArrayList<String>();
+            double balance = 0.0;
             for (String s : quietDestroy) {
                 SuperRegion sr = regionManager.getSuperRegion(s);
                 for (String so : sr.getOwners()) {
@@ -871,9 +872,17 @@ public class HeroStronghold extends JavaPlugin {
                         owners.add(so);
                 }
                 for (String sm : sr.getMembers().keySet()) {
-                    if (!members.containsKey(sm))
+                    if (!members.containsKey(sm) && sr.getMember(sm).contains("member"))
                         members.put(sm, sr.getMember(sm));
                 }
+                balance += sr.getBalance();
+            }
+            //Check if more members needed to create the super-region
+            if (owners.size() + members.size() < currentRegionType.getPopulation()) {
+                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You need " + (currentRegionType.getPopulation() - owners.size() - members.size()) + " more members.");
+                return true;
+            }
+            for (String s : quietDestroy) {
                 regionManager.destroySuperRegion(s, false);
             }
             if (currentCharter > 0 && pendingCharters.containsKey(args[2])) {
@@ -896,7 +905,7 @@ public class HeroStronghold extends JavaPlugin {
                     heroes.getCharacterManager().getHero(player).gainExp(currentRegionType.getExp(), ExperienceType.EXTERNAL, player.getLocation());
                 }
             }
-            regionManager.addSuperRegion(args[2], currentLocation, regionTypeName, owners, members, currentRegionType.getMaxPower());
+            regionManager.addSuperRegion(args[2], currentLocation, regionTypeName, owners, members, currentRegionType.getDailyPower(), balance);
             player.sendMessage(ChatColor.GOLD + "[HeroStronghold] You've created a new " + args[1] + " called " + args[2]);
             return true;
         } else if (args.length > 2 && args[0].equalsIgnoreCase("withdraw")) {
@@ -1985,7 +1994,7 @@ public class HeroStronghold extends JavaPlugin {
             }
             
             regionManager.destroySuperRegion(args[1], false);
-            regionManager.addSuperRegion(args[2], sr.getLocation(), sr.getType(), sr.getOwners(), sr.getMembers(), sr.getPower());
+            regionManager.addSuperRegion(args[2], sr.getLocation(), sr.getType(), sr.getOwners(), sr.getMembers(), sr.getPower(), sr.getBalance());
             player.sendMessage(ChatColor.GOLD + "[HeroStronghold] " + args[1] + " is now " + args[2]);
             return true;
         } else if (args.length > 0 && (args[0].equalsIgnoreCase("stats") || args[0].equalsIgnoreCase("who"))) {
