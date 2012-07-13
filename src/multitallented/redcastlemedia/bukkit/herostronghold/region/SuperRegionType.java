@@ -22,9 +22,10 @@ public class SuperRegionType {
     private final String centralStructure;
     private final int rawRadius;
     private final String description;
+    private final int population;
     public SuperRegionType(String name, List<String> effects, int radius, Map<String, Integer> requirements, double moneyRequirement, double output,
             List<String> children, int maxPower, int dailyPower, int charter, double exp, String centralStructure,
-            String description) {
+            String description, int population) {
         this.name=name;
         this.effects = effects;
         this.radius = radius;
@@ -39,6 +40,11 @@ public class SuperRegionType {
         this.exp = exp;
         this.centralStructure = centralStructure;
         this.description = description;
+        this.population = population;
+    }
+    
+    public int getPopulation() {
+        return population;
     }
     
     public int getRawRadius() {
