@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package multitallented.redcastlemedia.bukkit.herostronghold.region;
 
 import java.io.File;
@@ -36,7 +31,7 @@ public class DefaultRegions {
             tempList.add("denyfirenoreagent.1");
             tempList.add("denydamage.1");
             config.set("effects", tempList);
-            tempList.clear();
+            tempList = new ArrayList<String>();
             config.set("radius", 4);
             tempList.add("WOODEN_DOOR.1");
             tempList.add("THIN_GLASS.3");
@@ -50,19 +45,19 @@ public class DefaultRegions {
             tempList.add("WOOL.1");
             tempList.add("CHEST.2");
             config.set("requirements", new ArrayList<String>(tempList));
-            tempList.clear();
+            tempList = new ArrayList<String>();
             tempList.add("BREAD.2");
             tempList.add("IRON_INGOT.1");
             tempList.add("DIAMOND.1");
             config.set("reagents", new ArrayList<String>(tempList));
-            tempList.clear();
+            tempList = new ArrayList<String>();
             tempList.add("BREAD.2");
             config.set("upkeep", new ArrayList<String>(tempList));
-            tempList.clear();
+            tempList = new ArrayList<String>();
             tempList.add("DIRT.1");
             config.set("output", new ArrayList<String>(tempList));
             config.set("upkeep-chance", 1.0);
-            tempList.clear();
+            tempList = new ArrayList<String>();
             tempList.add("ward");
             tempList.add("village");
             config.set("super-regions", new ArrayList<String>(tempList));
@@ -80,12 +75,12 @@ public class DefaultRegions {
             ArrayList<String> tempList = new ArrayList<String>();
             tempList.add("mancannon.3");
             config.set("effects",tempList);
-            tempList.clear();
+            tempList = new ArrayList<String>();
             config.set("radius", 2);
             tempList.add("POWERED_RAIL.3");
             tempList.add("PISTON_BASE.1");
             config.set("requirements", new ArrayList<String>(tempList));
-            tempList.clear();
+            tempList = new ArrayList<String>();
             tempList.add("REDSTONE.16");
             config.set("reagents", new ArrayList<String>(tempList));
             config.set("upkeep-chance", 0.0);
@@ -103,18 +98,18 @@ public class DefaultRegions {
             tempList.add("shootarrow.2");
             tempList.add("denyblockbuild.1");
             config.set("effects",tempList);
-            tempList.clear();
+            tempList = new ArrayList<String>();
             config.set("radius", 20);
             config.set("build-radius", 3);
             tempList.add("DISPENSER.1");
             tempList.add("FENCE.5");
             tempList.add("REDSTONE_WIRE.4");
             config.set("requirements", new ArrayList<String>(tempList));
-            tempList.clear();
+            tempList = new ArrayList<String>();
             tempList.add("REDSTONE.4");
             tempList.add("ARROW.1");
             config.set("reagents", new ArrayList<String>(tempList));
-            tempList.clear();
+            tempList = new ArrayList<String>();
             tempList.add("ARROW.1");
             config.set("upkeep", new ArrayList<String>(tempList));
             config.set("upkeep-chance", 0.0);
@@ -142,7 +137,7 @@ public class DefaultRegions {
             tempList.add("denyfirenoreagent");
             tempList.add("denyfriendlyfire");
             config.set("effects", tempList);
-            tempList.clear();
+            tempList = new ArrayList<String>();
             config.set("radius", 50);
             tempList.add("mancannon.2");
             config.set("requirements", new ArrayList<String>(tempList));
@@ -168,7 +163,7 @@ public class DefaultRegions {
             tempList.add("denyfirenoreagent");
             tempList.add("denypvp");
             config.set("effects", tempList);
-            tempList.clear();
+            tempList = new ArrayList<String>();
             config.set("radius", 50);
             tempList.add("arrowturret.2");
             tempList.add("mancannon.2");
@@ -180,7 +175,7 @@ public class DefaultRegions {
             config.set("max-power", 400);
             config.set("daily-power-increase", 40);
             config.set("charter", 4);
-            tempList.clear();
+            tempList = new ArrayList<String>();
             tempList.add("ward");
             config.set("children", new ArrayList<String>(tempList));
             config.set("exp", 5000);
@@ -198,15 +193,19 @@ public class DefaultRegions {
             Set<String> keys = config.getKeys(false);
             folder.mkdirs();
             for (String s : keys) {
-                FileConfiguration currentConfig = new YamlConfiguration();
-                ConfigurationSection cs = config.getConfigurationSection(s);
-                File file = new File(folder, s + ".yml");
-                file.createNewFile();
-                currentConfig.load(file);
-                for (String s0 : cs.getKeys(false)) {
-                    currentConfig.set(s0, cs.get(s0));
+                try {
+                    FileConfiguration currentConfig = new YamlConfiguration();
+                    ConfigurationSection cs = config.getConfigurationSection(s);
+                    File file = new File(folder, s + ".yml");
+                    file.createNewFile();
+                    currentConfig.load(file);
+                    for (String s0 : cs.getKeys(false)) {
+                        currentConfig.set(s0, cs.get(s0));
+                    }
+                    currentConfig.save(file);
+                } catch (Exception e) {
+                    System.out.println("[HeroStronghold] failed to migrate " + s + ".yml");
                 }
-                currentConfig.save(file);
             }
         } catch (Exception e) {
             System.out.println("[HeroStronghold] failed to migrate regions.yml");
