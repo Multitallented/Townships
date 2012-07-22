@@ -456,7 +456,7 @@ public class HeroStronghold extends JavaPlugin {
             
             //Check if over max number of regions of that type
             if (regionManager.isAtMaxRegions(player, currentRegionType)) {
-                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You dont have permission to build more " + currentRegionType);
+                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You dont have permission to build more " + currentRegionType.getName());
                 return true;
             }
             
@@ -907,6 +907,50 @@ public class HeroStronghold extends JavaPlugin {
             }
             regionManager.addSuperRegion(args[2], currentLocation, regionTypeName, owners, members, currentRegionType.getDailyPower(), balance);
             player.sendMessage(ChatColor.GOLD + "[HeroStronghold] You've created a new " + args[1] + " called " + args[2]);
+            return true;
+        } else if (args.length > 0 && args[0].equalsIgnoreCase("listall")) {
+            if (args.length > 1) {
+                SuperRegionType srt = regionManager.getSuperRegionType(args[1]);
+                if (srt == null) {
+                    player.sendMessage(ChatColor.GRAY + "[HeroStronghold] There is no super-region type named " + args[1]);
+                    return true;
+                }
+                String message = ChatColor.GOLD + "";
+                int j =0;
+                for (SuperRegion sr : regionManager.getSortedSuperRegions()) {
+                    if (message.length() + sr.getName().length() + 2 > 55) {
+                        player.sendMessage(message);
+                        message = ChatColor.GOLD + "";
+                        j++;
+                    }
+                    if (j > 14) {
+                        break;
+                    } else {
+                        message += sr.getName() + ", ";
+                    }
+                }
+                if (!message.equals(ChatColor.GOLD + "")) {
+                    player.sendMessage(message);
+                }
+            } else {
+                String message = ChatColor.GOLD + "";
+                int j =0;
+                for (SuperRegion sr : regionManager.getSortedSuperRegions()) {
+                    if (message.length() + sr.getName().length() + 2 > 55) {
+                        player.sendMessage(message);
+                        message = ChatColor.GOLD + "";
+                        j++;
+                    }
+                    if (j > 14) {
+                        break;
+                    } else {
+                        message += sr.getName() + ", ";
+                    }
+                }
+                if (!message.equals(ChatColor.GOLD + "")) {
+                    player.sendMessage(message);
+                }
+            }
             return true;
         } else if (args.length > 2 && args[0].equalsIgnoreCase("withdraw")) {
             if (econ == null) {
@@ -1712,9 +1756,12 @@ public class HeroStronghold extends JavaPlugin {
                 } else {
                     boolean takeover = false;
                     for (SuperRegion sr : regionManager.getContainingSuperRegions(loc)) {
+                        if (!sr.hasOwner(player.getName())) {
+                            takeover = false;
+                            break;
+                        }
                         if (regionManager.getSuperRegionType(sr.getType()).hasEffect("control")) {
                             takeover = true;
-                            break;
                         }
                     }
                     if (takeover) {
