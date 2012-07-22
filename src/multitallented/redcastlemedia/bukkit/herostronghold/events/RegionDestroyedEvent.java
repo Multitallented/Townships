@@ -1,6 +1,6 @@
 package multitallented.redcastlemedia.bukkit.herostronghold.events;
 
-import org.bukkit.Location;
+import multitallented.redcastlemedia.bukkit.herostronghold.region.Region;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
@@ -10,13 +10,13 @@ import org.bukkit.event.HandlerList;
  */
 public class RegionDestroyedEvent extends Event {
     private static final HandlerList handlers = new HandlerList();
-    private final Location l;
-    public RegionDestroyedEvent(Location l) {
-        this.l = l;
+    private final Region r;
+    public RegionDestroyedEvent(Region r) {
+        this.r = r;
     }
     
-    public Location getLocation() {
-        return l;
+    public Region getRegion() {
+        return r;
     }
     
     public static HandlerList getHandlerList() {

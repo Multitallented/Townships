@@ -2,6 +2,7 @@ package multitallented.redcastlemedia.bukkit.herostronghold.checkregiontask;
 
 import java.util.HashSet;
 import java.util.Set;
+import multitallented.redcastlemedia.bukkit.herostronghold.events.TwoSecondEvent;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.Region;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionManager;
 import org.bukkit.Location;
@@ -67,6 +68,7 @@ public class CheckRegionTask implements Runnable {
                 } catch (Exception e) {
                 }
             }
+            pm.callEvent(new TwoSecondEvent());
         } else {
             i++;
         }

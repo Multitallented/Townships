@@ -1,8 +1,6 @@
 package multitallented.redcastlemedia.bukkit.herostronghold.effect;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.Map;
 import multitallented.redcastlemedia.bukkit.herostronghold.HeroStronghold;
 import multitallented.redcastlemedia.bukkit.herostronghold.Util;
 import multitallented.redcastlemedia.bukkit.herostronghold.events.HSEvent;
@@ -14,12 +12,10 @@ import multitallented.redcastlemedia.bukkit.herostronghold.region.SuperRegion;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
-import org.bukkit.inventory.ItemStack;
 
 /**
  *
@@ -37,7 +33,7 @@ public class Effect {
     }
     
     protected void registerEvent(Listener listener) {
-        plugin.getServer().getPluginManager().registerEvents(listener, plugin);
+        Bukkit.getPluginManager().registerEvents(listener, plugin);
     }
     
     /**

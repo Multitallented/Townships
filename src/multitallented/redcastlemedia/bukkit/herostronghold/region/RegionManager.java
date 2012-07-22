@@ -10,10 +10,8 @@ import multitallented.redcastlemedia.bukkit.herostronghold.effect.Effect;
 import multitallented.redcastlemedia.bukkit.herostronghold.events.RegionCreatedEvent;
 import multitallented.redcastlemedia.bukkit.herostronghold.events.RegionDestroyedEvent;
 import multitallented.redcastlemedia.bukkit.herostronghold.events.SuperRegionCreatedEvent;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import multitallented.redcastlemedia.bukkit.herostronghold.events.SuperRegionDestroyedEvent;
+import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -38,7 +36,7 @@ public class RegionManager {
     private FileConfiguration dataConfig;
     private final ConfigManager configManager;
     private HashMap<SuperRegion, HashSet<SuperRegion>> wars = new HashMap<SuperRegion, HashSet<SuperRegion>>();
-    private HashMap<String, HashMap<String, Integer>> permSets = new HashMap<String, HashMap<String, Integer>>();
+    private HashMap<String, PermSet> permSets = new HashMap<String, PermSet>();
     private HashSet<String> possiblePermSets = new HashSet<String>();
     private ArrayList<Region> sortedBuildRegions = new ArrayList<Region>();
     
@@ -50,9 +48,7 @@ public class RegionManager {
         configManager = new ConfigManager(config, plugin);
         plugin.setConfigManager(configManager);
         
-        PermSet ps = new PermSet();
-        
-        permSets = ps.loadPermSets(plugin);
+        permSets = PermSet.loadPermSets(plugin);
         for (String s : permSets.keySet()) {
             possiblePermSets.add(s);
         }
@@ -423,7 +419,7 @@ public class RegionManager {
                     }
                 });
             }
-            plugin.getServer().getPluginManager().callEvent(new RegionCreatedEvent(loc));
+            plugin.getServer().getPluginManager().callEvent(new RegionCreatedEvent(liveRegions.get(loc)));
         } catch (Exception ioe) {
             System.out.println("[HeroStronghold] unable to write new region to file " + i + ".yml");
             ioe.printStackTrace();
@@ -472,7 +468,7 @@ public class RegionManager {
                     }
                 });
             }
-            plugin.getServer().getPluginManager().callEvent(new RegionCreatedEvent(loc));
+            plugin.getServer().getPluginManager().callEvent(new RegionCreatedEvent(liveRegions.get(loc)));
         } catch (Exception ioe) {
             System.out.println("[HeroStronghold] unable to write new region to file " + i + ".yml");
             ioe.printStackTrace();
@@ -563,7 +559,7 @@ public class RegionManager {
           }
         }.run();
         
-        plugin.getServer().getPluginManager().callEvent(new RegionDestroyedEvent(l));
+        plugin.getServer().getPluginManager().callEvent(new RegionDestroyedEvent(currentRegion));
         if (configManager.getExplode()) {
             l.getBlock().setTypeId(0);
             TNTPrimed tnt = l.getWorld().spawn(l, TNTPrimed.class); 
@@ -600,6 +596,7 @@ public class RegionManager {
         removeWars(name);
         liveSuperRegions.remove(name);
         sortedSuperRegions.remove(currentRegion);
+        Bukkit.getPluginManager().callEvent(new SuperRegionDestroyedEvent(currentRegion));
     }
     
     public void checkIfDestroyedSuperRegion(Location loc) {
@@ -1002,6 +999,8 @@ public class RegionManager {
         ArrayList<Region> tempList = new ArrayList<Region>();
         double x = loc.getX();
         double y = loc.getY();
+        y = y < 0 ? 0 : y;
+        y = y > loc.getWorld().getMaxHeight() ? loc.getWorld().getMaxHeight() : y;
         double z = loc.getZ();
         for (Region r : getSortedRegions()) {
             try {
@@ -1379,12 +1378,20 @@ public class RegionManager {
     
     public boolean isAtMaxRegions(Player p, RegionType rt) {
         //Find permSet
-        String s = getPermSet(p);
+        ArrayList<String> sets = getPermSets(p);
+        PermSet ps = null;
+        int highestPriority = -9999999;
+        for (String s : sets) {
+            if (permSets.containsKey(s) && permSets.get(s).getPriority() > highestPriority) {
+                ps = permSets.get(s);
+                highestPriority = ps.getPriority();
+            }
+        }
         
         //Find total regions of that type
         int max = 9999999;
         try {
-            max = permSets.get(s).get(rt.getName());
+            max = ps.getPerms().get(rt.getName());
         } catch (NullPointerException npe) {
             return false;
         }
@@ -1403,16 +1410,62 @@ public class RegionManager {
                 return true;
             }
         }
-        
         return false;
     }
     
-    public String getPermSet(Player p) {
+    public ArrayList<String> getPermSets(Player p) {
+        ArrayList<String> sets = new ArrayList<String>();
         for (String s : possiblePermSets) {
             if (HeroStronghold.perms.has(p, "herostronghold.group." + s)) {
-                return s;
+                sets.add(s);
             }
         }
-        return null;
+        return sets;
+    }
+    
+    public boolean canBuildHere(Player p, Location l) {
+        String playername = p.getName();
+        Effect effect = new Effect(plugin);
+        for (Region r : getContainingRegions(l)) {
+            if (r.isMember(playername) || r.isOwner(playername)) {
+                continue;
+            } else if ((effect.regionHasEffect(r, "denyblockbuild") != 0 && effect.hasReagents(r.getLocation())) ||
+                    effect.regionHasEffect(r, "denyblockbuildnoreagent") != 0) {
+                return false;
+            }
+        }
+        for (SuperRegion sr : getContainingSuperRegions(l)) {
+            SuperRegionType srt = getSuperRegionType(sr.getType());
+            if (sr.hasMember(playername) || sr.hasOwner(playername)) {
+                continue;
+            } else if (srt.hasEffect("denyblockbuild") || srt.hasEffect("denyblockbuildnoreagent")) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    public boolean canBreakHere(Location l, Player p) {
+        String playername = p.getName();
+        Effect effect = new Effect(plugin);
+        for (Region r : getContainingRegions(l)) {
+            if (r.isMember(playername) || r.isOwner(playername)) {
+                continue;
+            } else if ((effect.regionHasEffect(r, "denyblockbreak") != 0 && effect.hasReagents(r.getLocation())) ||
+                    effect.regionHasEffect(r, "denyblockbreaknoreagent") != 0) {
+                return false;
+            }
+        }
+        for (SuperRegion sr : getContainingSuperRegions(l)) {
+            SuperRegionType srt = getSuperRegionType(sr.getType());
+            if (sr.hasMember(playername) || sr.hasOwner(playername)) {
+                continue;
+            } else if (srt.hasEffect("denyblockbreak") || srt.hasEffect("denyblockbreaknoreagent")) {
+                return false;
+            }
+        }
+        
+        return true;
     }
 }
