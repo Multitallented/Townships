@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package multitallented.redcastlemedia.bukkit.herostronghold.checkregiontask;
 
 import multitallented.redcastlemedia.bukkit.herostronghold.events.PlayerInRegionEvent;
@@ -31,38 +27,26 @@ public class CheckPlayerInRegionThread implements Runnable {
 
     @Override
     public void run() {
-        double x = loc.getX();
-        for (Region r : rm.getSortedRegions()) {
-            int radius = rm.getRegionType(r.getType()).getRadius();
-            Location l = r.getLocation();
-            if (l.getX() + radius < x) {
-                return;
+        for (Region re : rm.getContainingRegions(loc)) {
+            PlayerInRegionEvent pIREvent = new PlayerInRegionEvent(re.getLocation(), p);
+            pm.callEvent(pIREvent);
+            try {
+                for (Location dl : pIREvent.getRegionsToDestroy()) {
+                    if (!crt.containsRegionToDestory(dl)) {
+                        crt.addOrDestroyRegionToDestroy(dl);
+                    }
+                }
+            } catch (NullPointerException npe) {
+
             }
             try {
-                if (!(l.getX() - radius > x) && l.distanceSquared(loc) < radius) {
-                    PlayerInRegionEvent pIREvent = new PlayerInRegionEvent(l, p);
-                    pm.callEvent(pIREvent);
-                    try {
-                        for (Location dl : pIREvent.getRegionsToDestroy()) {
-                            if (!crt.containsRegionToDestory(dl)) {
-                                crt.addOrDestroyRegionToDestroy(dl);
-                            }
-                        }
-                    } catch (NullPointerException npe) {
-
-                    }
-                    try {
-                        for (Region re : pIREvent.getRegionsToCreate()) {
-                            crt.addRegionToCreate(re);
-                        }
-                    } catch (Exception e) {
-                        
-                    }
-                    return;
+                for (Region reg : pIREvent.getRegionsToCreate()) {
+                    crt.addRegionToCreate(reg);
                 }
-            } catch (IllegalArgumentException iae) {
-                
+            } catch (Exception e) {
+
             }
+            return;
         }
         
     }
