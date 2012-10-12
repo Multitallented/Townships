@@ -26,6 +26,7 @@ public class ConfigManager {
     private final double makePeaceBase;
     private final double makePeacePer;
     private final double renameCost;
+    private final int powerPerKill;
     
     public ConfigManager(FileConfiguration config, HeroStronghold plugin) {
         this.config = config;
@@ -43,6 +44,7 @@ public class ConfigManager {
         makePeaceBase = config.getDouble("war.make-peace-base-cost", 1000.0);
         makePeacePer = config.getDouble("war.make-peace-cost-per-member", 500.0);
         renameCost = config.getDouble("rename-cost", 1000.0);
+        powerPerKill = config.getInt("power-per-kill", 1);
         loadCharters();
     }
     
@@ -89,6 +91,9 @@ public class ConfigManager {
             return;
         }
         charterConfig.set(name, data);
+    }
+    public int getPowerPerKill() {
+        return powerPerKill;
     }
     
     public boolean getExplode() {

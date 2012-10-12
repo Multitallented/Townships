@@ -47,7 +47,13 @@ public class RegionManager {
         
         configManager = new ConfigManager(config, plugin);
         plugin.setConfigManager(configManager);
-        
+        load();
+    }
+    
+    public void reload() {   
+        load();
+    }
+    private void load() {
         permSets = PermSet.loadPermSets(plugin);
         for (String s : permSets.keySet()) {
             possiblePermSets.add(s);
@@ -83,49 +89,14 @@ public class RegionManager {
                         rConfig.getDouble("money-requirement"),
                         rConfig.getDouble("upkeep-money-output"),
                         rConfig.getDouble("exp"),
-                        rConfig.getString("description")));
+                        rConfig.getString("description"),
+                        rConfig.getInt("power-drain", 0),
+                        rConfig.getInt("housing", 0)));
             } catch (Exception e) {
                 plugin.warning("[HeroStronghold] failed to load " + currentRegionFile.getName());
                 e.printStackTrace();
             }
         }
-        /*FileConfiguration regionConfig = new YamlConfiguration();
-        try {
-            File regionFile = new File(plugin.getDataFolder(), "regions.yml");
-            if (!regionFile.exists()) {
-                InputStream defRegionConfigStream = plugin.getResource("regions.yml");
-                if (defRegionConfigStream != null) {
-                    FileConfiguration defRegionConfig = YamlConfiguration.loadConfiguration(defRegionConfigStream);
-                    regionConfig.setDefaults(defRegionConfig);
-                }
-                regionConfig.options().copyDefaults(true);
-                regionFile.createNewFile();
-                defRegionConfigStream.close();
-            }
-            regionConfig.load(regionFile);
-            for (String key : regionConfig.getKeys(false)) {
-                ConfigurationSection currentRegion = regionConfig.getConfigurationSection(key);
-                regionTypes.put(key, new RegionType(key,
-                        (ArrayList<String>) currentRegion.getStringList("friendly-classes"),
-                        (ArrayList<String>) currentRegion.getStringList("enemy-classes"),
-                        (ArrayList<String>) currentRegion.getStringList("effects"),
-                        (int) Math.pow(currentRegion.getInt("radius"), 2),
-                        (int) Math.pow(currentRegion.getInt("build-radius", currentRegion.getInt("radius")), 2),
-                        processItemStackList(currentRegion.getStringList("requirements")),
-                        currentRegion.getStringList("super-regions"),
-                        processItemStackList(currentRegion.getStringList("reagents")),
-                        processItemStackList(currentRegion.getStringList("upkeep")),
-                        processItemStackList(currentRegion.getStringList("output")),
-                        currentRegion.getDouble("upkeep-chance"),
-                        currentRegion.getDouble("money-requirement"),
-                        currentRegion.getDouble("upkeep-money-output"),
-                        currentRegion.getDouble("exp")));
-            }
-            regionConfig.save(regionFile);
-        } catch (Exception ex) {
-            plugin.warning("Unable to load regions.yml");
-            plugin.getServer().getPluginManager().disablePlugin(plugin);
-        }*/
         
         File suRegionFolder = new File(plugin.getDataFolder(), "SuperRegionConfig");
         if (!suRegionFolder.exists()) {
@@ -159,41 +130,6 @@ public class RegionManager {
                 plugin.warning("[HeroStronghold] failed to load " + currentRegionFile.getName());
             }
         }
-        
-        
-        /*FileConfiguration sRegionConfig = new YamlConfiguration();
-        try {
-            File sRegionFile = new File(plugin.getDataFolder(), "super-regions.yml");
-            if (!sRegionFile.exists()) {
-                InputStream defSRegionConfigStream = plugin.getResource("super-regions.yml");
-                if (defSRegionConfigStream != null) {
-                    FileConfiguration defSRegionConfig = YamlConfiguration.loadConfiguration(defSRegionConfigStream);
-                    sRegionConfig.setDefaults(defSRegionConfig);
-                }
-                sRegionConfig.options().copyDefaults(true);
-                sRegionFile.createNewFile();
-                defSRegionConfigStream.close();
-            }
-            sRegionConfig.load(sRegionFile);
-            for (String key : sRegionConfig.getKeys(false)) {
-                ConfigurationSection currentRegion = sRegionConfig.getConfigurationSection(key);
-                superRegionTypes.put(key, new SuperRegionType(key, currentRegion.getStringList("effects"),
-                        (int) Math.pow(currentRegion.getInt("radius"), 2),
-                        processRegionTypeMap(currentRegion.getStringList("requirements")),
-                        currentRegion.getDouble("money-requirement", 0),
-                        currentRegion.getDouble("money-output-daily", 0),
-                        currentRegion.getStringList("children"),
-                        currentRegion.getInt("max-power", 100),
-                        currentRegion.getInt("daily-power-increase", 10),
-                        currentRegion.getInt("charter", 0),
-                        currentRegion.getDouble("exp", 0),
-                        currentRegion.getString("central-structure")));
-            }
-            sRegionConfig.save(sRegionFile);
-        } catch (Exception e) {
-            plugin.warning("Unable to load super-regions.yml");
-            plugin.getServer().getPluginManager().disablePlugin(plugin);
-        }*/
 
         File playerFolder = new File(plugin.getDataFolder(), "data"); // Setup the Data Folder if it doesn't already exist
         playerFolder.mkdirs();
@@ -620,7 +556,7 @@ public class RegionManager {
         double y = loc.getY();
         double z = loc.getZ();
         int radius = getSuperRegionType(sr.getType()).getRawRadius();
-        for (Region r : getSortedRegions()) {	  	
+        for (Region r : getSortedBuildRegions()) {	  	
             Location l = r.getLocation();  	
             if (l.getX() + radius < x) { 	
                 break;	  	
@@ -674,10 +610,11 @@ public class RegionManager {
         if (!cm.getUsePower()) {
             return;
         }
-        int currentPower = sr.getPower() - 1;
-        setPower(sr, currentPower);
+        int powerLoss = cm.getPowerPerKill();
+        int currentPower = sr.getPower() - powerLoss;
+        currentPower = currentPower > 0 ? currentPower : 0;
         final String st = sr.getName();
-        if (currentPower == 25) {
+        if (currentPower < 26 && sr.getPower() > 25) {
             new Runnable() {
                   @Override
                   public void run()
@@ -685,7 +622,7 @@ public class RegionManager {
                     plugin.getServer().broadcastMessage(ChatColor.RED + "[HeroStronghold] " + st + " reached 25 power! Destruction is near!");
                   }
             }.run();
-        } else if (currentPower == 10) {
+        } else if (currentPower < 11 && sr.getPower() > 10) {
             new Runnable() {
                   @Override
                   public void run()
@@ -693,7 +630,7 @@ public class RegionManager {
                     plugin.getServer().broadcastMessage(ChatColor.RED + "[HeroStronghold] " + st + " reached 10 power! Destruction is at hand!");
                   }
             }.run();
-        } else if (currentPower <= 0) {
+        } else if (currentPower < 1) {
             new Runnable() {
                   @Override
                   public void run()
@@ -702,6 +639,7 @@ public class RegionManager {
                   }
             }.run();
         }
+        setPower(sr, currentPower);
     }
     
     public synchronized void setPower(SuperRegion sr, int newPower) {
@@ -1261,6 +1199,10 @@ public class RegionManager {
         return sortedRegions;
     }
     
+    public ArrayList<Region> getSortedBuildRegions() {
+        return sortedBuildRegions;
+    }
+    
     public ArrayList<SuperRegion> getSortedSuperRegions() {
         return sortedSuperRegions;
     }
@@ -1310,6 +1252,28 @@ public class RegionManager {
                     if (srt.equals(sr1)) {
                         return true;
                     }
+                }
+            }
+        }
+        return false;
+    }
+    
+    public boolean isAtWar(Player p, Player p1) {
+        String playername = p.getName();
+        String dPlayername = p1.getName();
+        HashSet<SuperRegion> tempSet = new HashSet<SuperRegion>();
+        HashSet<SuperRegion> dTempSet = new HashSet<SuperRegion>();
+        for (SuperRegion sr : getSortedSuperRegions()) {
+            if (sr.hasMember(playername) || sr.hasOwner(playername)) {
+                tempSet.add(sr);
+            } else if (sr.hasMember(dPlayername) || sr.hasOwner(dPlayername)) {
+                dTempSet.add(sr);
+            }
+        }
+        for (SuperRegion sr : tempSet) {
+            for (SuperRegion srt : dTempSet) {
+                if (hasWar(sr, srt)) {
+                    return true;
                 }
             }
         }
@@ -1467,5 +1431,13 @@ public class RegionManager {
         }
         
         return true;
+    }
+    
+    public boolean hasAvailableHousing(SuperRegion sr) {
+        int housing = 0;
+        for (Region r : getContainedRegions(sr)) {
+            housing += getRegionType(r.getType()).getHousing();
+        }
+        return housing > sr.getPopulation();
     }
 }

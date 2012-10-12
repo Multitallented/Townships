@@ -92,7 +92,7 @@ public class HeroStronghold extends JavaPlugin {
         
         pm.registerEvents(dpeListener, this);
         
-        pm.registerEvents(new CustomListener(regionManager), this);
+        pm.registerEvents(new CustomListener(this), this);
         log = Logger.getLogger("Minecraft");
         
         //Check for Heroes
@@ -108,7 +108,7 @@ public class HeroStronghold extends JavaPlugin {
         new EffectManager(this);
         
         //Setup repeating sync task for checking regions
-        CheckRegionTask theSender = new CheckRegionTask(getServer(), regionManager);
+        CheckRegionTask theSender = new CheckRegionTask(getServer(), this);
         getServer().getScheduler().scheduleSyncRepeatingTask(this, theSender, 10L, 10L);
         
         System.currentTimeMillis();
@@ -134,11 +134,31 @@ public class HeroStronghold extends JavaPlugin {
     
     @Override
     public boolean onCommand(CommandSender sender, org.bukkit.command.Command command, String label, String[] args) {
-        if (!(sender instanceof Player)) {
+        String debug = label;
+        for (String s : args) {
+            debug += " " + s;
+        }
+        System.out.println("[HeroStronghold] " + debug);
+        Player player = null;
+        try {
+            player = (Player) sender;
+        } catch (Exception e) {
+
+        }
+        if (args[0].equalsIgnoreCase("reload")) {
+            if (player != null && !(HeroStronghold.perms == null || HeroStronghold.perms.has(player, "herostronghold.admin"))) {
+                return true;
+            }
+            config = getConfig();
+            regionManager.reload();
+            configManager = new ConfigManager(config, this);
+            sender.sendMessage("[HeroStronghold] reloaded");
+            return true;
+        }
+        if (player == null) {
             sender.sendMessage("[HeroStronghold] doesn't recognize non-player commands.");
             return true;
         }
-        Player player = (Player) sender;
     if (args.length > 2 && args[0].equalsIgnoreCase("war")) {
         //hs war mySR urSR
         
@@ -774,7 +794,7 @@ public class HeroStronghold extends JavaPlugin {
                 try {
                     if (sr.getLocation().distance(currentLocation) < radius + regionManager.getSuperRegionType(sr.getType()).getRawRadius() &&
                             (sr.getType().equalsIgnoreCase(regionTypeName) || !sr.hasOwner(player.getName()))) {
-                        player.sendMessage(ChatColor.GRAY + "[HeroStronghold] There is already a " + regionTypeName + " here");
+                        player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + sr.getName() + " is already here.");
                         return true;
                     }
                 } catch (IllegalArgumentException iae) {
@@ -1199,6 +1219,11 @@ public class HeroStronghold extends JavaPlugin {
             if (!perms.has(invitee, "herostronghold.join")) {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + args[1] + " doesnt have permission to join a super-region.");
                 return true;
+            }
+            
+            //Check if has housing effect and if has enough housing
+            if (regionManager.getSuperRegionType(sr.getType()).hasEffect("housing") && !regionManager.hasAvailableHousing(sr)) {
+                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You cant addmember people to " + sr.getName() + " until you build more housing");
             }
             
             //Send an invite
@@ -1859,6 +1884,24 @@ public class HeroStronghold extends JavaPlugin {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You don't own this region.");
                 return true;
             }
+        } else if (args.length > 1 && args[0].equalsIgnoreCase("whereis")) {
+            RegionType rt = regionManager.getRegionType(args[1]);
+            if (rt == null) {
+                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] There is no region type " + args[1]);
+                return true;
+            }
+            boolean found = false;
+            for (Region r : regionManager.getSortedRegions()) {
+                if (r.isOwner(player.getName()) && r.getType().equals(args[1])) {
+                    player.sendMessage(ChatColor.GOLD + "[HeroStronghold] " + args[1] + " at " + ((int) r.getLocation().getX())
+                            + ", " + ((int) r.getLocation().getY()) + ", " + ((int) r.getLocation().getZ()));
+                    found = true;
+                }
+            }
+            if (!found) {
+                player.sendMessage(ChatColor.GOLD + "[HeroStronghold] " + args[1] + " not found.");
+            }
+            return true;
         } else if (args.length > 1 && args[0].equalsIgnoreCase("setowner")) {
             String playername = args[1];
             Player aPlayer = getServer().getPlayer(playername);
@@ -2044,10 +2087,13 @@ public class HeroStronghold extends JavaPlugin {
             regionManager.addSuperRegion(args[2], sr.getLocation(), sr.getType(), sr.getOwners(), sr.getMembers(), sr.getPower(), sr.getBalance());
             player.sendMessage(ChatColor.GOLD + "[HeroStronghold] " + args[1] + " is now " + args[2]);
             return true;
+        } else if (args.length > 0 && (args[0].equalsIgnoreCase("show"))) {
+            
+            return true;
         } else if (args.length > 0 && (args[0].equalsIgnoreCase("stats") || args[0].equalsIgnoreCase("who"))) {
             if (args.length == 1) {
                 Location loc = player.getLocation();
-                for (Region r : regionManager.getContainingRegions(loc)) {
+                for (Region r : regionManager.getContainingBuildRegions(loc)) {
                     player.sendMessage(ChatColor.GRAY + "[HeroStronghold] ==:|" + ChatColor.GOLD + r.getID() + " (" + r.getType() + ") " + ChatColor.GRAY + "|:==");
                     String message = ChatColor.GRAY + "Owners: " + ChatColor.GOLD;
                     int j = 0;
@@ -2109,6 +2155,10 @@ public class HeroStronghold extends JavaPlugin {
                 player.sendMessage(ChatColor.GRAY + "Taxes: " + ChatColor.GOLD + sr.getTaxes()
                         + ChatColor.GRAY + " Total Revenue: " + (revenue < 0 ? ChatColor.RED : ChatColor.GOLD) + revenue +
                         ChatColor.GRAY + " Disabled: " + (regionManager.hasAllRequiredRegions(sr) ? (ChatColor.GOLD + "false") : (ChatColor.RED + "true")));
+                //TODO state why the sr is disabled
+                if (sr.hasMember(player.getName()) || sr.hasOwner(player.getName())) {
+                    player.sendMessage(ChatColor.GRAY + "Location: " + ChatColor.GOLD + (int) sr.getLocation().getX() + ", " + (int) sr.getLocation().getY() + ", " + (int) sr.getLocation().getZ());
+                }
                 if (sr.getTaxes() != 0) {
                     String message = ChatColor.GRAY + "Tax Revenue History: " + ChatColor.GOLD;
                     for (double d : sr.getTaxRevenue()) {

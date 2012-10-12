@@ -195,7 +195,14 @@ public class Effect {
             return false;
         }
         RegionManager rm = getPlugin().getRegionManager();
-        RegionType rt = rm.getRegionType(rm.getRegion(l).getType());
+        Region r = null;
+        RegionType rt = null;
+        try {
+            r = rm.getRegion(l);
+            rt = rm.getRegionType(r.getType());
+        } catch (NullPointerException npe) {
+            return false;
+        }
         /*Map<Material, Integer> reagentMap = new EnumMap<Material, Integer>(Material.class);
         for (ItemStack is : rt.getReagents()) {
             reagentMap.put(is.getType(), is.getAmount());
@@ -204,6 +211,24 @@ public class Effect {
         if (!(bs instanceof Chest)) {
             return false;
         }
+        
+        if (rt.getPowerDrain() != 0) {
+            ArrayList<SuperRegion> srs = rm.getContainingSuperRegions(r.getLocation());
+            if (srs.isEmpty()) {
+                return false;
+            }
+            boolean hasPower = false;
+            for (SuperRegion sr : srs) {
+                if (sr.getPower() > rt.getPowerDrain() && rm.getSuperRegionType(sr.getType()).getMaxPower() > sr.getPower() - rt.getPowerDrain()) {
+                    hasPower = true;
+                    break;
+                }
+            }
+            if (!hasPower) {
+                return false;
+            }
+        }
+        
         //Check if chest is full and region has output
         Chest chest = ((Chest) bs);
         return Util.containsItems(rt.getReagents(), chest.getInventory());
@@ -285,6 +310,24 @@ public class Effect {
             }
         }
         
+        if (rt.getPowerDrain() != 0) {
+            ArrayList<SuperRegion> srs = rm.getContainingSuperRegions(l);
+            if (srs.isEmpty()) {
+                return;
+            }
+            boolean hasPower = false;
+            for (SuperRegion sr : srs) {
+                if (sr.getPower() > rt.getPowerDrain() && rm.getSuperRegionType(sr.getType()).getMaxPower() > sr.getPower() - rt.getPowerDrain()) {
+                    hasPower = true;
+                    rm.setPower(sr, sr.getPower() - rt.getPowerDrain());
+                    break;
+                }
+            }
+            if (!hasPower) {
+                return;
+            }
+        }
+        
         Util.removeItems(rt.getUpkeep(), chest.getInventory());
         /*for (ItemStack is : rt.getUpkeep()) {
             chest.getInventory().removeItem(is);
@@ -351,6 +394,24 @@ public class Effect {
         double output = rt.getMoneyOutput();
         if (rt.getMoneyOutput() != 0 && HeroStronghold.econ != null) {
             if (output < 0  && HeroStronghold.econ.getBalance(playername) < Math.abs(output)) {
+                return;
+            }
+        }
+        
+        if (rt.getPowerDrain() != 0) {
+            ArrayList<SuperRegion> srs = rm.getContainingSuperRegions(l);
+            if (srs.isEmpty()) {
+                return;
+            }
+            boolean hasPower = false;
+            for (SuperRegion sr : srs) {
+                if (sr.getPower() > rt.getPowerDrain() && rm.getSuperRegionType(sr.getType()).getMaxPower() > sr.getPower() - rt.getPowerDrain()) {
+                    hasPower = true;
+                    rm.setPower(sr, sr.getPower() - rt.getPowerDrain());
+                    break;
+                }
+            }
+            if (!hasPower) {
                 return;
             }
         }
@@ -432,6 +493,24 @@ public class Effect {
             }
         }
         
+        if (rt.getPowerDrain() != 0) {
+            ArrayList<SuperRegion> srs = rm.getContainingSuperRegions(l);
+            if (srs.isEmpty()) {
+                return false;
+            }
+            boolean hasPower = false;
+            for (SuperRegion sr : srs) {
+                if (sr.getPower() > rt.getPowerDrain() && rm.getSuperRegionType(sr.getType()).getMaxPower() > sr.getPower() - rt.getPowerDrain()) {
+                    hasPower = true;
+                    rm.setPower(sr, sr.getPower() - rt.getPowerDrain());
+                    break;
+                }
+            }
+            if (!hasPower) {
+                return false;
+            }
+        }
+        
         Util.removeItems(rt.getUpkeep(), chest.getInventory());
         /*for (ItemStack is : rt.getUpkeep()) {
             chest.getInventory().removeItem(is);
@@ -505,6 +584,24 @@ public class Effect {
                 return false;
             }
             if (output < 0  && econ.getBalance(playername) < Math.abs(output)) {
+                return false;
+            }
+        }
+        
+        if (rt.getPowerDrain() != 0) {
+            ArrayList<SuperRegion> srs = rm.getContainingSuperRegions(l);
+            if (srs.isEmpty()) {
+                return false;
+            }
+            boolean hasPower = false;
+            for (SuperRegion sr : srs) {
+                if (sr.getPower() > rt.getPowerDrain() && rm.getSuperRegionType(sr.getType()).getMaxPower() > sr.getPower() - rt.getPowerDrain()) {
+                    hasPower = true;
+                    rm.setPower(sr, sr.getPower() - rt.getPowerDrain());
+                    break;
+                }
+            }
+            if (!hasPower) {
                 return false;
             }
         }

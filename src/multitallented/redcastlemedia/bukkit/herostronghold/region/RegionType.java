@@ -28,6 +28,8 @@ public class RegionType {
     private final int rawRadius;
     private final String description;
     private final String group;
+    private final int powerDrain;
+    private final int housing;
     
     
     public RegionType(String name, String group, ArrayList<String> friendlyClasses,
@@ -36,7 +38,8 @@ public class RegionType {
             ArrayList<ItemStack> reagents, ArrayList<ItemStack> upkeep,
             ArrayList<ItemStack> output, double upkeepChance,
             double moneyRequirement, double moneyOutput, double exp,
-            String description) {
+            String description, int powerDrain,
+            int housing) {
         this.name = name;
         this.group = group;
         this.friendlyClasses = friendlyClasses;
@@ -56,6 +59,15 @@ public class RegionType {
         this.moneyOutput = moneyOutput;
         this.exp = exp;
         this.description = description;
+        this.powerDrain = powerDrain;
+        this.housing = housing;
+    }
+    public int getHousing() {
+        return housing;
+    }
+    
+    public int getPowerDrain() {
+        return powerDrain;
     }
     
     public String getGroup() {

@@ -85,7 +85,7 @@ public class RegionBlockListener implements Listener {
                     break;
                 }
 
-                int radius = regionManager.getRegionType(r.getType()).getRawRadius();
+                int radius = regionManager.getRegionType(r.getType()).getRawBuildRadius();
                 Location l = r.getLocation();
                 if (l.getX() + radius < loc.getX()) {
                     return;

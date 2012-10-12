@@ -27,7 +27,7 @@ public class PluginServerListener implements Listener {
     public void onPluginDisable(PluginDisableEvent event) {
         Plugin currentPlugin = event.getPlugin();
         String name = currentPlugin.getDescription().getName();
-
+        
         if (name.equals("Heroes")) {
             Logger log = Logger.getLogger("Minecraft");
             String message = "[HeroStronghold] " + name + " has been disabled!";

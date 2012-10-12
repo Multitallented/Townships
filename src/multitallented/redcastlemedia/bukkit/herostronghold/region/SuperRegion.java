@@ -126,4 +126,14 @@ public class SuperRegion {
     public void setPower(int i) {
         power = i;
     }
+    
+    public int getPopulation() {
+        int membersSize = 0;
+        for (String s : members.keySet()) {
+            if (members.get(s).contains("member")) {
+                membersSize += 1;
+            }
+        }
+        return owners.size() + membersSize;
+    }
 }

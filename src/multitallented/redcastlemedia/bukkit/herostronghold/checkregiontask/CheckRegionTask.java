@@ -2,9 +2,9 @@ package multitallented.redcastlemedia.bukkit.herostronghold.checkregiontask;
 
 import java.util.HashSet;
 import java.util.Set;
+import multitallented.redcastlemedia.bukkit.herostronghold.HeroStronghold;
 import multitallented.redcastlemedia.bukkit.herostronghold.events.TwoSecondEvent;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.Region;
-import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionManager;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
@@ -16,14 +16,14 @@ import org.bukkit.plugin.PluginManager;
  */
 public class CheckRegionTask implements Runnable {
     private final transient Server server;
-    private final RegionManager regionManager;
+    private final HeroStronghold hs;
     private final Set<Location> regionsToDestroy = new HashSet<Location>();
     private final HashSet<Region> regionsToCreate = new HashSet<Region>();
     private int i= 0;
     
-    public CheckRegionTask(Server server, RegionManager regionManager) {
+    public CheckRegionTask(Server server, HeroStronghold hs) {
         this.server = server;
-        this.regionManager = regionManager;
+        this.hs = hs;
     }
     
     public synchronized void addOrDestroyRegionToDestroy(Location l) {
@@ -51,7 +51,7 @@ public class CheckRegionTask implements Runnable {
         PluginManager pm = server.getPluginManager();
         for (int j=chunk * i; j<(i==3 ? players.length : chunk * (i+1)); j++) {
             try {
-                CheckPlayerInRegionThread thread = new CheckPlayerInRegionThread(this, pm, regionManager, players[j]);
+                CheckPlayerInRegionThread thread = new CheckPlayerInRegionThread(this, pm, hs.getRegionManager(), players[j]);
                 thread.run();
             } catch (Exception e) {
                 
@@ -61,8 +61,8 @@ public class CheckRegionTask implements Runnable {
             i=-1;
             
             
-            for (Location l : regionManager.getRegionLocations()) {
-                CheckUpkeepThread thread = new CheckUpkeepThread(this, pm, regionManager, l);
+            for (Location l : hs.getRegionManager().getRegionLocations()) {
+                CheckUpkeepThread thread = new CheckUpkeepThread(this, pm, hs.getRegionManager(), l);
                 try {
                     thread.run();
                 } catch (Exception e) {
@@ -74,12 +74,12 @@ public class CheckRegionTask implements Runnable {
         }
         
         for (Location l : regionsToDestroy) {
-            regionManager.destroyRegion(l);
-            regionManager.removeRegion(l);
+            hs.getRegionManager().destroyRegion(l);
+            hs.getRegionManager().removeRegion(l);
         }
         regionsToDestroy.clear();
         for (Region r : regionsToCreate) {
-            regionManager.addRegion(r.getLocation(), r.getType(), r.getOwners(), r.getMembers());
+            hs.getRegionManager().addRegion(r.getLocation(), r.getType(), r.getOwners(), r.getMembers());
         }
         regionsToCreate.clear();
     }
