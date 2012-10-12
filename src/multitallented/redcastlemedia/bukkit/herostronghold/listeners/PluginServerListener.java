@@ -1,8 +1,6 @@
 package multitallented.redcastlemedia.bukkit.herostronghold.listeners;
 
 import com.herocraftonline.heroes.Heroes;
-import com.massivecraft.factions.Factions;
-import com.palmergames.bukkit.towny.Towny;
 import java.util.logging.Logger;
 import multitallented.redcastlemedia.bukkit.herostronghold.HeroStronghold;
 import org.bukkit.event.EventHandler;
@@ -33,14 +31,7 @@ public class PluginServerListener implements Listener {
             String message = "[HeroStronghold] " + name + " has been disabled!";
             log.info(message);
             HeroStronghold.heroes = null;
-        } else if (name.equals("Towny")) {
-            HeroStronghold.towny = null;
-        } else if (name.equals("Factions")) {
-            HeroStronghold.factions = null;
         }
-        /*else if (name.equals("iConomy") || name.equals("BOSEconomy") || name.equals("Essentials")) {
-            HeroStronghold.econ = null;
-        }*/
     }
 
     @EventHandler
@@ -52,22 +43,6 @@ public class PluginServerListener implements Listener {
             HeroStronghold.heroes = (Heroes) currentPlugin;
             Logger log = Logger.getLogger("Minecraft");
             log.info("[HeroStronghold] Successfully hooked Heroes.");
-        } else if (name.equals("Towny")) {
-            HeroStronghold.towny = (Towny) currentPlugin;
-            Logger log = Logger.getLogger("Minecraft");
-            log.info("[HeroStronghold] Successfully hooked Towny.");
-        } else if (name.equals("Factions")) {
-            HeroStronghold.factions = (Factions) currentPlugin;
-            Logger log = Logger.getLogger("Minecraft");
-            log.info("[HeroStronghold] Successfully hooked Factions.");
         }
-        /*else if (name.equals("Vault") && (pm.isPluginEnabled("iConomy") || pm.isPluginEnabled("BOSEconomy") || pm.isPluginEnabled("Essentials"))
-                && HeroStronghold.econ == null) {
-            this.plugin.setupEconomy();
-        } else if ((name.equals("iConomy") || name.equals("BOSEconomy") || name.equals("Essentials")) && pm.isPluginEnabled("Vault")
-                && HeroStronghold.econ == null) {
-            this.plugin.setupEconomy();
-        }*/
     }
-    
 }
