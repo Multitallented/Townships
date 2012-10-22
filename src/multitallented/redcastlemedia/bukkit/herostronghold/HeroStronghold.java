@@ -1216,6 +1216,7 @@ public class HeroStronghold extends JavaPlugin {
             //Check if has housing effect and if has enough housing
             if (regionManager.getSuperRegionType(sr.getType()).hasEffect("housing") && !regionManager.hasAvailableHousing(sr)) {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You cant addmember people to " + sr.getName() + " until you build more housing");
+                return true;
             }
             
             //Send an invite
