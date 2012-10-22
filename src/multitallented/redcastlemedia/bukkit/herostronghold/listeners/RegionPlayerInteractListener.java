@@ -26,7 +26,7 @@ public class RegionPlayerInteractListener implements Listener {
     }
     
     @EventHandler
-    public void onPlayerChat(org.bukkit.event.player.AsyncPlayerChatEvent event) {
+    public void onPlayerChat(PlayerChatEvent event) {
         Player player = event.getPlayer();
         String channel = channels.get(player);
         if (channel == null || channel.equals(""))
