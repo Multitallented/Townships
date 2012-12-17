@@ -1074,8 +1074,9 @@ public class HeroStronghold extends JavaPlugin {
             try {
                 taxes = Double.parseDouble(args[1]);
                 double maxTax = configManager.getMaxTax();
-                if (taxes < 0 && (maxTax == 0 || taxes <= maxTax)) {
-                    player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You cant set negative taxes.");
+                System.out.println(maxTax);
+                if (taxes < 0 || taxes > maxTax) {
+                    player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You cant set taxes that high/low.");
                     return true;
                 }
             } catch (Exception e) {

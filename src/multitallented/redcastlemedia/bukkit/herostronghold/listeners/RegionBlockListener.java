@@ -26,10 +26,12 @@ public class RegionBlockListener implements Listener {
         this.regionManager = plugin.getRegionManager();
     }
     
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent event) {
-        if (event.isCancelled())
-            return;
+        boolean debug = false;
+        if (event.getPlayer().getName().equalsIgnoreCase("Multitallented")) {
+            debug = true;
+        }
         Location loc = event.getBlock().getLocation();
         Location currentLoc = null;
         boolean delete = false;
@@ -54,12 +56,9 @@ public class RegionBlockListener implements Listener {
                 return;
             }
         }
-        
-        double x1 = loc.getX();
-        double y1 = loc.getY();
-        double z1 = loc.getZ();
-        for (Region r : regionManager.getSortedRegions()) {
+        for (Region r : regionManager.getContainingBuildRegions(loc)) {
             try {
+                //Check chest
                 currentLoc = r.getLocation();
                 if (currentLoc.getBlock().equals(loc.getBlock())) {
                     Region currentRegion = regionManager.getRegion(currentLoc);
@@ -69,15 +68,17 @@ public class RegionBlockListener implements Listener {
                     if ((player == null || (!currentRegion.isOwner(player.getName())))
                             && effect.regionHasEffect(currentRegionType.getEffects(), "denyblockbreak") != 0 && effect.hasReagents(currentLoc)) {
                         event.setCancelled(true);
-                        if (player != null)
+                        if (player != null) {
                             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
+                        }
                         return;
                     }
                     if ((player == null || !currentRegion.isOwner(player.getName()))
                             && effect.regionHasEffect(currentRegionType.getEffects(), "denyblockbreaknoreagent") != 0) {
                         event.setCancelled(true);
-                        if (player != null)
+                        if (player != null) {
                             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
+                        }
                         return;
                     }
                     regionManager.destroyRegion(currentLoc);
@@ -85,73 +86,90 @@ public class RegionBlockListener implements Listener {
                     break;
                 }
 
-                int radius = regionManager.getRegionType(r.getType()).getRawBuildRadius();
-                Location l = r.getLocation();
-                if (l.getX() + radius < loc.getX()) {
+                //Check everything else
+                Region currentRegion = regionManager.getRegion(currentLoc);
+                RegionType currentRegionType = regionManager.getRegionType(currentRegion.getType());
+                Player player = event.getPlayer();
+                Effect effect = new Effect(plugin);
+                if ((player == null || (!currentRegion.isOwner(player.getName()) && !currentRegion.isMember(player.getName())))
+                        && effect.regionHasEffect(currentRegionType.getEffects(), "denyblockbreak") != 0 && effect.hasReagents(currentLoc)) {
+                    event.setCancelled(true);
+                    if (player != null) {
+                        player.sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
+                    }
                     return;
                 }
-                if (l.getX() - radius < x1 && l.getY() + radius > y1 && l.getY() - radius < y1 && 
-                        l.getZ() + radius > z1 && l.getZ() - radius < z1 && l.getWorld().equals(loc.getWorld())) {
-                    Region currentRegion = regionManager.getRegion(currentLoc);
-                    RegionType currentRegionType = regionManager.getRegionType(currentRegion.getType());
-                    Player player = event.getPlayer();
-                    Effect effect = new Effect(plugin);
-                    if ((player == null || (!currentRegion.isOwner(player.getName()) && !currentRegion.isMember(player.getName())))
-                            && effect.regionHasEffect(currentRegionType.getEffects(), "denyblockbreak") != 0 && effect.hasReagents(currentLoc)) {
-                        event.setCancelled(true);
-                        if (player != null)
-                            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
-                        return;
+                if ((player == null || (!currentRegion.isOwner(player.getName()) && !currentRegion.isMember(player.getName())))
+                        && effect.regionHasEffect(currentRegionType.getEffects(), "denyblockbreaknoreagent") != 0) {
+                    event.setCancelled(true);
+                    if (player != null) {
+                        player.sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
                     }
-                    if ((player == null || (!currentRegion.isOwner(player.getName()) && !currentRegion.isMember(player.getName())))
-                            && effect.regionHasEffect(currentRegionType.getEffects(), "denyblockbreaknoreagent") != 0) {
-                        event.setCancelled(true);
-                        if (player != null)
-                            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
-                        return;
+                    return;
+                }
+                int amountRequired = 0;
+                int i = 0;
+                for (ItemStack currentStack : currentRegionType.getRequirements()) {
+                    if (currentStack.getTypeId() == event.getBlock().getTypeId()) {
+                        amountRequired = new Integer(currentStack.getAmount());
+                        break;
                     }
-                    int amountRequired = 0;
-                    int i = 0;
-                    for (ItemStack currentStack : currentRegionType.getRequirements()) {
-                        if (currentStack.getTypeId() == event.getBlock().getTypeId()) {
-                            amountRequired = new Integer(currentStack.getAmount());
-                            break;
-                        }
-                    }
-                    if (amountRequired == 0)
-                        return;
-                    int radius1 = regionManager.getRegionType(r.getType()).getRawBuildRadius(); 
+                }
+                if (amountRequired == 0) {
+                    return;
+                }
+                int radius1 = regionManager.getRegionType(r.getType()).getRawBuildRadius(); 
 
-                    for (int x= (int) (currentLoc.getX()-radius1); x<radius1 + currentLoc.getX(); x++) {
-                        for (int y = currentLoc.getY()- radius1 > 1 ? (int) (currentLoc.getY() - radius1) : 1; y< radius1 + currentLoc.getY() && y < 255; y++) {
-                            for (int z = (int) (currentLoc.getZ() - radius1); z<radius1 + currentLoc.getZ(); z++) {
-                                Block tempBlock = currentLoc.getWorld().getBlockAt(x, y, z);
-                                if (tempBlock.getTypeId() == event.getBlock().getTypeId()) {
-                                    if (i >= amountRequired) {
-                                        return;
-                                    } else {
-                                        i++;
-                                    }
+                for (int x= (int) (currentLoc.getX()-radius1); x<radius1 + currentLoc.getX(); x++) {
+                    for (int y = currentLoc.getY()- radius1 > 1 ? (int) (currentLoc.getY() - radius1) : 1; y< radius1 + currentLoc.getY() && y < 255; y++) {
+                        for (int z = (int) (currentLoc.getZ() - radius1); z<radius1 + currentLoc.getZ(); z++) {
+                            Block tempBlock = currentLoc.getWorld().getBlockAt(x, y, z);
+                            if (tempBlock.getTypeId() == event.getBlock().getTypeId()) {
+                                if (i >= amountRequired) {
+                                    return;
+                                } else {
+                                    i++;
                                 }
                             }
                         }
                     }
-                    if (r.isMember(player.getName()) || r.isOwner(player.getName())) {
-                        player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Breaking this, would destroy your " + r.getType());
-                        event.setCancelled(true);
-                        break;
-                    }
-                    regionManager.destroyRegion(currentLoc);
-                    delete = true;
+                }
+                if (r.isMember(player.getName()) || r.isOwner(player.getName())) {
+                    player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Breaking this, would destroy your " + r.getType());
+                    event.setCancelled(true);
                     break;
                 }
+                regionManager.destroyRegion(currentLoc);
+                delete = true;
+                break;
             } catch (NullPointerException npe) {
                 plugin.warning("Region " + r.getID() + " corrupted.");
             }
         }
+        
         if (delete && currentLoc != null) {
             regionManager.removeRegion(currentLoc);
         }
+        
+        /*double x1 = loc.getX();
+        double y1 = loc.getY();
+        double z1 = loc.getZ();
+        for (Region r : regionManager.getSortedRegions()) {
+            try {
+                
+
+                int radius = regionManager.getRegionType(r.getType()).getRawBuildRadius();
+                Location l = r.getLocation();
+                if (l.getX() + radius < loc.getX()) {
+                    if (debug) {
+                        System.out.println("Region Sort error");
+                    }
+                    return;
+                }
+                if (l.getX() - radius < x1 && l.getY() + radius > y1 && l.getY() - radius < y1 && 
+                        l.getZ() + radius > z1 && l.getZ() - radius < z1 && l.getWorld().equals(loc.getWorld())) {
+                }
+        }*/
     }
     
     @EventHandler

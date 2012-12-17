@@ -1005,6 +1005,30 @@ public class RegionManager {
         return tempList;
     }
     
+    public ArrayList<Region> getContainingBuildRegions(Location loc, int modifier) {
+        ArrayList<Region> tempList = new ArrayList<Region>();
+        double x = loc.getX();
+        double y = loc.getY();
+        double z = loc.getZ();
+        for (Region r : sortedBuildRegions) {
+            try {
+                int radius = getRegionType(r.getType()).getRawBuildRadius() + modifier;
+                radius = radius < 1 ? getRegionType(r.getType()).getRawRadius() : radius;
+                Location l = r.getLocation();
+                if (l.getX() + radius < x) {
+                    break;
+                }
+                if (l.getX() - radius < x && l.getY() + radius > y && l.getY() - radius < y && 
+                        l.getZ() + radius > z && l.getZ() - radius < z && l.getWorld().equals(loc.getWorld())) {
+                    tempList.add(r);
+                }
+            } catch (NullPointerException npe) {
+                plugin.warning("Region " + r.getID() + " is corrupted");
+            }
+        }
+        return tempList;
+    }
+    
     public Region getClosestRegionType(Location loc, String type) {
         Region re = null;
         double distance = 999999999;

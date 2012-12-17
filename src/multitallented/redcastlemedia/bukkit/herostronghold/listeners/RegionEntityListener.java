@@ -226,7 +226,7 @@ public class RegionEntityListener implements Listener {
         
         Location loc = event.getLocation();
         ArrayList<Location> tempArray = new ArrayList<Location>();
-        for (Region r : rm.getContainingRegions(loc, 4)) {
+        for (Region r : rm.getContainingBuildRegions(loc, 4)) {
             tempArray.add(r.getLocation());
         }
         for (Location l : tempArray) {
