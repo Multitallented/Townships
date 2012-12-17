@@ -220,7 +220,7 @@ public class RegionEntityListener implements Listener {
                 || event.getEntity() instanceof TNTPrimed || event.getEntity() instanceof Fireball)) {
             return;
         }*/
-        ArrayList<RegionCondition> conditions = new ArrayList<>();
+        ArrayList<RegionCondition> conditions = new ArrayList<RegionCondition>();
         conditions.add(new RegionCondition("denyexplosion", true, 4));
         conditions.add(new RegionCondition("denyexplosionnoreagent", false, 4));
         if (event.getEntity().getClass().equals(Creeper.class)) {
@@ -241,7 +241,7 @@ public class RegionEntityListener implements Listener {
         
         
         Location loc = event.getLocation();
-        ArrayList<Location> tempArray = new ArrayList<>();
+        ArrayList<Location> tempArray = new ArrayList<Location>();
         for (Region r : rm.getContainingBuildRegions(loc, 5)) {
             if (!Util.hasRequiredBlocks(r, rm)) {
                 tempArray.add(r.getLocation());

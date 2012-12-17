@@ -22,7 +22,7 @@ import org.bukkit.event.player.*;
  */
 public class RegionPlayerInteractListener implements Listener {
     private final RegionManager rm;
-    private final Map<Player, String> channels = new HashMap<>();
+    private final Map<Player, String> channels = new HashMap<Player, String>();
     private final HeroStronghold plugin;
     public RegionPlayerInteractListener(HeroStronghold plugin) {
         this.rm = plugin.getRegionManager();
@@ -111,7 +111,7 @@ public class RegionPlayerInteractListener implements Listener {
         }
         if (event.getAction() == Action.PHYSICAL) {
             if ((event.getClickedBlock().getType() == Material.CROPS || event.getClickedBlock().getTypeId() == 60)) {
-                ArrayList<RegionCondition> conditions = new ArrayList<>();
+                ArrayList<RegionCondition> conditions = new ArrayList<RegionCondition>();
                 conditions.add(new RegionCondition("denyblockbreak", true, 0));
                 conditions.add(new RegionCondition("denyblockbreaknoreagent", false, 0));
                 if (rm.shouldTakeAction(event.getClickedBlock().getLocation(), event.getPlayer(), conditions)) {
@@ -119,7 +119,7 @@ public class RegionPlayerInteractListener implements Listener {
                     return;
                 }
             } else {
-                ArrayList<RegionCondition> conditions = new ArrayList<>();
+                ArrayList<RegionCondition> conditions = new ArrayList<RegionCondition>();
                 conditions.add(new RegionCondition("denyplayerinteract", true, 0));
                 conditions.add(new RegionCondition("denyplayerinteractnoreagent", false, 0));
                 conditions.add(new RegionCondition("denyusecircuit", true, 0));
@@ -132,7 +132,7 @@ public class RegionPlayerInteractListener implements Listener {
             return;
         }
         
-        ArrayList<RegionCondition> conditions = new ArrayList<>();
+        ArrayList<RegionCondition> conditions = new ArrayList<RegionCondition>();
         conditions.add(new RegionCondition("denyplayerinteract", true, 0));
         conditions.add(new RegionCondition("denyplayerinteractnoreagent", false, 0));
         if (event.getClickedBlock().getType() == Material.LEVER || event.getClickedBlock().getType() == Material.STONE_BUTTON) {

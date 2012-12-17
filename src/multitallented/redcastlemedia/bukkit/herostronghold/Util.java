@@ -143,7 +143,7 @@ public class Util {
         int zMax = (int) region.getLocation().getZ() + rt.getRawBuildRadius();
         World world = region.getLocation().getWorld();
         
-        HashMap<Material, Integer> requirements = new HashMap<>();
+        HashMap<Material, Integer> requirements = new HashMap<Material, Integer>();
         for (ItemStack is : rt.getRequirements()) {
             requirements.put(is.getType(), is.getAmount());
         }
