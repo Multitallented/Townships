@@ -5,6 +5,12 @@
 package multitallented.redcastlemedia.bukkit.herostronghold;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import multitallented.redcastlemedia.bukkit.herostronghold.region.Region;
+import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionManager;
+import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionType;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -119,5 +125,46 @@ public class Util {
         }
         
         return remainingItems;
+    }
+    
+    public static boolean hasRequiredBlocks(Region region, RegionManager rm) {
+        if (region.getLocation().getBlock().getType() != Material.CHEST) {
+            return false;
+        }
+        
+        RegionType rt = rm.getRegionType(region.getType());
+        int x = (int) region.getLocation().getX() - rt.getRawBuildRadius();
+        int y = (int) region.getLocation().getY() - rt.getRawBuildRadius();
+        y = y < 0 ? 0 : y;
+        int z = (int) region.getLocation().getZ() - rt.getRawBuildRadius();
+        int xMax = (int) region.getLocation().getX() + rt.getRawBuildRadius();
+        int yMax = (int) region.getLocation().getY() + rt.getRawBuildRadius();
+        yMax = yMax > region.getLocation().getWorld().getMaxHeight() - 1 ? region.getLocation().getWorld().getMaxHeight() - 1 : yMax;
+        int zMax = (int) region.getLocation().getZ() + rt.getRawBuildRadius();
+        World world = region.getLocation().getWorld();
+        
+        HashMap<Material, Integer> requirements = new HashMap<>();
+        for (ItemStack is : rt.getRequirements()) {
+            requirements.put(is.getType(), is.getAmount());
+        }
+        
+        for (int i = x; i < xMax; i++) {
+            for (int j = y; j < yMax; j++) {
+                for (int k = z; k < zMax; k++) {
+                    Material mat = world.getBlockAt(i, j, k).getType();
+                    if (requirements.containsKey(mat)) {
+                        requirements.put(mat, requirements.get(mat) - 1);
+                        if (requirements.get(mat) < 1) {
+                            requirements.remove(mat);
+                        }
+                    }
+                }
+            }
+        }
+        if (!requirements.isEmpty()) {
+            return false;
+        }
+        
+        return true;
     }
 }

@@ -5,8 +5,10 @@ import java.util.HashSet;
 import java.util.Set;
 import multitallented.redcastlemedia.bukkit.herostronghold.ConfigManager;
 import multitallented.redcastlemedia.bukkit.herostronghold.HeroStronghold;
+import multitallented.redcastlemedia.bukkit.herostronghold.Util;
 import multitallented.redcastlemedia.bukkit.herostronghold.effect.Effect;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.Region;
+import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionCondition;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionManager;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.SuperRegion;
 import org.bukkit.ChatColor;
@@ -212,32 +214,40 @@ public class RegionEntityListener implements Listener {
     }
 
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onEntityExplode(EntityExplodeEvent event) {
-        if (event.isCancelled() || !(event.getEntity() instanceof Creeper || event.getEntity() instanceof EnderDragon
+        /*if (event.isCancelled() || !(event.getEntity() instanceof Creeper || event.getEntity() instanceof EnderDragon
                 || event.getEntity() instanceof TNTPrimed || event.getEntity() instanceof Fireball)) {
             return;
+        }*/
+        ArrayList<RegionCondition> conditions = new ArrayList<>();
+        conditions.add(new RegionCondition("denyexplosion", true, 4));
+        conditions.add(new RegionCondition("denyexplosionnoreagent", false, 4));
+        if (event.getEntity().getClass().equals(Creeper.class)) {
+            conditions.add(new RegionCondition("denycreeperexplosion", true, 4));
+            conditions.add(new RegionCondition("denycreeperexplosionnoreagent", false, 4));
+        } else if (event.getEntity().getClass().equals(TNTPrimed.class)) {
+            conditions.add(new RegionCondition("denytntexplosion", true, 4));
+            conditions.add(new RegionCondition("denytntexplosionnoreagent", false, 4));
+        } else if (event.getEntity().getClass().equals(Fireball.class)) {
+            conditions.add(new RegionCondition("denyghastexplosion", true, 4));
+            conditions.add(new RegionCondition("denyghastexplosionnoreagent", false, 4));
         }
-        if (rm.shouldTakeAction(event.getLocation(), null, 4, "denyexplosion", true) ||
-                rm.shouldTakeAction(event.getLocation(), null, 4, "denyexplosionnoreagent", false)) {
+        if (rm.shouldTakeAction(event.getLocation(), null, conditions)) {
             event.setCancelled(true);
             return;
         }
         
+        
+        
         Location loc = event.getLocation();
-        ArrayList<Location> tempArray = new ArrayList<Location>();
-        for (Region r : rm.getContainingBuildRegions(loc, 4)) {
-            tempArray.add(r.getLocation());
+        ArrayList<Location> tempArray = new ArrayList<>();
+        for (Region r : rm.getContainingBuildRegions(loc, 5)) {
+            if (!Util.hasRequiredBlocks(r, rm)) {
+                tempArray.add(r.getLocation());
+            }
         }
         for (Location l : tempArray) {
-            for (SuperRegion sr : rm.getContainingSuperRegions(l)) {
-                if ((rm.getSuperRegionType(sr.getType()).hasEffect("denyexplosion") && sr.getPower() > 0 &&
-                        sr.getBalance() > 0 && rm.hasAllRequiredRegions(sr)) ||
-                        (rm.getSuperRegionType(sr.getType())).hasEffect("denyexplosionnoreagent")) {
-                    event.setCancelled(true);
-                    return;
-                }
-            }
             rm.destroyRegion(l);
             rm.removeRegion(l);
         }
