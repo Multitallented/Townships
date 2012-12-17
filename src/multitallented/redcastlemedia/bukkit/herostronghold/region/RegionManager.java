@@ -1077,6 +1077,7 @@ public class RegionManager {
         return tempList;
     }
     
+    @Deprecated
     public boolean shouldTakeAction(Location loc, Player player, int modifier, String effectName, boolean useReagents) {
         Effect effect = new Effect(plugin);
         for (Region r : this.getContainingRegions(loc, modifier)) {
@@ -1121,6 +1122,127 @@ public class RegionManager {
             }
             if (!useReagents && (nullPlayer || !member) && hasEffect) {
                 return true;
+            }
+        }
+        return false;
+    }
+    
+    public boolean shouldTakeAction(Location loc, Player player, RegionCondition condition) {
+        int modifier = condition.MODIFIER;
+        boolean useReagents = condition.USE_REAGENTS;
+        String effectName = condition.NAME;
+        Effect effect = new Effect(plugin);
+        for (Region r : this.getContainingRegions(loc, modifier)) {
+            boolean nullPlayer = player == null;
+            boolean member = false;
+            if (!nullPlayer) {
+                if ((r.isMember(player.getName()) || r.isOwner(player.getName()))) {
+                    member = true;
+                } else if (r.isMember("all")) {
+                    member = true;
+                } else  {
+                    for (String s : r.getMembers()) {
+                        if (s.contains("sr:")) {
+                            SuperRegion sr = getSuperRegion(s.replace("sr:", ""));
+                            if (sr != null && (sr.hasMember(player.getName()) || sr.hasOwner(player.getName()))) {
+                                member = true;
+                            }
+                        }
+                    }
+                }
+            }
+            if (!useReagents && (nullPlayer || !member) && effect.regionHasEffect(getRegionType(r.getType()).getEffects(), effectName) != 0) {
+                return true;
+            }
+            if (useReagents && (nullPlayer || !member) && effect.regionHasEffect(getRegionType(r.getType()).getEffects(), effectName) != 0
+                    && effect.hasReagents(r.getLocation())) {
+                return true;
+            }
+        }
+        for (SuperRegion sr : this.getContainingSuperRegions(loc)) {
+            boolean nullPlayer = player == null;
+            boolean member = false;
+            if (!nullPlayer) {
+                member = (sr.hasOwner(player.getName()) || sr.hasMember(player.getName()));
+            }
+            boolean reqs = hasAllRequiredRegions(sr);
+            boolean hasEffect = getSuperRegionType(sr.getType()).hasEffect(effectName);
+            boolean hasPower = sr.getPower() > 0;
+            boolean hasMoney = sr.getBalance() > 0;
+            if (useReagents && (nullPlayer || !member) && hasEffect && reqs && hasPower && hasMoney) {
+                return true;
+            }
+            if (!useReagents && (nullPlayer || !member) && hasEffect) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public boolean shouldTakeAction(Location loc, Player player, ArrayList<RegionCondition> conditions) {
+        Effect effect = new Effect(plugin);
+        HashMap<Integer, ArrayList<RegionCondition>> conditionJA = new HashMap<>();
+        for (RegionCondition rc : conditions) {
+            if (conditionJA.containsKey(rc.MODIFIER) && conditionJA.get(rc.MODIFIER) != null && !conditionJA.get(rc.MODIFIER).isEmpty()) {
+                conditionJA.put(rc.MODIFIER, new ArrayList<RegionCondition>());
+                conditionJA.get(rc.MODIFIER).add(rc);
+            } else {
+                conditionJA.get(rc.MODIFIER).add(rc);
+            }
+        }
+        for (Integer i : conditionJA.keySet()) {
+            for (Region r : this.getContainingRegions(loc, i)) {
+                boolean nullPlayer = player == null;
+                boolean member = false;
+                if (!nullPlayer) {
+                    if ((r.isMember(player.getName()) || r.isOwner(player.getName()))) {
+                        member = true;
+                    } else if (r.isMember("all")) {
+                        member = true;
+                    } else  {
+                        for (String s : r.getMembers()) {
+                            if (s.contains("sr:")) {
+                                SuperRegion sr = getSuperRegion(s.replace("sr:", ""));
+                                if (sr != null && (sr.hasMember(player.getName()) || sr.hasOwner(player.getName()))) {
+                                    member = true;
+                                }
+                            }
+                        }
+                    }
+                }
+                for (RegionCondition rc : conditionJA.get(i)) {
+                    boolean useReagents = rc.USE_REAGENTS;
+                    String effectName = rc.NAME;
+                    if (!useReagents && (nullPlayer || !member) && effect.regionHasEffect(getRegionType(r.getType()).getEffects(), effectName) != 0) {
+                        return true;
+                    }
+                    if (useReagents && (nullPlayer || !member) && effect.regionHasEffect(getRegionType(r.getType()).getEffects(), effectName) != 0
+                            && effect.hasReagents(r.getLocation())) {
+                        return true;
+                    }
+                }
+            }
+            for (SuperRegion sr : this.getContainingSuperRegions(loc)) {
+                boolean nullPlayer = player == null;
+                boolean member = false;
+                if (!nullPlayer) {
+                    member = (sr.hasOwner(player.getName()) || sr.hasMember(player.getName()));
+                }
+                boolean reqs = hasAllRequiredRegions(sr);
+                boolean hasPower = sr.getPower() > 0;
+                boolean hasMoney = sr.getBalance() > 0;
+                
+                for (RegionCondition rc : conditionJA.get(i)) {
+                    String effectName = rc.NAME;
+                    boolean useReagents = rc.USE_REAGENTS;
+                    boolean hasEffect = getSuperRegionType(sr.getType()).hasEffect(effectName);
+                    if (useReagents && (nullPlayer || !member) && hasEffect && reqs && hasPower && hasMoney) {
+                        return true;
+                    }
+                    if (!useReagents && (nullPlayer || !member) && hasEffect) {
+                        return true;
+                    }
+                }
             }
         }
         return false;

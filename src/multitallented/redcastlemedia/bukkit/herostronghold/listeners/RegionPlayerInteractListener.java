@@ -1,10 +1,12 @@
 package multitallented.redcastlemedia.bukkit.herostronghold.listeners;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import multitallented.redcastlemedia.bukkit.herostronghold.HeroStronghold;
+import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionCondition;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionManager;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -20,7 +22,7 @@ import org.bukkit.event.player.*;
  */
 public class RegionPlayerInteractListener implements Listener {
     private final RegionManager rm;
-    private final Map<Player, String> channels = new HashMap<Player, String>();
+    private final Map<Player, String> channels = new HashMap<>();
     private final HeroStronghold plugin;
     public RegionPlayerInteractListener(HeroStronghold plugin) {
         this.rm = plugin.getRegionManager();
@@ -31,8 +33,9 @@ public class RegionPlayerInteractListener implements Listener {
     public void onPlayerChat(PlayerChatEvent event) {
         Player player = event.getPlayer();
         String channel = channels.get(player);
-        if (channel == null || channel.equals(""))
+        if (channel == null || channel.equals("")) {
             return;
+        }
         event.setCancelled(true);
         String title = null;
         try {
@@ -45,7 +48,8 @@ public class RegionPlayerInteractListener implements Listener {
             
         }
         SendMessageThread smt = new SendMessageThread(plugin, channel, channels, title, player, event.getMessage());
-        Logger.getLogger("Minecraft").log(Level.INFO, "[" + channel + "] " + player.getDisplayName() + ": " + event.getMessage());
+        String message = "[" + channel + "] " + player.getDisplayName() + ": " + event.getMessage();
+        Logger.getLogger("Minecraft").log(Level.INFO, message);
         try {
             smt.run();
         } catch (Exception e) {
@@ -106,25 +110,47 @@ public class RegionPlayerInteractListener implements Listener {
             return;
         }
         if (event.getAction() == Action.PHYSICAL) {
-            if ((event.getClickedBlock().getType() == Material.CROPS || event.getClickedBlock().getTypeId() == 60) && (
-                    rm.shouldTakeAction(event.getClickedBlock().getLocation(), event.getPlayer(), 0, "denyblockbreak", true) ||
-                    rm.shouldTakeAction(event.getClickedBlock().getLocation(), event.getPlayer(), 0, "denyblockbreaknoreagent", false))) {
-                event.setCancelled(true);
-                return;
-            } else if (rm.shouldTakeAction(event.getClickedBlock().getLocation(), event.getPlayer(), 0, "denyplayerinteract", true) || 
-                    rm.shouldTakeAction(event.getClickedBlock().getLocation(), event.getPlayer(), 0, "denyplayerinteractnoreagent", false)) {
-                event.setCancelled(true);
-                return;
+            if ((event.getClickedBlock().getType() == Material.CROPS || event.getClickedBlock().getTypeId() == 60)) {
+                ArrayList<RegionCondition> conditions = new ArrayList<>();
+                conditions.add(new RegionCondition("denyblockbreak", true, 0));
+                conditions.add(new RegionCondition("denyblockbreaknoreagent", false, 0));
+                if (rm.shouldTakeAction(event.getClickedBlock().getLocation(), event.getPlayer(), conditions)) {
+                    event.setCancelled(true);
+                    return;
+                }
+            } else {
+                ArrayList<RegionCondition> conditions = new ArrayList<>();
+                conditions.add(new RegionCondition("denyplayerinteract", true, 0));
+                conditions.add(new RegionCondition("denyplayerinteractnoreagent", false, 0));
+                conditions.add(new RegionCondition("denyusecircuit", true, 0));
+                conditions.add(new RegionCondition("denyusecircuitnoreagent", false, 0));
+                if (rm.shouldTakeAction(event.getClickedBlock().getLocation(), event.getPlayer(), conditions)) {
+                    event.setCancelled(true);
+                    return;
+                }
             }
-        }
-        
-        if (!rm.shouldTakeAction(event.getClickedBlock().getLocation(), event.getPlayer(), 0, "denyplayerinteract", true) && 
-                !rm.shouldTakeAction(event.getClickedBlock().getLocation(), event.getPlayer(), 0, "denyplayerinteractnoreagent", false)) {
             return;
         }
-
-        event.getPlayer().sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
-        event.setCancelled(true);
+        
+        ArrayList<RegionCondition> conditions = new ArrayList<>();
+        conditions.add(new RegionCondition("denyplayerinteract", true, 0));
+        conditions.add(new RegionCondition("denyplayerinteractnoreagent", false, 0));
+        if (event.getClickedBlock().getType() == Material.LEVER || event.getClickedBlock().getType() == Material.STONE_BUTTON) {
+            conditions.add(new RegionCondition("denyusecircuit", true, 0));
+            conditions.add(new RegionCondition("denyusecircuitnoreagent", false, 0));
+        } else if (event.getClickedBlock().getType() == Material.WOODEN_DOOR || event.getClickedBlock().getType() == Material.TRAP_DOOR ||
+                event.getClickedBlock().getType() == Material.IRON_DOOR_BLOCK) {
+            conditions.add(new RegionCondition("denyusedoor", true, 0));
+            conditions.add(new RegionCondition("denyusedoornoreagent", false, 0));
+        } else if (event.getClickedBlock().getType() == Material.CHEST || event.getClickedBlock().getType() == Material.FURNACE ||
+                event.getClickedBlock().getType() == Material.DISPENSER) {
+            conditions.add(new RegionCondition("denyusechest", true, 0));
+            conditions.add(new RegionCondition("denyusechestnoreagent", false, 0));
+        }
+        if (rm.shouldTakeAction(event.getClickedBlock().getLocation(), event.getPlayer(), conditions)) {
+            event.getPlayer().sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
+            event.setCancelled(true);
+        }
     }
 
     @EventHandler
