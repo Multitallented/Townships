@@ -1181,7 +1181,7 @@ public class RegionManager {
     
     public boolean shouldTakeAction(Location loc, Player player, ArrayList<RegionCondition> conditions) {
         Effect effect = new Effect(plugin);
-        HashMap<Integer, ArrayList<RegionCondition>> conditionJA = new HashMap<>();
+        HashMap<Integer, ArrayList<RegionCondition>> conditionJA = new HashMap<Integer, ArrayList<RegionCondition>>();
         for (RegionCondition rc : conditions) {
             if (conditionJA.containsKey(rc.MODIFIER) && conditionJA.get(rc.MODIFIER) != null && !conditionJA.get(rc.MODIFIER).isEmpty()) {
                 conditionJA.put(rc.MODIFIER, new ArrayList<RegionCondition>());
