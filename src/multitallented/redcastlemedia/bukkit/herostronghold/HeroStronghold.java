@@ -137,7 +137,7 @@ public class HeroStronghold extends JavaPlugin {
         } catch (Exception e) {
 
         }
-        if (args[0].equalsIgnoreCase("reload")) {
+        if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
             if (player != null && !(HeroStronghold.perms == null || HeroStronghold.perms.has(player, "herostronghold.admin"))) {
                 return true;
             }

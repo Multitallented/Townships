@@ -2,6 +2,8 @@ package multitallented.redcastlemedia.bukkit.herostronghold.listeners;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import multitallented.redcastlemedia.bukkit.herostronghold.HeroStronghold;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionManager;
 import org.bukkit.ChatColor;
@@ -43,6 +45,7 @@ public class RegionPlayerInteractListener implements Listener {
             
         }
         SendMessageThread smt = new SendMessageThread(plugin, channel, channels, title, player, event.getMessage());
+        Logger.getLogger("Minecraft").log(Level.INFO, "[" + channel + "] " + player.getDisplayName() + ": " + event.getMessage());
         try {
             smt.run();
         } catch (Exception e) {
