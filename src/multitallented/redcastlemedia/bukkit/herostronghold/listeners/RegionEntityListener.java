@@ -11,6 +11,7 @@ import multitallented.redcastlemedia.bukkit.herostronghold.region.Region;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionCondition;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionManager;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.SuperRegion;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.*;
@@ -240,17 +241,23 @@ public class RegionEntityListener implements Listener {
         
         
         
-        Location loc = event.getLocation();
-        ArrayList<Location> tempArray = new ArrayList<Location>();
-        for (Region r : rm.getContainingBuildRegions(loc, 5)) {
-            if (!Util.hasRequiredBlocks(r, rm)) {
-                tempArray.add(r.getLocation());
+        final Location loc = event.getLocation();
+        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+            @Override
+            public void run() {
+                ArrayList<Location> tempArray = new ArrayList<Location>();
+                for (Region r : rm.getContainingBuildRegions(loc, 5)) {
+                    if (!Util.hasRequiredBlocks(r, rm)) {
+                        tempArray.add(r.getLocation());
+                    }
+                }
+                for (Location l : tempArray) {
+                    rm.destroyRegion(l);
+                    rm.removeRegion(l);
+                }
             }
-        }
-        for (Location l : tempArray) {
-            rm.destroyRegion(l);
-            rm.removeRegion(l);
-        }
+        }, 1L);
+        
         
     }
 }
