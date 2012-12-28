@@ -1187,6 +1187,7 @@ public class RegionManager {
                 conditionJA.put(rc.MODIFIER, new ArrayList<RegionCondition>());
                 conditionJA.get(rc.MODIFIER).add(rc);
             } else {
+                conditionJA.put(rc.MODIFIER, new ArrayList<RegionCondition>());
                 conditionJA.get(rc.MODIFIER).add(rc);
             }
         }

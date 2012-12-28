@@ -34,6 +34,9 @@ public class Util {
     }
     
     public static boolean containsItems(ArrayList<ItemStack> req, Inventory inv) {
+        if (inv == null) {
+            return false;
+        }
         outer: for (ItemStack is : req) {
             if (is == null) {
                 continue;
@@ -125,6 +128,10 @@ public class Util {
         }
         
         return remainingItems;
+    }
+    
+    public static ArrayList<ItemStack> matchItems(ArrayList<ItemStack> list1, ArrayList<ItemStack> list2) {
+        return null;
     }
     
     public static boolean hasRequiredBlocks(Region region, RegionManager rm) {
