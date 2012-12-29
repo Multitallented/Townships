@@ -224,7 +224,9 @@ public class RegionEntityListener implements Listener {
         ArrayList<RegionCondition> conditions = new ArrayList<RegionCondition>();
         conditions.add(new RegionCondition("denyexplosion", true, 4));
         conditions.add(new RegionCondition("denyexplosionnoreagent", false, 4));
-        if (event.getEntity().getClass().equals(Creeper.class)) {
+        if (event.getEntity() == null) {
+            
+        } else if (event.getEntity().getClass().equals(Creeper.class)) {
             conditions.add(new RegionCondition("denycreeperexplosion", true, 4));
             conditions.add(new RegionCondition("denycreeperexplosionnoreagent", false, 4));
         } else if (event.getEntity().getClass().equals(TNTPrimed.class)) {

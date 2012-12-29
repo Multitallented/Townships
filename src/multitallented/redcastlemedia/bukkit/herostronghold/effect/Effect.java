@@ -81,8 +81,9 @@ public class Effect {
      */
     public int regionHasEffect(ArrayList<String> effects, String name) {
         int data = 0;
-        if (effects == null || effects.isEmpty())
+        if (effects == null || effects.isEmpty()) {
             return 0;
+        }
         
         for (String effect : effects) {
             String[] params = effect.split("\\.");
@@ -90,8 +91,9 @@ public class Effect {
                 data = Integer.parseInt(params[1]);
             }
         }
-        if (data < 1)
+        if (data < 1) {
             return 0;
+        }
         return data;
     }
     

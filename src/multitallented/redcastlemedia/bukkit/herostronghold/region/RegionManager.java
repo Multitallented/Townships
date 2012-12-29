@@ -1183,11 +1183,10 @@ public class RegionManager {
         Effect effect = new Effect(plugin);
         HashMap<Integer, ArrayList<RegionCondition>> conditionJA = new HashMap<Integer, ArrayList<RegionCondition>>();
         for (RegionCondition rc : conditions) {
-            if (conditionJA.containsKey(rc.MODIFIER) && conditionJA.get(rc.MODIFIER) != null && !conditionJA.get(rc.MODIFIER).isEmpty()) {
+            if (!conditionJA.containsKey(rc.MODIFIER) || conditionJA.get(rc.MODIFIER) == null) {
                 conditionJA.put(rc.MODIFIER, new ArrayList<RegionCondition>());
                 conditionJA.get(rc.MODIFIER).add(rc);
             } else {
-                conditionJA.put(rc.MODIFIER, new ArrayList<RegionCondition>());
                 conditionJA.get(rc.MODIFIER).add(rc);
             }
         }
@@ -1248,6 +1247,90 @@ public class RegionManager {
         }
         return false;
     }
+    
+    /*public boolean shouldTakeActionDebug(Location loc, Player player, ArrayList<RegionCondition> conditions) {
+        Logger log = Logger.getLogger("Minecraft");
+        Effect effect = new Effect(plugin);
+        HashMap<Integer, ArrayList<RegionCondition>> conditionJA = new HashMap<Integer, ArrayList<RegionCondition>>();
+        for (RegionCondition rc : conditions) {
+            if (conditionJA.containsKey(rc.MODIFIER) && conditionJA.get(rc.MODIFIER) != null && !conditionJA.get(rc.MODIFIER).isEmpty()) {
+                conditionJA.put(rc.MODIFIER, new ArrayList<RegionCondition>());
+                conditionJA.get(rc.MODIFIER).add(rc);
+            } else {
+                conditionJA.put(rc.MODIFIER, new ArrayList<RegionCondition>());
+                conditionJA.get(rc.MODIFIER).add(rc);
+            }
+        }
+        for (Integer i : conditionJA.keySet()) {
+            for (Region r : this.getContainingRegions(loc, i)) {
+                boolean nullPlayer = player == null;
+                boolean member = false;
+                if (!nullPlayer) {
+                    if ((r.isMember(player.getName()) || r.isOwner(player.getName()))) {
+                        member = true;
+                    } else if (r.isMember("all")) {
+                        member = true;
+                    } else  {
+                        for (String s : r.getMembers()) {
+                            if (s.contains("sr:")) {
+                                SuperRegion sr = getSuperRegion(s.replace("sr:", ""));
+                                if (sr != null && (sr.hasMember(player.getName()) || sr.hasOwner(player.getName()))) {
+                                    member = true;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                for (RegionCondition rc : conditionJA.get(i)) {
+                    boolean useReagents = rc.USE_REAGENTS;
+                    String effectName = rc.NAME;
+                    String message = rc.NAME + " : " + useReagents + " : " + (nullPlayer || !member) + " : " + 
+                            (effect.regionHasEffect(getRegionType(r.getType()).getEffects(), effectName) != 0) + " : " + effect.hasReagents(r.getLocation());
+                    log.info(message);
+                    if (!useReagents && (nullPlayer || !member) && effect.regionHasEffect(getRegionType(r.getType()).getEffects(), effectName) != 0) {
+                        log.info("denied");
+                        return true;
+                    }
+                    if (useReagents && (nullPlayer || !member) && effect.regionHasEffect(getRegionType(r.getType()).getEffects(), effectName) != 0
+                            && effect.hasReagents(r.getLocation())) {
+                        log.info("denied");
+                        return true;
+                    }
+                }
+            }
+            for (SuperRegion sr : this.getContainingSuperRegions(loc)) {
+                boolean nullPlayer = player == null;
+                boolean member = false;
+                if (!nullPlayer) {
+                    member = (sr.hasOwner(player.getName()) || sr.hasMember(player.getName()));
+                }
+                boolean reqs = hasAllRequiredRegions(sr);
+                boolean hasPower = sr.getPower() > 0;
+                boolean hasMoney = sr.getBalance() > 0;
+                
+                
+                for (RegionCondition rc : conditionJA.get(i)) {
+                    String effectName = rc.NAME;
+                    boolean useReagents = rc.USE_REAGENTS;
+                    boolean hasEffect = getSuperRegionType(sr.getType()).hasEffect(effectName);
+                    String message = rc.NAME + ": " + useReagents + " : " + (nullPlayer || !member) + " : " +
+                            hasEffect + " : " + reqs + " : " + hasPower + " : " + hasMoney;
+                    log.info(message);
+                    if (useReagents && (nullPlayer || !member) && hasEffect && reqs && hasPower && hasMoney) {
+                        log.info("denied");
+                        return true;
+                    }
+                    if (!useReagents && (nullPlayer || !member) && hasEffect) {
+                        log.info("denied");
+                        return true;
+                    }
+                }
+            }
+        }
+        log.info("not denied");
+        return false;
+    }*/
     
     public void setWar(SuperRegion sr1, SuperRegion sr2) {
         File warFile = new File(plugin.getDataFolder(), "war.yml");
