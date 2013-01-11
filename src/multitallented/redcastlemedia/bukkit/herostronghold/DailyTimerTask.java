@@ -72,7 +72,7 @@ public class DailyTimerTask implements Runnable {
             }
             if (cm.getUsePower()) {
                 int power = sr.getPower();
-                int maxPower = rm.getSuperRegionType(sr.getType()).getMaxPower();
+                int maxPower = sr.getMaxPower();
                 int dailyPower = rm.getSuperRegionType(sr.getType()).getDailyPower();
                 if (power <= 0 && plugin.getConfigManager().getDestroyNoPower()) {
                     destroyThese.add(sr);

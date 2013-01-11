@@ -19,8 +19,9 @@ public class SuperRegion {
     private double taxes = 0;
     private double balance = 0;
     private LinkedList<Double> taxRevenue;
+    private int maxPower;
     
-    public SuperRegion(String name, Location l, String type, List<String> owner, Map<String, List<String>> members, int power, double taxes, double balance, LinkedList<Double> taxRevenue) {
+    public SuperRegion(String name, Location l, String type, List<String> owner, Map<String, List<String>> members, int power, double taxes, double balance, LinkedList<Double> taxRevenue, int maxPower) {
         this.name = name;
         this.l = l;
         this.type=type;
@@ -30,6 +31,15 @@ public class SuperRegion {
         this.taxes = taxes;
         this.balance = balance;
         this.taxRevenue = taxRevenue;
+        this.maxPower = maxPower;
+    }
+    
+    public void setMaxPower(int maxPower) {
+        this.maxPower = maxPower;
+    }
+    
+    public int getMaxPower() {
+        return maxPower;
     }
     
     public LinkedList<Double> getTaxRevenue() {

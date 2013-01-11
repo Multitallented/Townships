@@ -226,13 +226,14 @@ public class RegionManager {
                     double balance = sRegionDataConfig.getDouble("balance", 0.0);
                     List<Double> taxRevenue1 = sRegionDataConfig.getDoubleList("tax-revenue");
                     LinkedList<Double> taxRevenue = new LinkedList<Double>();
+                    int maxPower = sRegionDataConfig.getInt("max-power", this.getSuperRegionType(type).getMaxPower());
                     if (taxRevenue1 != null) {
                         for (double d : taxRevenue1) {
                             taxRevenue.add(d);
                         }
                     }
                     if (location != null && type != null) {
-                        liveSuperRegions.put(name, new SuperRegion(name, location, type, owners, members, power, taxes, balance, taxRevenue));
+                        liveSuperRegions.put(name, new SuperRegion(name, location, type, owners, members, power, taxes, balance, taxRevenue, maxPower));
                         
                         sortedSuperRegions.add(liveSuperRegions.get(name));
                     }
@@ -433,7 +434,9 @@ public class RegionManager {
             dataConfig.set("power", power);
             dataConfig.set("balance", balance);
             dataConfig.save(dataFile);
-            liveSuperRegions.put(name, new SuperRegion(name, loc, type, owners, members, power, 0.0, 0.0, new LinkedList<Double>()));
+            int maxPower = this.getSuperRegionType(type).getMaxPower();
+            dataConfig.set("max-power", maxPower);
+            liveSuperRegions.put(name, new SuperRegion(name, loc, type, owners, members, power, 0.0, 0.0, new LinkedList<Double>(), maxPower));
             
             sortedSuperRegions.add(liveSuperRegions.get(name));
             
