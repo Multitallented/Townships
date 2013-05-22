@@ -91,7 +91,8 @@ public class RegionManager {
                         rConfig.getDouble("exp"),
                         rConfig.getString("description"),
                         rConfig.getInt("power-drain", 0),
-                        rConfig.getInt("housing", 0)));
+                        rConfig.getInt("housing", 0),
+                        rConfig.getStringList("biome")));
             } catch (Exception e) {
                 plugin.warning("[HeroStronghold] failed to load " + currentRegionFile.getName());
                 e.printStackTrace();

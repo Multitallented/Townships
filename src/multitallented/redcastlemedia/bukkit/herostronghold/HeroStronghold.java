@@ -472,6 +472,14 @@ public class HeroStronghold extends JavaPlugin {
                 return true;
             }
             
+            //Check biome
+            if (!currentRegionType.getBiome().isEmpty()
+                    && !currentRegionType.getBiome().contains(player.getLocation().getBlock().getBiome().name())) {
+                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You must build this in a " + currentRegionType.getBiome() + " biome");
+                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You are currently in a " + player.getLocation().getBlock().getBiome().name() + " biome");
+                return true;
+            }
+            
             //Check if too close to other HeroStrongholds
             if (!regionManager.getContainingBuildRegions(currentLocation).isEmpty()) {
                 player.sendMessage (ChatColor.GRAY + "[HeroStronghold] You are too close to another HeroStronghold");
