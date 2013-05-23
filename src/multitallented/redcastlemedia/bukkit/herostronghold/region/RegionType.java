@@ -30,6 +30,7 @@ public class RegionType {
     private final String group;
     private final int powerDrain;
     private final int housing;
+    private final List<String> biome;
     
     
     public RegionType(String name, String group, ArrayList<String> friendlyClasses,
@@ -39,7 +40,7 @@ public class RegionType {
             ArrayList<ItemStack> output, double upkeepChance,
             double moneyRequirement, double moneyOutput, double exp,
             String description, int powerDrain,
-            int housing) {
+            int housing, List<String> biome) {
         this.name = name;
         this.group = group;
         this.friendlyClasses = friendlyClasses;
@@ -61,6 +62,10 @@ public class RegionType {
         this.description = description;
         this.powerDrain = powerDrain;
         this.housing = housing;
+        this.biome = biome;
+    }
+    public List<String> getBiome() {
+        return biome;
     }
     public int getHousing() {
         return housing;
