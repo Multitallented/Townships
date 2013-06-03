@@ -594,12 +594,19 @@ public class RegionManager {
             }
             
             if (l.getX() - radius < x && l.getY() + radius > y && l.getY() - radius < y && 
-                    l.getZ() + radius > z && l.getZ() - radius < z && l.getWorld().equals(loc.getWorld()) && reqs.containsKey(getRegionType(r.getType()).getGroup())) {
-                String group = getRegionType(r.getType()).getGroup();
-                if (reqs.get(group) < 2) {
-                    reqs.remove(group);
-                } else {
-                    reqs.put(group, reqs.get(group) - 1);
+                    l.getZ() + radius > z && l.getZ() - radius < z && l.getWorld().equals(loc.getWorld())) {
+                String group = "";
+                if (reqs.containsKey(getRegionType(r.getType()).getGroup())) {
+                    group = getRegionType(r.getType()).getGroup();
+                } else if (reqs.containsKey(getRegionType(r.getType()).getName())) {
+                    group = getRegionType(r.getType()).getName();
+                }
+                if (!group.equals("")) {
+                    if (reqs.get(group) < 2) {
+                        reqs.remove(group);
+                    } else {
+                        reqs.put(group, reqs.get(group) - 1);
+                    }
                 }
             }
         }
