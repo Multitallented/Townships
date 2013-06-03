@@ -594,12 +594,19 @@ public class RegionManager {
             }
             
             if (l.getX() - radius < x && l.getY() + radius > y && l.getY() - radius < y && 
-                    l.getZ() + radius > z && l.getZ() - radius < z && l.getWorld().equals(loc.getWorld()) && reqs.containsKey(getRegionType(r.getType()).getGroup())) {
-                String group = getRegionType(r.getType()).getGroup();
-                if (reqs.get(group) < 2) {
-                    reqs.remove(group);
-                } else {
-                    reqs.put(group, reqs.get(group) - 1);
+                    l.getZ() + radius > z && l.getZ() - radius < z && l.getWorld().equals(loc.getWorld())) {
+                String group = "";
+                if (reqs.containsKey(getRegionType(r.getType()).getGroup())) {
+                    group = getRegionType(r.getType()).getGroup();
+                } else if (reqs.containsKey(getRegionType(r.getType()).getName())) {
+                    group = getRegionType(r.getType()).getName();
+                }
+                if (!group.equals("")) {
+                    if (reqs.get(group) < 2) {
+                        reqs.remove(group);
+                    } else {
+                        reqs.put(group, reqs.get(group) - 1);
+                    }
                 }
             }
         }
@@ -615,6 +622,43 @@ public class RegionManager {
             return;
         }
         int powerLoss = cm.getPowerPerKill();
+        int currentPower = sr.getPower() - powerLoss;
+        currentPower = currentPower > 0 ? currentPower : 0;
+        final String st = sr.getName();
+        if (currentPower < 26 && sr.getPower() > 25) {
+            new Runnable() {
+                  @Override
+                  public void run()
+                  {
+                    plugin.getServer().broadcastMessage(ChatColor.RED + "[HeroStronghold] " + st + " reached 25 power! Destruction is near!");
+                  }
+            }.run();
+        } else if (currentPower < 11 && sr.getPower() > 10) {
+            new Runnable() {
+                  @Override
+                  public void run()
+                  {
+                    plugin.getServer().broadcastMessage(ChatColor.RED + "[HeroStronghold] " + st + " reached 10 power! Destruction is at hand!");
+                  }
+            }.run();
+        } else if (currentPower < 1) {
+            new Runnable() {
+                  @Override
+                  public void run()
+                  {
+                    plugin.getServer().broadcastMessage(ChatColor.RED + "[HeroStronghold] " + st + " reached 0 power!");
+                  }
+            }.run();
+        }
+        setPower(sr, currentPower);
+    }
+    
+    public synchronized void reduceRegion(SuperRegion sr, int power) {
+        ConfigManager cm = HeroStronghold.getConfigManager();
+        if (!cm.getUsePower()) {
+            return;
+        }
+        int powerLoss = power;
         int currentPower = sr.getPower() - powerLoss;
         currentPower = currentPower > 0 ? currentPower : 0;
         final String st = sr.getName();
