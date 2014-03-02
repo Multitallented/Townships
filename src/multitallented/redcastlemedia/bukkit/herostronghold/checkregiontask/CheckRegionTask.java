@@ -40,7 +40,7 @@ public class CheckRegionTask implements Runnable {
         return regionsToDestroy.contains(l);
     }
     
-    public HashSet<Region> getRegiosToCreate(Region r) {
+    public HashSet<Region> getRegionsToCreate(Region r) {
         return regionsToCreate;
     }
 
@@ -56,10 +56,10 @@ public class CheckRegionTask implements Runnable {
             } catch (Exception e) {
                 
             }
+            Thread.yield();
         }
         if (i == 3) {
             i=-1;
-            
             
             for (Location l : hs.getRegionManager().getRegionLocations()) {
                 CheckUpkeepThread thread = new CheckUpkeepThread(this, pm, hs.getRegionManager(), l);

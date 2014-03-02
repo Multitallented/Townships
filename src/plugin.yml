@@ -1,15 +1,17 @@
 author: Multitallented
 database: false
+author: Multitallented
+authors: [chivers1234, Sevaron, Kiak]
 description: Allows you to create regions that can give buffs or debuffs to players with certain HeroClasses.
 main: multitallented.redcastlemedia.bukkit.herostronghold.HeroStronghold
 name: HeroStronghold
 startup: postworld
-version: 0.6.1-b000
+version: 1.2.1-b054
 depend: [Vault]
-softdepend: [Heroes]
+softdepend: [Heroes, Towny, Factions]
 commands:
-   herostrong:
-      aliases: ['herostronghold', 'hs']
+   hs:
+      aliases: ['herostronghold', 'herostrong']
       description: HeroStronghold commands
       usage: /<command>
 permissions:
@@ -19,3 +21,4 @@ permissions:
    herostronghold.admin:
       description: Lets you use admin commands
       default: op
+loadbefore: [Vault, Heroes]

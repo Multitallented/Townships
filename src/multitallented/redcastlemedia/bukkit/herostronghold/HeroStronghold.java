@@ -63,6 +63,7 @@ public class HeroStronghold extends JavaPlugin {
         config = getConfig();
         config.options().copyDefaults(true);
         saveConfig();
+        configManager = new ConfigManager(config, this);
         
         //Setup RegionManager
         regionManager = new RegionManager(this, config);
@@ -100,8 +101,13 @@ public class HeroStronghold extends JavaPlugin {
         new EffectManager(this);
         
         //Setup repeating sync task for checking regions
-        CheckRegionTask theSender = new CheckRegionTask(getServer(), this);
-        getServer().getScheduler().scheduleSyncRepeatingTask(this, theSender, 10L, 10L);
+        if (getConfigManager().getPlayerInRegionChecks()) {
+            log.info("[HeroStronghold] starting PlayerInRegion Task");
+            CheckRegionTask theSender = new CheckRegionTask(getServer(), this);
+            getServer().getScheduler().scheduleSyncRepeatingTask(this, theSender, 10L, 10L);
+        } else {
+            log.warning("[HeroStronghold] PlayerInRegion Task disbaled. Some of your effects may not work");
+        }
         
         System.currentTimeMillis();
         Date date = new Date();
@@ -1500,27 +1506,35 @@ public class HeroStronghold extends JavaPlugin {
             }
             if (rt != null) {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Info for region type " + ChatColor.GOLD + args[1] + ":");
-                player.sendMessage(ChatColor.GRAY + "Cost: " + ChatColor.GOLD + rt.getMoneyRequirement() + ChatColor.GRAY +
-                        ", Payout: " + ChatColor.GOLD + rt.getMoneyOutput() + ChatColor.GRAY + ", Radius: " + ChatColor.GOLD + (int) Math.sqrt(rt.getRadius()));
                 
-                String message = ChatColor.GRAY + "Description: " + ChatColor.GOLD;
+                String message = "";
+                if (rt.getMoneyRequirement() != 0) {
+                    message += ChatColor.GRAY + "Cost: " + ChatColor.GOLD + rt.getMoneyRequirement();
+                }
+                if (rt.getMoneyOutput() != 0) {
+                    message += ChatColor.GRAY + ", Payout: " + ChatColor.GOLD + rt.getMoneyOutput();
+                }
+                message += ChatColor.GRAY + ", Radius: " + ChatColor.GOLD + (int) Math.sqrt(rt.getRadius());
+                player.sendMessage(message);
+                
+                String description = rt.getDescription();
                 int j=0;
-                if (rt.getDescription() != null) {
-                    String tempMess = rt.getDescription();
-                    if (tempMess.length() + message.length() <= 55) {
-                        player.sendMessage(message + tempMess);
-                        tempMess = null;
+                if (description != null) {
+                    message = ChatColor.GRAY + "Description: " + ChatColor.GOLD;
+                    if (description.length() + message.length() <= 55) {
+                        player.sendMessage(message + description);
+                        description = null;
                     }
-                    while (tempMess != null && j<12) {
-                        if (tempMess.length() > 53) {
-                            message += tempMess.substring(0, 53);
+                    while (description != null && j<12) {
+                        if (description.length() > 53) {
+                            message += description.substring(0, 53);
                             player.sendMessage(message);
-                            tempMess = tempMess.substring(53);
+                            description = description.substring(53);
                             message = ChatColor.GOLD + "";
                             j++;
                         } else {
-                            player.sendMessage(message + tempMess);
-                            tempMess = null;
+                            player.sendMessage(message + description);
+                            description = null;
                             j++;
                         }
                     }
@@ -1548,7 +1562,7 @@ public class HeroStronghold extends JavaPlugin {
                 } else {
                     player.sendMessage(message.substring(0, message.length()-2));
                 }
-                message = ChatColor.GRAY + "Requirements: " + ChatColor.GOLD;
+                message = ChatColor.GRAY + "Required Blocks: " + ChatColor.GOLD;
                 if (rt.getRequirements() != null) {
                     for (ItemStack is : rt.getRequirements()) {
                         String addLine = is.getAmount() + ":" + is.getType().name() + ", ";
@@ -1570,7 +1584,7 @@ public class HeroStronghold extends JavaPlugin {
                 } else {
                     player.sendMessage(message.substring(0, message.length()-2));
                 }
-                message = ChatColor.GRAY + "Reagents: " + ChatColor.GOLD;
+                message = ChatColor.GRAY + "Required Items: " + ChatColor.GOLD;
                 if (rt.getReagents() != null) {
                     for (ItemStack is : rt.getReagents()) {
                         String addLine = is.getAmount() + ":" + is.getType().name() + ", ";
@@ -1592,8 +1606,8 @@ public class HeroStronghold extends JavaPlugin {
                 } else {
                     player.sendMessage(message.substring(0, message.length()-2));
                 }
-                message = ChatColor.GRAY + "UpkeepCost: " + ChatColor.GOLD;
-                if (rt.getUpkeep() != null) {
+                if (rt.getUpkeep() != null && !rt.getUpkeep().isEmpty()) {
+                    message = ChatColor.GRAY + "Upkeep Cost: " + ChatColor.GOLD;
                     for (ItemStack is : rt.getUpkeep()) {
                         String addLine = is.getAmount() + ":" + is.getType().name() + ", ";
                         if (message.length() + addLine.length() > 55) {
@@ -1607,15 +1621,11 @@ public class HeroStronghold extends JavaPlugin {
                             break;
                         }
                     }
-                }
-                if (rt.getUpkeep() == null || rt.getUpkeep().isEmpty()) {
-                    message += "None";
-                    player.sendMessage(message);
-                } else {
                     player.sendMessage(message.substring(0, message.length()-2));
                 }
-                message = ChatColor.GRAY + "Output: " + ChatColor.GOLD;
-                if (rt.getOutput() != null) {
+                
+                if (rt.getOutput() != null && !rt.getOutput().isEmpty()) {
+                    message = ChatColor.GRAY + "Output: " + ChatColor.GOLD;
                     for (ItemStack is : rt.getOutput()) {
                         String addLine = is.getAmount() + ":" + is.getType().name() + ", ";
                         if (message.length() + addLine.length() > 55) {
@@ -1629,23 +1639,34 @@ public class HeroStronghold extends JavaPlugin {
                             break;
                         }
                     }
-                }
-                if (rt.getOutput() == null || rt.getOutput().isEmpty()) {
-                    message += "None";
-                    player.sendMessage(message);
-                } else {
                     player.sendMessage(message.substring(0, message.length()-2));
                 }
             } else if (srt != null) {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Info for super-region type " + ChatColor.GOLD + args[1] + ":");
-                player.sendMessage(ChatColor.GRAY + "Cost: " + ChatColor.GOLD + srt.getMoneyRequirement() + ChatColor.GRAY +
-                        ", Payout: " + ChatColor.GOLD + srt.getOutput());
-                player.sendMessage(ChatColor.GRAY + "Power: " + ChatColor.GOLD + srt.getMaxPower() + " (+" + srt.getDailyPower() + "), " +
-                        ChatColor.GRAY + "Charter: " + ChatColor.GOLD + srt.getCharter() + ChatColor.GRAY + ", Radius: " + ChatColor.GOLD + (int) Math.sqrt(srt.getRadius()));
                 
-                String message = ChatColor.GRAY + "Description: " + ChatColor.GOLD;
+                String message = "";
+                if (srt.getMoneyRequirement() != 0) {
+                    message += ChatColor.GRAY + "Cost: " + ChatColor.GOLD + srt.getMoneyRequirement();
+                }
+                if (srt.getOutput() != 0) {
+                    message += ChatColor.GRAY + ", Payout: " + ChatColor.GOLD + srt.getOutput();
+                }
+                
+                if (!message.equals("")) {
+                    player.sendMessage(message);
+                }
+                
+                message = ChatColor.GRAY + "Power: " + ChatColor.GOLD + srt.getMaxPower() + " (+" + srt.getDailyPower() + "), ";
+                if (srt.getCharter() != 0) {
+                    message += ChatColor.GRAY + "Charter: " + ChatColor.GOLD + srt.getCharter() + ChatColor.GRAY + ", ";
+                }
+                message += "Radius: " + ChatColor.GOLD + (int) Math.sqrt(srt.getRadius());
+                
+                player.sendMessage(message);
+                
                 int j=0;
                 if (srt.getDescription() != null) {
+                    message = ChatColor.GRAY + "Description: " + ChatColor.GOLD;
                     String tempMess = srt.getDescription();
                     if (tempMess.length() + message.length() <= 55) {
                         player.sendMessage(message + tempMess);
@@ -1666,8 +1687,9 @@ public class HeroStronghold extends JavaPlugin {
                     }
                 }
                 message = ChatColor.GRAY + "Effects: " + ChatColor.GOLD;
-                if (srt.getEffects() != null) {
-                    for (String is : srt.getEffects()) {
+                List<String> effects = srt.getEffects();
+                if (effects != null) {
+                    for (String is : effects) {
                         String addLine = is + ", ";
                         if (message.length() + addLine.length() > 55) {
                             player.sendMessage(message.substring(0, message.length() - 2));
@@ -1681,13 +1703,13 @@ public class HeroStronghold extends JavaPlugin {
                         }
                     }
                 }
-                if (srt == null || srt.getEffects().isEmpty()) {
+                if (effects != null && !effects.isEmpty()) {
+                    player.sendMessage(message.substring(0, message.length()-2));
+                } else {
                     message += "None";
                     player.sendMessage(message);
-                } else {
-                    player.sendMessage(message.substring(0, message.length()-2));
                 }
-                message = ChatColor.GRAY + "Requirements: " + ChatColor.GOLD;
+                message = ChatColor.GRAY + "Required Regions: " + ChatColor.GOLD;
                 if (srt.getRequirements() != null) {
                     for (String is : srt.getRequirements().keySet()) {
                         String addLine = is + ":" + srt.getRequirement(is) + ", ";
@@ -1709,8 +1731,8 @@ public class HeroStronghold extends JavaPlugin {
                 } else {
                     player.sendMessage(message.substring(0, message.length()-2));
                 }
-                message = ChatColor.GRAY + "Evolves from: " + ChatColor.GOLD;
                 if (srt.getChildren() != null) {
+                    message = ChatColor.GRAY + "Evolves from: " + ChatColor.GOLD;
                     for (String is : srt.getChildren()) {
                         String addLine = is + ", ";
                         if (message.length() + addLine.length() > 55) {
@@ -1724,11 +1746,6 @@ public class HeroStronghold extends JavaPlugin {
                             break;
                         }
                     }
-                }
-                if (srt.getChildren() == null || srt.getChildren().isEmpty()) {
-                    message += "None";
-                    player.sendMessage(message);
-                } else {
                     player.sendMessage(message.substring(0, message.length()-2));
                 }
             }

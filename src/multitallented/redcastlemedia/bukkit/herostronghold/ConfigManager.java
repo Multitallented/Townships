@@ -27,6 +27,7 @@ public class ConfigManager {
     private final double makePeacePer;
     private final double renameCost;
     private final int powerPerKill;
+    private final boolean playerInRegionChecks;
     
     public ConfigManager(FileConfiguration config, HeroStronghold plugin) {
         this.config = config;
@@ -45,6 +46,7 @@ public class ConfigManager {
         makePeacePer = config.getDouble("war.make-peace-cost-per-member", 500.0);
         renameCost = config.getDouble("rename-cost", 1000.0);
         powerPerKill = config.getInt("power-per-kill", 1);
+        playerInRegionChecks = !config.getBoolean("disable-player-in-region-checks", false);
         loadCharters();
     }
     
@@ -72,7 +74,7 @@ public class ConfigManager {
         File charterFolder = new File(plugin.getDataFolder(), "charters");
         charterFolder.mkdirs();//Create the folder if it doesn't exist
         
-        File charterData = new File(plugin.getDataFolder() + "/charters", name + ".yml");
+        File charterData = new File(charterFolder, name + ".yml");
         if (!charterData.exists()) {
             try {
                 charterData.createNewFile();
@@ -92,6 +94,10 @@ public class ConfigManager {
         }
         charterConfig.set(name, data);
     }
+    public boolean getPlayerInRegionChecks() {
+        return playerInRegionChecks;
+    }
+    
     public int getPowerPerKill() {
         return powerPerKill;
     }

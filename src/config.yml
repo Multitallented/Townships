@@ -1,4 +1,5 @@
 explode-on-destroy: false
+disable-player-in-region-checks: false
 max-tax: 500.0
 destroy-if-no-money: true
 destroy-if-no-power: true
