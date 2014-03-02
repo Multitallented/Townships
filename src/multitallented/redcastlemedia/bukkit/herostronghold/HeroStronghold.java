@@ -2142,8 +2142,16 @@ public class HeroStronghold extends JavaPlugin {
                 SuperRegionType srt = regionManager.getSuperRegionType(sr.getType());
                 int population = sr.getOwners().size() + sr.getMembers().size();
                 double revenue = sr.getTaxes() * population + srt.getOutput();
+                String housing = "∞";
+                if (srt.hasEffect("housing")) {
+                    int housin = 0;
+                    for (Region r : regionManager.getContainedRegions(sr)) {
+                        housin += regionManager.getRegionType(r.getType()).getHousing();
+                    }
+                    housing = housin + "";
+                }
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] ==:|" + ChatColor.GOLD + sr.getName() + " (" + sr.getType() + ") " + ChatColor.GRAY + "|:==");
-                player.sendMessage(ChatColor.GRAY + "Population: " + ChatColor.GOLD + population + ChatColor.GRAY +
+                player.sendMessage(ChatColor.GRAY + "Population: " + ChatColor.GOLD + population + "/" + housing + ChatColor.GRAY +
                         " Bank: " + (sr.getBalance() < srt.getOutput() ? ChatColor.RED : ChatColor.GOLD) + sr.getBalance() + ChatColor.GRAY +
                         " Power: " + (sr.getPower() < srt.getDailyPower() ? ChatColor.RED : ChatColor.GOLD) + sr.getPower() + 
                         " (+" + srt.getDailyPower() + ") / " + srt.getMaxPower());
