@@ -256,7 +256,6 @@ public class RegionManager {
             }
         }
         
-        
         FileConfiguration warConfig = new YamlConfiguration();
         try {
             File warFile = new File(plugin.getDataFolder(), "war.yml");
