@@ -26,7 +26,6 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.hidendra.bukkit.metrics.Metrics;
 
 public class HeroStronghold extends JavaPlugin {
     private PluginServerListener serverListener;
@@ -52,12 +51,6 @@ public class HeroStronghold extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        try {
-            Metrics metrics = new Metrics(this);
-            metrics.start();
-        } catch (IOException e) {
-            // Failed to submit the stats :-(
-        }
       
         //setup configs
         config = getConfig();
