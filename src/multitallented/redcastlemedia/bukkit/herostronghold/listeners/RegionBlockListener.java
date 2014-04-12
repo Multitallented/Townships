@@ -35,6 +35,7 @@ public class RegionBlockListener implements Listener {
         Location loc = event.getBlock().getLocation();
         Location currentLoc = null;
         boolean delete = false;
+        boolean activeSRDetected = false;
         for (SuperRegion sr : regionManager.getContainingSuperRegions(loc)) {
             SuperRegionType currentRegionType = regionManager.getSuperRegionType(sr.getType());
             Player player = event.getPlayer();
@@ -55,6 +56,16 @@ public class RegionBlockListener implements Listener {
                 }
                 return;
             }
+            
+            boolean nullPlayer = player == null;
+            boolean member = false;
+            if (!nullPlayer) {
+                member = (sr.hasOwner(player.getName()) || sr.hasMember(player.getName()));
+            }
+            boolean reqs = regionManager.hasAllRequiredRegions(sr);
+            boolean hasPower = sr.getPower() > 0;
+            boolean hasMoney = sr.getBalance() > 0;
+            activeSRDetected = activeSRDetected || (reqs && hasPower && hasMoney);
         }
         for (Region r : regionManager.getContainingBuildRegions(loc)) {
             try {
@@ -75,6 +86,14 @@ public class RegionBlockListener implements Listener {
                     }
                     if ((player == null || !currentRegion.isOwner(player.getName()))
                             && effect.regionHasEffect(currentRegionType.getEffects(), "denyblockbreaknoreagent") != 0) {
+                        event.setCancelled(true);
+                        if (player != null) {
+                            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
+                        }
+                        return;
+                    }
+                    if (activeSRDetected && effect.regionHasEffect(currentRegionType.getEffects(), "powerdenyblockbreak") != 0 &&
+                            (player == null || !currentRegion.isOwner(player.getName()))) {
                         event.setCancelled(true);
                         if (player != null) {
                             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] This region is protected");
