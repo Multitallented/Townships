@@ -14,6 +14,7 @@ import multitallented.redcastlemedia.bukkit.herostronghold.region.SuperRegion;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -59,7 +60,7 @@ public class RegionEntityListener implements Listener {
         }
         if (!(d instanceof Player)) {
             return;
-        }
+        }        
         Player dPlayer = (Player) d;
         String dPlayername = dPlayer.getName();
         int powerLoss = cm.getPowerPerKill();
@@ -118,27 +119,37 @@ public class RegionEntityListener implements Listener {
     }
     
     @EventHandler
-    public void onEntityDamage(EntityDamageEvent event) {
-        if (event.isCancelled() || !(event.getEntity() instanceof Player) || !(event instanceof EntityDamageByEntityEvent)) {
+    public void onEntityDamage(EntityDamageByEntityEvent event) {
+        if (event.isCancelled()) {
             return;
         }
+        
+        if (event.getEntity() instanceof ItemFrame) {
+            ArrayList<RegionCondition> conditions = new ArrayList<RegionCondition>();
+            conditions.add(new RegionCondition("denyblockbreak", true, 0));
+            conditions.add(new RegionCondition("denyblockbreaknoreagent", false, 0));
+            if (rm.shouldTakeAction(event.getEntity().getLocation(), (Player) event.getDamager(), conditions)) {
+                event.setCancelled(true);
+                return;
+            }
+        } else if (!(event.getEntity() instanceof Player)) {
+            return;
+        }
+        
+        Player player = (Player) event.getEntity();
+        
         if (rm.shouldTakeAction(event.getEntity().getLocation(), (Player) event.getEntity(), 0, "denydamage", true) ||
-            rm.shouldTakeAction(event.getEntity().getLocation(), (Player) event.getEntity(), 0, "denydamagenoreagent", false)) {
-            ((Player) event.getEntity()).sendMessage(ChatColor.RED + "[HeroStronghold] Damage is disabled here.");
+                rm.shouldTakeAction(event.getEntity().getLocation(), (Player) event.getEntity(), 0, "denydamagenoreagent", false)) {
+            player.sendMessage(ChatColor.RED + "[HeroStronghold] Damage is disabled here.");
             event.setCancelled(true);
             return;
         }
         
-        EntityDamageByEntityEvent edby = (EntityDamageByEntityEvent) event;
-        Entity damager = edby.getDamager(); 
-        if (event.getCause() == DamageCause.PROJECTILE) {
-            damager = ((Projectile)damager).getShooter();
-        }
-        if (!(damager instanceof Player)) {
+        if (!(event.getDamager() instanceof Player)) {
             return;
         }
-        Player player = (Player) event.getEntity();
-        Player dPlayer = (Player) damager;
+        
+        Player dPlayer = (Player) event.getDamager();
         
         Location loc = player.getLocation();
         for (SuperRegion sr : rm.getContainingSuperRegions(loc)) {
