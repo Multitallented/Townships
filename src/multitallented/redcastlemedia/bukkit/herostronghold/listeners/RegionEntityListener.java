@@ -15,6 +15,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.craftbukkit.v1_7_R3.entity.CraftItemFrame;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -124,7 +125,7 @@ public class RegionEntityListener implements Listener {
             return;
         }
         
-        if (event.getEntity() instanceof ItemFrame) {
+        if (event.getEntity() instanceof ItemFrame || event.getEntity() instanceof CraftItemFrame) {
             ArrayList<RegionCondition> conditions = new ArrayList<RegionCondition>();
             conditions.add(new RegionCondition("denyblockbreak", true, 0));
             conditions.add(new RegionCondition("denyblockbreaknoreagent", false, 0));
@@ -132,7 +133,8 @@ public class RegionEntityListener implements Listener {
                 event.setCancelled(true);
                 return;
             }
-        } else if (!(event.getEntity() instanceof Player)) {
+        }
+        if (!(event.getEntity() instanceof Player)) {
             return;
         }
         

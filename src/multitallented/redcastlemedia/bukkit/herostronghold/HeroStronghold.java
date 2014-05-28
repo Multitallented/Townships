@@ -433,7 +433,7 @@ public class HeroStronghold extends JavaPlugin {
             boolean nullPerms = perms == null;
             boolean createAll = nullPerms || perms.has(player, "herostronghold.create.all");
             if (!(nullPerms || createAll || perms.has(player, "herostronghold.create." + regionName))) {
-                //TODO add limited quantity permissions here
+                
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] you dont have permission to create a " + regionName);
                 return true;
             }
@@ -532,78 +532,14 @@ public class HeroStronghold extends JavaPlugin {
             }
             
             
-            //Prepare a requirements checklist
-            ArrayList<ItemStack> requirements = currentRegionType.getRequirements();
-            Map<Integer, Integer> reqMap = null;
-            if (!requirements.isEmpty()) {
-                reqMap = new HashMap<Integer, Integer>();
-                for (ItemStack currentIS : requirements) {
-                    reqMap.put(new Integer(currentIS.getTypeId()), new Integer(currentIS.getAmount()));
+            //Check if it has required blocks
+            if (!currentRegionType.getRequirements().isEmpty()) {
+                String message = Util.hasCreationRequirements(currentLocation, currentRegionType, regionManager);
+                if (!message.equals("")) {
+                    player.sendMessage(ChatColor.GRAY + "[HeroStronghold] you don't have all of the required blocks in this structure.");
+                    player.sendMessage(ChatColor.GOLD + message);
+                    return true;
                 }
-                
-                //Check the area for required blocks
-                int radius = (int) Math.sqrt(currentRegionType.getBuildRadius());
-
-                int lowerLeftX = (int) currentLocation.getX() - radius;
-                int lowerLeftY = (int) currentLocation.getY() - radius;
-                lowerLeftY = lowerLeftY < 0 ? 0 : lowerLeftY;
-                int lowerLeftZ = (int) currentLocation.getZ() - radius;
-
-                int upperRightX = (int) currentLocation.getX() + radius;
-                int upperRightY = (int) currentLocation.getY() + radius;
-                upperRightY = upperRightY > 255 ? 255 : upperRightY;
-                int upperRightZ = (int) currentLocation.getZ() + radius;
-                
-                World world = currentLocation.getWorld();
-                
-                
-                outer: for (int x=lowerLeftX; x<upperRightX; x++) {
-                    
-                    for (int z=lowerLeftZ; z<upperRightZ; z++) {
-                        
-                        for (int y=lowerLeftY; y<upperRightY; y++) {
-                            
-                            int type = world.getBlockTypeIdAt(x, y, z);
-                            if (type != 0 && reqMap.containsKey(type)) {
-                                if (reqMap.get(type) < 2) {
-                                    reqMap.remove(type);
-                                    if (reqMap.isEmpty()) {
-                                        break outer;
-                                    }
-                                } else {
-                                    reqMap.put(type, reqMap.get(type) - 1);
-                                }
-                            }
-                        }
-                        
-                    }
-                    
-                }
-            }
-            
-            
-            if (reqMap != null && !reqMap.isEmpty()) {
-                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] you don't have all of the required blocks in this structure.");
-                String message = ChatColor.GOLD + "";
-                int j=0;
-                for (int type : reqMap.keySet()) {
-                    int reqAmount = reqMap.get(type);
-                    String reqType = Material.getMaterial(type).name();
-                    if (message.length() + reqAmount + reqType.length() + 3 > 55) {
-                        player.sendMessage(message);
-                        message = ChatColor.GOLD + "";
-                        j++;
-                    }
-                    if (j > 14) {
-                        break;
-                    } else {
-                        message += reqAmount + ":" + reqType + ", ";
-                    }
-                }
-                if (!reqMap.isEmpty()) {
-                    player.sendMessage(message.substring(0, message.length() - 2));
-                }
-                return true;
             }
             
             //Create chest at players feet for tracking reagents and removing upkeep items
@@ -620,31 +556,6 @@ public class HeroStronghold extends JavaPlugin {
             }
             regionManager.addRegion(currentLocation, regionName, owners);
             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] " + ChatColor.WHITE + "You successfully create a " + ChatColor.RED + regionName);
-            
-            //Tell the player what reagents are required for it to work
-            String message = ChatColor.GOLD + "Reagents: ";
-            if (currentRegionType.getReagents() != null) {
-                int j=0;
-                for (ItemStack is : currentRegionType.getReagents()) {
-                    String addLine = is.getAmount() + ":" + is.getType().name() + ", ";
-                    if (message.length() + addLine.length() > 55) {
-                        player.sendMessage(message);
-                        message = ChatColor.GOLD + "";
-                        j++;
-                    }
-                    if (j < 14) {
-                        message += addLine;
-                    } else {
-                        break;
-                    }
-                }
-            }
-            if (currentRegionType.getReagents() == null || currentRegionType.getReagents().isEmpty()) {
-                message += "None";
-                player.sendMessage(message);
-            } else {
-                player.sendMessage(message.substring(0, message.length()-2));
-            }
             
             return true;
         } else if (args.length > 2 && args[0].equalsIgnoreCase("create")) {
@@ -1557,8 +1468,15 @@ public class HeroStronghold extends JavaPlugin {
                 }
                 message = ChatColor.GRAY + "Required Blocks: " + ChatColor.GOLD;
                 if (rt.getRequirements() != null) {
-                    for (ItemStack is : rt.getRequirements()) {
-                        String addLine = is.getAmount() + ":" + is.getType().name() + ", ";
+                    for (ArrayList<HSItem> is : rt.getRequirements()) {
+                        String addLine = "";
+                        for (HSItem iss : is) {
+                            if (addLine.equals("")) {
+                                addLine = iss.getQty() + ":" + iss.getMat().name() + ", ";
+                            } else {
+                                addLine = " or " + iss.getQty() + ":" + iss.getMat().name() + ", ";
+                            }
+                        }
                         if (message.length() + addLine.length() > 55) {
                             player.sendMessage(message.substring(0, message.length() - 2));
                             message = ChatColor.GOLD + "";
@@ -1579,8 +1497,15 @@ public class HeroStronghold extends JavaPlugin {
                 }
                 message = ChatColor.GRAY + "Required Items: " + ChatColor.GOLD;
                 if (rt.getReagents() != null) {
-                    for (ItemStack is : rt.getReagents()) {
-                        String addLine = is.getAmount() + ":" + is.getType().name() + ", ";
+                    for (ArrayList<HSItem> is : rt.getReagents()) {
+                        String addLine = "";
+                        for (HSItem iss : is) {
+                            if (addLine.equals("")) {
+                                addLine = iss.getQty() + ":" + iss.getMat().name() + ", ";
+                            } else {
+                                addLine = " or " + iss.getQty() + ":" + iss.getMat().name() + ", ";
+                            }
+                        }
                         if (message.length() + addLine.length() > 55) {
                             player.sendMessage(message.substring(0, message.length() - 2));
                             message = ChatColor.GOLD + "";
@@ -1601,8 +1526,15 @@ public class HeroStronghold extends JavaPlugin {
                 }
                 if (rt.getUpkeep() != null && !rt.getUpkeep().isEmpty()) {
                     message = ChatColor.GRAY + "Upkeep Cost: " + ChatColor.GOLD;
-                    for (ItemStack is : rt.getUpkeep()) {
-                        String addLine = is.getAmount() + ":" + is.getType().name() + ", ";
+                    for (ArrayList<HSItem> is : rt.getUpkeep()) {
+                        String addLine = "";
+                        for (HSItem iss : is) {
+                            if (addLine.equals("")) {
+                                addLine = iss.getQty() + ":" + iss.getMat().name() + ", ";
+                            } else {
+                                addLine = " or " + iss.getQty() + ":" + iss.getMat().name() + ", ";
+                            }
+                        }
                         if (message.length() + addLine.length() > 55) {
                             player.sendMessage(message.substring(0, message.length() - 2));
                             message = ChatColor.GOLD + "";
@@ -1619,8 +1551,15 @@ public class HeroStronghold extends JavaPlugin {
                 
                 if (rt.getOutput() != null && !rt.getOutput().isEmpty()) {
                     message = ChatColor.GRAY + "Output: " + ChatColor.GOLD;
-                    for (ItemStack is : rt.getOutput()) {
-                        String addLine = is.getAmount() + ":" + is.getType().name() + ", ";
+                    for (ArrayList<HSItem> is : rt.getOutput()) {
+                        String addLine = "";
+                        for (HSItem iss : is) {
+                            if (addLine.equals("")) {
+                                addLine = iss.getQty() + ":" + iss.getMat().name() + ", ";
+                            } else {
+                                addLine = " or " + iss.getQty() + ":" + iss.getMat().name() + ", ";
+                            }
+                        }
                         if (message.length() + addLine.length() > 55) {
                             player.sendMessage(message.substring(0, message.length() - 2));
                             message = ChatColor.GOLD + "";

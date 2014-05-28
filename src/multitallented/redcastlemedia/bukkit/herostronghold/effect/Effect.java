@@ -234,31 +234,6 @@ public class Effect {
         //Check if chest is full and region has output
         Chest chest = ((Chest) bs);
         return Util.containsItems(rt.getReagents(), chest.getInventory());
-        
-        /*for (ItemStack is : rt.getReagents()) {
-            if (!chest.getInventory().contains(is.getType(), is.getAmount())) {
-                return false;
-            }
-        }
-        return true;*/
-        /*for (ItemStack is : chest.getInventory().getContents()) {
-            Material mat = Material.AIR;
-            if (is != null) {
-                mat = is.getType();
-                if (!mat.equals(Material.AIR) && reagentMap.containsKey(mat)) {
-                    if (reagentMap.get(mat) <= is.getAmount()) {
-                        reagentMap.remove(mat);
-                    } else {
-                        reagentMap.put(mat, reagentMap.get(mat) - is.getAmount());
-                    }
-                }
-            }
-        }
-        if (reagentMap.isEmpty()) {
-            return true;
-        }
-        
-        return false;*/
     }
     
     /**

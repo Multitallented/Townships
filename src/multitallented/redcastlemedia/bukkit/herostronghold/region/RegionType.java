@@ -1,6 +1,7 @@
 package multitallented.redcastlemedia.bukkit.herostronghold.region;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import org.bukkit.inventory.ItemStack;
 
@@ -14,10 +15,10 @@ public class RegionType {
     private final ArrayList<String> enemyClasses;
     private final ArrayList<String> effects;
     private final int radius;
-    private final ArrayList<ItemStack> requirements;
-    private final ArrayList<ItemStack> reagents;
-    private final ArrayList<ItemStack> upkeep;
-    private final ArrayList<ItemStack> output;
+    private final ArrayList<ArrayList<HSItem>> requirements;
+    private final ArrayList<ArrayList<HSItem>> reagents;
+    private final ArrayList<ArrayList<HSItem>> upkeep;
+    private final ArrayList<ArrayList<HSItem>> output;
     private final double upkeepChance;
     private final double moneyRequirement;
     private final double moneyOutput;
@@ -35,9 +36,9 @@ public class RegionType {
     
     public RegionType(String name, String group, ArrayList<String> friendlyClasses,
             ArrayList<String> enemyClasses, ArrayList<String> effects,
-            int radius, int buildRadius, ArrayList<ItemStack> requirements, List<String> superRegions,
-            ArrayList<ItemStack> reagents, ArrayList<ItemStack> upkeep,
-            ArrayList<ItemStack> output, double upkeepChance,
+            int radius, int buildRadius, ArrayList<ArrayList<HSItem>> requirements, List<String> superRegions,
+            ArrayList<ArrayList<HSItem>> reagents, ArrayList<ArrayList<HSItem>> upkeep,
+            ArrayList<ArrayList<HSItem>> output, double upkeepChance,
             double moneyRequirement, double moneyOutput, double exp,
             String description, int powerDrain,
             int housing, List<String> biome) {
@@ -103,7 +104,7 @@ public class RegionType {
         return name;
     }
     
-    public ArrayList<ItemStack> getReagents() {
+    public ArrayList<ArrayList<HSItem>> getReagents() {
         return reagents;
     }
     
@@ -111,7 +112,7 @@ public class RegionType {
         return radius;
     }
     
-    public ArrayList<ItemStack> getRequirements() {
+    public ArrayList<ArrayList<HSItem>> getRequirements() {
         return requirements;
     }
     
@@ -127,7 +128,7 @@ public class RegionType {
         return effects;
     }
     
-    public ArrayList<ItemStack> getUpkeep() {
+    public ArrayList<ArrayList<HSItem>> getUpkeep() {
         return upkeep;
     }
     
@@ -135,7 +136,7 @@ public class RegionType {
         return moneyOutput;
     }
     
-    public ArrayList<ItemStack> getOutput() {
+    public ArrayList<ArrayList<HSItem>> getOutput() {
         return output;
     }
     

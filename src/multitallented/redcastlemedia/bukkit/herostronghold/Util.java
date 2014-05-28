@@ -6,9 +6,11 @@ package multitallented.redcastlemedia.bukkit.herostronghold;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import multitallented.redcastlemedia.bukkit.herostronghold.region.HSItem;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.Region;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionManager;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionType;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.inventory.Inventory;
@@ -33,23 +35,26 @@ public class Util {
         return newFileName;
     }
     
-    public static boolean containsItems(ArrayList<ItemStack> req, Inventory inv) {
+    public static boolean containsItems(ArrayList<ArrayList<HSItem>> req, Inventory inv) {
         if (inv == null) {
             return false;
         }
-        outer: for (ItemStack is : req) {
-            if (is == null) {
-                continue;
-            }
-            int amount = is.getAmount();
-            for (ItemStack iss : inv.getContents()) {
-                if (iss == null) {
-                    continue;
-                }
-                if (iss.getType() == is.getType()) {
-                    amount -= iss.getAmount();
-                    if (amount < 1) {
-                        continue outer;
+        
+        outer: for (ArrayList<HSItem> orReqs : req) {
+            for (HSItem orReq : orReqs) {
+
+                int amount = 0;
+                for (ItemStack iss : inv.getContents()) {
+                    if (iss == null) {
+                        continue;
+                    }
+                    
+                    if (iss.getType() == orReq.getMat() && (orReq.isWildDamage() || orReq.getDamage() == (int) (iss.getDurability()))) {
+                        if ((iss.getAmount() + amount) >= orReq.getQty()) {
+                            continue outer;
+                        } else {
+                            amount += iss.getAmount();
+                        }
                     }
                 }
             }
@@ -58,8 +63,73 @@ public class Util {
         return true;
     }
     
-    public static boolean removeItems(ArrayList<ItemStack> removeItems, Inventory inv) {
-        ArrayList<Integer> removeIndexes = new ArrayList<Integer>();
+    public static boolean removeItems(ArrayList<ArrayList<HSItem>> req, Inventory inv) {
+        if (inv == null) {
+            return false;
+        }
+        
+        //clone the list
+        ArrayList<ArrayList<HSItem>> hsItemsList = new ArrayList<ArrayList<HSItem>>();
+        for (ArrayList<HSItem> hsItems : req) {
+            ArrayList<HSItem> tempList = new ArrayList<HSItem>();
+            for (HSItem hsItem : hsItems) {
+                tempList.add(hsItem.clone());
+            }
+            hsItemsList.add(tempList);
+        }
+        
+        
+        ArrayList<Integer> removeItems = new ArrayList<Integer>();
+        HashMap<Integer, Integer> reduceItems = new HashMap<Integer, Integer>();
+        
+        for (int i =0; i< inv.getSize(); i++) {
+            ItemStack item = inv.getItem(i);
+            if (item == null) {
+                continue;
+            }
+            
+            int j=0;
+            boolean removeIndex = false;
+            outer1: for (ArrayList<HSItem> hsItems : hsItemsList) {
+                for (HSItem hsItem : hsItems) {
+                    if (item.getType() == hsItem.getMat() && (hsItem.isWildDamage() || hsItem.getDamage() == (int) item.getDurability())) {
+                        
+                        if (item.getAmount() > hsItem.getQty()) {
+                            reduceItems.put(i, hsItem.getQty());
+                            removeIndex = true;
+                        } else if (item.getAmount() == hsItem.getQty()) {
+                            removeItems.add(i);
+                            removeIndex = true;
+                        } else {
+                            removeItems.add(i);
+                            hsItem.setQty(hsItem.getQty() - item.getAmount());
+                        }
+                        break outer1;
+                        
+                    }
+                }
+                j++;
+            }
+            if (removeIndex) {
+                hsItemsList.remove(j);
+            }
+        }
+        
+        if (!hsItemsList.isEmpty()) {
+            return false;
+        }
+        
+        for (Integer i : reduceItems.keySet()) {
+            inv.getItem(i).setAmount(inv.getItem(i).getAmount() - reduceItems.get(i));
+        }
+        
+        for (Integer i : removeItems) {
+            inv.setItem(i, null);
+        }
+        
+        return true;
+        
+        /*ArrayList<Integer> removeIndexes = new ArrayList<Integer>();
         boolean removedAll = true;
         outer: for (ItemStack is : removeItems) {
             if (is == null) {
@@ -92,12 +162,31 @@ public class Util {
             inv.setItem(i, null);
         }
         
-        return removedAll;
+        return removedAll;*/
     }
     
-    public static ArrayList<ItemStack> addItems(ArrayList<ItemStack> addItems, Inventory inv) {
+    public static ArrayList<ItemStack> addItems(ArrayList<ArrayList<HSItem>> addItems, Inventory inv) {
         ArrayList<ItemStack> remainingItems = new ArrayList<ItemStack>();
-        outer: for (ItemStack is : addItems) {
+        
+        outer: for (ArrayList<HSItem> tempItems : addItems) {
+            double rand = Math.random();
+            double prevChance = 0;
+            for (HSItem item : tempItems) {
+                if ((prevChance < rand) && (prevChance + item.getChance() > rand)) {
+                    
+                    HashMap<Integer, ItemStack> is = inv.addItem(new ItemStack(item.getMat(), item.getQty(), (short) item.getDamage()));
+                    if (!is.isEmpty()) {
+                        for (ItemStack iss : is.values()) {
+                            remainingItems.add(iss);
+                        }
+                    }
+                    continue outer;
+                    
+                }
+                prevChance += item.getChance();
+            }
+        }
+        /* outer: for (HSItem is : addItems) {
             if (is == null) {
                 continue;
             }
@@ -125,53 +214,149 @@ public class Util {
                 }
             }
             remainingItems.add(new ItemStack(is.getType(), amount));
-        }
+        }*/
         
         return remainingItems;
     }
     
-    public static ArrayList<ItemStack> matchItems(ArrayList<ItemStack> list1, ArrayList<ItemStack> list2) {
-        return null;
-    }
-    
-    public static boolean hasRequiredBlocks(Region region, RegionManager rm) {
-        if (region.getLocation().getBlock().getType() != Material.CHEST) {
-            return false;
+    public static String hasCreationRequirements(Location loc, RegionType rt, RegionManager rm) {
+        if (rt.getRequirements().isEmpty()) {
+            return "";
         }
         
-        RegionType rt = rm.getRegionType(region.getType());
-        int x = (int) region.getLocation().getX() - rt.getRawBuildRadius();
-        int y = (int) region.getLocation().getY() - rt.getRawBuildRadius();
+        ArrayList<ArrayList<HSItem>> reqMap = new ArrayList<ArrayList<HSItem>>();
+
+        for (ArrayList<HSItem> currentStack : rt.getRequirements()) {
+            ArrayList<HSItem> tempMap = new ArrayList<HSItem>();
+                    
+            for (HSItem hsItem : currentStack) {
+                tempMap.add(hsItem.clone());
+            }
+            reqMap.add(tempMap);
+        }
+        
+        int x = (int) loc.getX() - rt.getRawBuildRadius();
+        int y = (int) loc.getY() - rt.getRawBuildRadius();
         y = y < 0 ? 0 : y;
-        int z = (int) region.getLocation().getZ() - rt.getRawBuildRadius();
-        int xMax = (int) region.getLocation().getX() + rt.getRawBuildRadius();
-        int yMax = (int) region.getLocation().getY() + rt.getRawBuildRadius();
-        yMax = yMax > region.getLocation().getWorld().getMaxHeight() - 1 ? region.getLocation().getWorld().getMaxHeight() - 1 : yMax;
-        int zMax = (int) region.getLocation().getZ() + rt.getRawBuildRadius();
-        World world = region.getLocation().getWorld();
-        
-        HashMap<Material, Integer> requirements = new HashMap<Material, Integer>();
-        for (ItemStack is : rt.getRequirements()) {
-            requirements.put(is.getType(), is.getAmount());
-        }
-        
+        int z = (int) loc.getZ() - rt.getRawBuildRadius();
+        int xMax = (int) loc.getX() + rt.getRawBuildRadius();
+        int yMax = (int) loc.getY() + rt.getRawBuildRadius();
+        yMax = yMax > loc.getWorld().getMaxHeight() - 1 ? loc.getWorld().getMaxHeight() - 1 : yMax;
+        int zMax = (int) loc.getZ() + rt.getRawBuildRadius();
+        World world = loc.getWorld();
+
         for (int i = x; i < xMax; i++) {
             for (int j = y; j < yMax; j++) {
                 for (int k = z; k < zMax; k++) {
-                    Material mat = world.getBlockAt(i, j, k).getType();
-                    if (requirements.containsKey(mat)) {
-                        requirements.put(mat, requirements.get(mat) - 1);
-                        if (requirements.get(mat) < 1) {
-                            requirements.remove(mat);
+                    ItemStack is = world.getBlockAt(i,j,k).getState().getData().toItemStack();
+                    
+                    int p = 0;
+                    boolean destroyIndex = false;
+                    outer1: for (ArrayList<HSItem> tempMap : reqMap) {
+                        for (HSItem item : tempMap) {
+                            if (item.getMat() == is.getType() && (item.isWildDamage() || item.damageMatches(is.getDurability()))) {
+                                if (item.getQty() < 2) {
+                                    destroyIndex = true;
+                                } else {
+                                    item.setQty(item.getQty() - 1);
+                                }
+                                break outer1;
+                            }
+                        }
+
+                        
+                        p++;
+                    }
+                    if (destroyIndex) {
+                        reqMap.remove(p);
+                        
+                        if (reqMap.isEmpty()) {
+                            return "";
                         }
                     }
                 }
             }
         }
-        if (!requirements.isEmpty()) {
+        
+        String message = "";
+        
+        for (ArrayList<HSItem> items : reqMap) {
+            for (HSItem item : items) {
+                message += item.getQty() + ":" + item.getMat().name() + " or ";
+            }
+            message = message.substring(0, message.length() - 4);
+            message += ", ";
+        }
+        
+        return message.substring(0, message.length() -2);
+    }
+    
+    public static boolean hasRequiredBlocks(Location loc, RegionType rt, RegionManager rm) {
+        if (loc.getBlock().getType() != Material.CHEST) {
             return false;
         }
         
-        return true;
+        if (rt.getRequirements().isEmpty()) {
+            return true;
+        }
+        
+        ArrayList<ArrayList<HSItem>> reqMap = new ArrayList<ArrayList<HSItem>>();
+
+        for (ArrayList<HSItem> currentStack : rt.getRequirements()) {
+            ArrayList<HSItem> tempMap = new ArrayList<HSItem>();
+                    
+            for (HSItem hsItem : currentStack) {
+                tempMap.add(hsItem.clone());
+            }
+            reqMap.add(tempMap);
+        }
+        
+        int x = (int) loc.getX() - rt.getRawBuildRadius();
+        int y = (int) loc.getY() - rt.getRawBuildRadius();
+        y = y < 0 ? 0 : y;
+        int z = (int) loc.getZ() - rt.getRawBuildRadius();
+        int xMax = (int) loc.getX() + rt.getRawBuildRadius();
+        int yMax = (int) loc.getY() + rt.getRawBuildRadius();
+        yMax = yMax > loc.getWorld().getMaxHeight() - 1 ? loc.getWorld().getMaxHeight() - 1 : yMax;
+        int zMax = (int) loc.getZ() + rt.getRawBuildRadius();
+        World world = loc.getWorld();
+
+        for (int i = x; i < xMax; i++) {
+            for (int j = y; j < yMax; j++) {
+                for (int k = z; k < zMax; k++) {
+                    ItemStack is = world.getBlockAt(i,j,k).getState().getData().toItemStack();
+                    
+                    int p = 0;
+                    boolean destroyIndex = false;
+                    outer1: for (ArrayList<HSItem> tempMap : reqMap) {
+                        for (HSItem item : tempMap) {
+                            if (item.getMat() == is.getType() && (item.isWildDamage() || item.damageMatches(is.getDurability()))) {
+                                if (item.getQty() < 2) {
+                                    destroyIndex = true;
+                                } else {
+                                    item.setQty(item.getQty() - 1);
+                                }
+                                break outer1;
+                            }
+                        }
+
+                        
+                        p++;
+                    }
+                    if (destroyIndex) {
+                        reqMap.remove(p);
+                        
+                        if (reqMap.isEmpty()) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+    
+    public static boolean hasRequiredBlocks(Region region, RegionManager rm) {
+        return Util.hasRequiredBlocks(region.getLocation(), rm.getRegionType(region.getType()), rm);
     }
 }

@@ -295,21 +295,63 @@ public class RegionManager {
         return tempMap;
     }
     
-    private ArrayList<ItemStack> processItemStackList(List<String> input, String filename) {
-        ArrayList<ItemStack> returnList = new ArrayList<ItemStack>();
+    private ArrayList<ArrayList<HSItem>> processItemStackList(List<String> input, String filename) {
+        ArrayList<ArrayList<HSItem>> returnList = new ArrayList<ArrayList<HSItem>>();
+        int i=0;
+        
         for (String current : input) {
-            String[] params = current.split("\\.");
-            if (Material.getMaterial(params[0]) != null) {
-                ItemStack is;
-                if (params.length < 3) {
-                    is = new ItemStack(Material.getMaterial(params[0]),Integer.parseInt(params[1]));
-                } else {
-                    is = new ItemStack(Material.getMaterial(params[0]),Integer.parseInt(params[1]), Short.parseShort(params[2]));
+            ArrayList<HSItem> cList = new ArrayList<HSItem>();
+            
+            for (String subItem : current.split(",")) {
+                
+                String[] params = subItem.split("\\.");
+                if (params.length < 2) {
+                    plugin.warning("[HeroStronghold] could not find item " + params[0] + " in " + filename);
+                    continue;
                 }
-                returnList.add(is);
-            } else {
-                plugin.warning("[HeroStronghold] could not find item " + params[0] + " in " + filename);
+                ItemStack is = null;
+                Material cMat = null;
+                cMat = Material.getMaterial(params[0]);
+                
+                if (cMat != null) {
+                    is = new ItemStack(cMat);
+                    
+                } else {
+                    int itemID = -1;
+                    try {
+                        itemID = Integer.parseInt(params[0]);
+                    } catch (Exception e) {
+                        plugin.warning("[HeroStronghold] could not find item " + params[0] + " in " + filename);
+                        continue;
+                    }
+                    
+                    itemID = itemID < 0 ? -1 : itemID;
+                    if (itemID != -1) {
+                        is = new ItemStack(itemID);
+                    } else {
+                        plugin.warning("[HeroStronghold] could not find item " + params[0] + " in " + filename);
+                        continue;
+                    }
+                }
+                
+                //LOG.1.64.50,LOG.2.64.50
+                HSItem hsItem = null;
+                try {
+                    if (params.length > 3) {
+                        hsItem = new HSItem(is.getType(), is.getTypeId(), Integer.parseInt(params[2]), Integer.parseInt(params[1]), Integer.parseInt(params[3]));
+                    } else if (params.length > 2) {
+                        hsItem = new HSItem(is.getType(), is.getTypeId(), Integer.parseInt(params[2]), Integer.parseInt(params[1]));
+                    } else {
+                        hsItem = new HSItem(is.getType(), is.getTypeId(), Integer.parseInt(params[1]));
+                    }
+                } catch (Exception e) {
+                    plugin.warning("[HeroStronghold] error reading item " + params[0] + " in " + filename);
+                    continue;
+                }
+                cList.add(hsItem);
             }
+            returnList.add(cList);
+            i++;
         }
         return returnList;
     }

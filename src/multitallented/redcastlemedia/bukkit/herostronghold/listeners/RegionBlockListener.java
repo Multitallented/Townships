@@ -1,5 +1,7 @@
 package multitallented.redcastlemedia.bukkit.herostronghold.listeners;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import multitallented.redcastlemedia.bukkit.herostronghold.HeroStronghold;
 import multitallented.redcastlemedia.bukkit.herostronghold.effect.Effect;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.*;
@@ -10,8 +12,8 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
 import org.bukkit.event.block.*;
+import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -28,10 +30,6 @@ public class RegionBlockListener implements Listener {
     
     @EventHandler(ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent event) {
-        boolean debug = false;
-        if (event.getPlayer().getName().equalsIgnoreCase("Multitallented")) {
-            debug = true;
-        }
         Location loc = event.getBlock().getLocation();
         Location currentLoc = null;
         boolean delete = false;
@@ -126,15 +124,26 @@ public class RegionBlockListener implements Listener {
                     }
                     return;
                 }
-                int amountRequired = 0;
-                int i = 0;
-                for (ItemStack currentStack : currentRegionType.getRequirements()) {
-                    if (currentStack.getTypeId() == event.getBlock().getTypeId()) {
-                        amountRequired = new Integer(currentStack.getAmount());
+                
+                HashMap<Material, HSItem> reqMap = null;
+                        
+                boolean reqFound = false;
+                for (ArrayList<HSItem> currentStack : currentRegionType.getRequirements()) {
+                    if (reqFound) {
                         break;
                     }
+                    reqMap = new HashMap<Material, HSItem>();
+                    for (HSItem hsItem : currentStack) {
+                        reqMap.put(hsItem.getMat(), hsItem.clone());
+                        
+                        if (hsItem.getMat().equals(event.getBlock().getType()) && 
+                                (hsItem.isWildDamage() || hsItem.getDamage() == event.getBlock().getState().getData().toItemStack().getDurability())) {
+                            reqFound = true;
+                        }
+                    }
                 }
-                if (amountRequired == 0) {
+                
+                if (!reqFound) {
                     return;
                 }
                 int radius1 = regionManager.getRegionType(r.getType()).getRawBuildRadius(); 
@@ -143,11 +152,11 @@ public class RegionBlockListener implements Listener {
                     for (int y = currentLoc.getY()- radius1 > 1 ? (int) (currentLoc.getY() - radius1) : 1; y< radius1 + currentLoc.getY() && y < 255; y++) {
                         for (int z = (int) (currentLoc.getZ() - radius1); z<radius1 + currentLoc.getZ(); z++) {
                             Block tempBlock = currentLoc.getWorld().getBlockAt(x, y, z);
-                            if (tempBlock.getTypeId() == event.getBlock().getTypeId()) {
-                                if (i >= amountRequired) {
+                            if (reqMap.containsKey(tempBlock.getType())) {
+                                if (reqMap.get(tempBlock.getType()).getQty() < 2) {
                                     return;
                                 } else {
-                                    i++;
+                                    reqMap.get(tempBlock.getType()).setQty(reqMap.get(tempBlock.getType()).getQty() - 1);
                                 }
                             }
                         }
