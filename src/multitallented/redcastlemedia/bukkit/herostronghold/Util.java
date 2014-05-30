@@ -173,12 +173,43 @@ public class Util {
             double prevChance = 0;
             for (HSItem item : tempItems) {
                 if ((prevChance < rand) && (prevChance + item.getChance() > rand)) {
-                    
-                    HashMap<Integer, ItemStack> is = inv.addItem(new ItemStack(item.getMat(), item.getQty(), (short) item.getDamage()));
-                    if (!is.isEmpty()) {
-                        for (ItemStack iss : is.values()) {
-                            remainingItems.add(iss);
+                    ItemStack is = null;
+                    if (!item.isWildDamage()) {
+                        is = new ItemStack(item.getMat(), 1, (short) item.getDamage());
+                    } else {
+                        is = new ItemStack(item.getMat(), 1);
+                    }
+                    if (inv == null) {
+                        remainingItems.add(is);
+                        continue;
+                    }
+                    int amount = item.getQty();
+                    int max = is.getMaxStackSize();
+                    for (ItemStack iss : inv) {
+                        if (iss == null) {
+                            if (amount > max) {
+                                inv.addItem(new ItemStack(is.getType(), max));
+                                amount -= max;
+                                continue;
+                            } else {
+                                inv.addItem(new ItemStack(is.getType(), amount));
+                                continue outer;
+                            }
                         }
+                        if (iss.getType() == is.getType() && iss.getDurability() == is.getDurability() && iss.getAmount() < iss.getMaxStackSize()) {
+                            if (amount + iss.getAmount() > iss.getMaxStackSize()) {
+                                amount = amount - (iss.getMaxStackSize() - iss.getAmount());
+                                iss.setAmount(iss.getMaxStackSize());
+                            } else {
+                                iss.setAmount(amount + iss.getAmount());
+                                continue outer;
+                            }
+                        }
+                    }
+                    
+                    if (amount > 0) {
+                        is.setAmount(amount);
+                        remainingItems.add(is);
                     }
                     continue outer;
                     
@@ -186,34 +217,38 @@ public class Util {
                 prevChance += item.getChance();
             }
         }
-        /* outer: for (HSItem is : addItems) {
-            if (is == null) {
+        /*outer: for (ArrayList<HSItem> iss : addItems) {
+            if (iss == null) {
                 continue;
             }
-            int amount = is.getAmount();
-            int max = is.getMaxStackSize();
-            for (ItemStack iss : inv) {
-                if (iss == null) {
-                    if (amount > max) {
-                        inv.addItem(new ItemStack(is.getType(), max));
-                        amount -= max;
-                        continue;
-                    } else {
-                        inv.addItem(new ItemStack(is.getType(), amount));
-                        continue outer;
+            for (HSItem is : iss) {
+                double rand = Math.random();
+                double prevChance = 0;
+                int amount = is.getAmount();
+                int max = is.getMaxStackSize();
+                for (ItemStack iss : inv) {
+                    if (iss == null) {
+                        if (amount > max) {
+                            inv.addItem(new ItemStack(is.getType(), max));
+                            amount -= max;
+                            continue;
+                        } else {
+                            inv.addItem(new ItemStack(is.getType(), amount));
+                            continue outer;
+                        }
+                    }
+                    if (iss.getType() == is.getType() && iss.getDurability() == is.getDurability() && iss.getAmount() < iss.getMaxStackSize()) {
+                        if (amount + iss.getAmount() > iss.getMaxStackSize()) {
+                            amount = amount - (iss.getMaxStackSize() - iss.getAmount());
+                            iss.setAmount(iss.getMaxStackSize());
+                        } else {
+                            iss.setAmount(amount + iss.getAmount());
+                            continue outer;
+                        }
                     }
                 }
-                if (iss.getType() == is.getType() && iss.getDurability() == is.getDurability() && iss.getAmount() < iss.getMaxStackSize()) {
-                    if (amount + iss.getAmount() > iss.getMaxStackSize()) {
-                        amount = amount - (iss.getMaxStackSize() - iss.getAmount());
-                        iss.setAmount(iss.getMaxStackSize());
-                    } else {
-                        iss.setAmount(amount + iss.getAmount());
-                        continue outer;
-                    }
-                }
+                remainingItems.add(new ItemStack(is.getType(), amount));
             }
-            remainingItems.add(new ItemStack(is.getType(), amount));
         }*/
         
         return remainingItems;
@@ -282,7 +317,14 @@ public class Util {
         
         for (ArrayList<HSItem> items : reqMap) {
             for (HSItem item : items) {
-                message += item.getQty() + ":" + item.getMat().name() + " or ";
+                String itemName = "";
+                if (item.isWildDamage()) {
+                    itemName = item.getMat().name();
+                } else {
+                    ItemStack ist = new ItemStack(item.getMat(), 1, (short) item.getDamage());
+                    itemName = ist.getItemMeta().getDisplayName();
+                }
+                message += item.getQty() + ":" + itemName + " or ";
             }
             message = message.substring(0, message.length() - 4);
             message += ", ";

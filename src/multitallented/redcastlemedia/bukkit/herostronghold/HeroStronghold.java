@@ -1471,10 +1471,18 @@ public class HeroStronghold extends JavaPlugin {
                     for (ArrayList<HSItem> is : rt.getRequirements()) {
                         String addLine = "";
                         for (HSItem iss : is) {
-                            if (addLine.equals("")) {
-                                addLine = iss.getQty() + ":" + iss.getMat().name() + ", ";
+                            String itemName = "";
+                            if (iss.isWildDamage()) {
+                                itemName = iss.getMat().name();
                             } else {
-                                addLine = " or " + iss.getQty() + ":" + iss.getMat().name() + ", ";
+                                ItemStack ist = new ItemStack(iss.getMat(), 1, (short) iss.getDamage());
+                                itemName = ist.getItemMeta().getDisplayName();
+                            }
+                            
+                            if (addLine.equals("")) {
+                                addLine = iss.getQty() + ":" + itemName + ", ";
+                            } else {
+                                addLine = " or " + iss.getQty() + ":" + itemName + ", ";
                             }
                         }
                         if (message.length() + addLine.length() > 55) {
@@ -1500,10 +1508,18 @@ public class HeroStronghold extends JavaPlugin {
                     for (ArrayList<HSItem> is : rt.getReagents()) {
                         String addLine = "";
                         for (HSItem iss : is) {
-                            if (addLine.equals("")) {
-                                addLine = iss.getQty() + ":" + iss.getMat().name() + ", ";
+                            
+                            String itemName = "";
+                            if (iss.isWildDamage()) {
+                                itemName = iss.getMat().name();
                             } else {
-                                addLine = " or " + iss.getQty() + ":" + iss.getMat().name() + ", ";
+                                ItemStack ist = new ItemStack(iss.getMat(), 1, (short) iss.getDamage());
+                                itemName = ist.getItemMeta().getDisplayName();
+                            }
+                            if (addLine.equals("")) {
+                                addLine = iss.getQty() + ":" + itemName + ", ";
+                            } else {
+                                addLine = " or " + iss.getQty() + ":" + itemName + ", ";
                             }
                         }
                         if (message.length() + addLine.length() > 55) {
@@ -1529,10 +1545,18 @@ public class HeroStronghold extends JavaPlugin {
                     for (ArrayList<HSItem> is : rt.getUpkeep()) {
                         String addLine = "";
                         for (HSItem iss : is) {
-                            if (addLine.equals("")) {
-                                addLine = iss.getQty() + ":" + iss.getMat().name() + ", ";
+                            String itemName = "";
+                            if (iss.isWildDamage()) {
+                                itemName = iss.getMat().name();
                             } else {
-                                addLine = " or " + iss.getQty() + ":" + iss.getMat().name() + ", ";
+                                ItemStack ist = new ItemStack(iss.getMat(), 1, (short) iss.getDamage());
+                                itemName = ist.getItemMeta().getDisplayName();
+                            }
+                            
+                            if (addLine.equals("")) {
+                                addLine = iss.getQty() + ":" + itemName + ", ";
+                            } else {
+                                addLine = " or " + iss.getQty() + ":" + itemName + ", ";
                             }
                         }
                         if (message.length() + addLine.length() > 55) {
@@ -1554,10 +1578,18 @@ public class HeroStronghold extends JavaPlugin {
                     for (ArrayList<HSItem> is : rt.getOutput()) {
                         String addLine = "";
                         for (HSItem iss : is) {
-                            if (addLine.equals("")) {
-                                addLine = iss.getQty() + ":" + iss.getMat().name() + ", ";
+                            String itemName = "";
+                            if (iss.isWildDamage()) {
+                                itemName = iss.getMat().name();
                             } else {
-                                addLine = " or " + iss.getQty() + ":" + iss.getMat().name() + ", ";
+                                ItemStack ist = new ItemStack(iss.getMat(), 1, (short) iss.getDamage());
+                                itemName = ist.getItemMeta().getDisplayName();
+                            }
+                            
+                            if (addLine.equals("")) {
+                                addLine = iss.getQty() + ":" + itemName + ", ";
+                            } else {
+                                addLine = " or " + iss.getQty() + ":" + itemName + ", ";
                             }
                         }
                         if (message.length() + addLine.length() > 55) {
