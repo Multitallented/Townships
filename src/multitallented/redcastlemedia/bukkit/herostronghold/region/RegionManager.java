@@ -81,7 +81,7 @@ public class RegionManager {
                         (int) Math.pow(rConfig.getInt("radius"), 2),
                         (int) Math.pow(rConfig.getInt("build-radius", rConfig.getInt("radius", 2)), 2),
                         processItemStackList(rConfig.getStringList("requirements"), currentRegionFile.getName()),
-                        rConfig.getStringList("super-regions"),
+                        processSRList(rConfig.getStringList("super-regions")),
                         processItemStackList(rConfig.getStringList("reagents"), currentRegionFile.getName()),
                         processItemStackList(rConfig.getStringList("upkeep"), currentRegionFile.getName()),
                         processItemStackList(rConfig.getStringList("output"), currentRegionFile.getName()),
@@ -116,7 +116,8 @@ public class RegionManager {
                 superRegionTypes.put(regionName, new SuperRegionType(regionName,
                         rConfig.getStringList("effects"),
                         (int) Math.pow(rConfig.getInt("radius"), 2),
-                        processRegionTypeMap(rConfig.getStringList("requirements")),
+                        //processRegionTypeMap(rConfig.getStringList("requirements")),
+                        rConfig.getStringList("requirements"),
                         rConfig.getDouble("money-requirement", 0),
                         rConfig.getDouble("money-output-daily", 0),
                         rConfig.getStringList("children"),
@@ -284,7 +285,24 @@ public class RegionManager {
         
     }
     
-    private Map<String, Integer> processRegionTypeMap(List<String> input) {
+    private HashMap<String, Integer> processSRList(List<String> input) {
+        HashMap<String, Integer> tempMap = new HashMap<String, Integer>();
+        for (String key : input) {
+            String[] keyParts = key.split("\\.");
+            if (keyParts.length > 1) {
+                try {
+                    tempMap.put(keyParts[0], Integer.parseInt(keyParts[1]));
+                    continue;
+                } catch (Exception e) {
+                    
+                }
+            }
+            tempMap.put(key, 0);
+        }
+        return tempMap;
+    }
+    
+    /*private Map<String, Integer> processRegionTypeMap(List<String> input) {
         Map<String, Integer> tempMap = new HashMap<String, Integer>();
         for (String s : input) {
             String[] args = s.split("\\.");
@@ -293,7 +311,7 @@ public class RegionManager {
                 tempMap.put(currentRegionType.getName(), Integer.parseInt(args[1]));
         }
         return tempMap;
-    }
+    }*/
     
     private ArrayList<ArrayList<HSItem>> processItemStackList(List<String> input, String filename) {
         ArrayList<ArrayList<HSItem>> returnList = new ArrayList<ArrayList<HSItem>>();

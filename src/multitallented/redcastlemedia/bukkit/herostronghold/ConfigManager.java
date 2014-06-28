@@ -1,9 +1,12 @@
 package multitallented.redcastlemedia.bukkit.herostronghold;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -79,7 +82,7 @@ public class ConfigManager {
             try {
                 charterData.createNewFile();
             } catch (Exception e) {
-                plugin.warning("Could not create new file " + name + ".yml");
+                plugin.warning("Could not create new charter file " + name + ".yml");
                 return;
             }
         }
@@ -89,10 +92,15 @@ public class ConfigManager {
         try {
             charterConfig.load(charterData);
         } catch (Exception e) {
-            plugin.warning("Could not load charters.yml");
+            plugin.warning("Could not load charter " + name + ".yml");
             return;
         }
         charterConfig.set(name, data);
+        try {
+            charterConfig.save(charterData);
+        } catch (IOException ex) {
+            plugin.warning("Could not save charter file " + name + ".yml");
+        }
     }
     public boolean getPlayerInRegionChecks() {
         return playerInRegionChecks;

@@ -10,6 +10,7 @@ import multitallented.redcastlemedia.bukkit.herostronghold.region.HSItem;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.Region;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionManager;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionType;
+import net.milkbowl.vault.item.Items;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -185,14 +186,15 @@ public class Util {
                     }
                     int amount = item.getQty();
                     int max = is.getMaxStackSize();
+                    int damageValue = item.isWildDamage() ? 0 : item.getDamage();
                     for (ItemStack iss : inv) {
                         if (iss == null) {
                             if (amount > max) {
-                                inv.addItem(new ItemStack(is.getType(), max));
+                                inv.addItem(new ItemStack(is.getType(), max, (short) damageValue));
                                 amount -= max;
                                 continue;
                             } else {
-                                inv.addItem(new ItemStack(is.getType(), amount));
+                                inv.addItem(new ItemStack(is.getType(), amount, (short) damageValue));
                                 continue outer;
                             }
                         }
@@ -322,7 +324,7 @@ public class Util {
                     itemName = item.getMat().name();
                 } else {
                     ItemStack ist = new ItemStack(item.getMat(), 1, (short) item.getDamage());
-                    itemName = ist.getItemMeta().getDisplayName();
+                    itemName = Items.itemByStack(ist).getName();
                 }
                 message += item.getQty() + ":" + itemName + " or ";
             }

@@ -6,7 +6,6 @@ package multitallented.redcastlemedia.bukkit.herostronghold;
 import com.herocraftonline.heroes.Heroes;
 import com.herocraftonline.heroes.characters.Hero;
 import com.herocraftonline.heroes.characters.classes.HeroClass.ExperienceType;
-import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
 import multitallented.redcastlemedia.bukkit.herostronghold.checkregiontask.CheckRegionTask;
@@ -15,6 +14,7 @@ import multitallented.redcastlemedia.bukkit.herostronghold.events.CommandEffectE
 import multitallented.redcastlemedia.bukkit.herostronghold.listeners.*;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.*;
 import net.milkbowl.vault.economy.Economy;
+import net.milkbowl.vault.item.Items;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -495,25 +495,47 @@ public class HeroStronghold extends JavaPlugin {
             
             //Check if in a super region and if has permission to make that region
             String playername = player.getName();
-            List<String> reqSuperRegion = currentRegionType.getSuperRegions();
-            boolean meetsReqs = reqSuperRegion == null || reqSuperRegion.isEmpty();
-            for (SuperRegion sr : regionManager.getContainingSuperRegions(currentLocation)) {
-                if (!meetsReqs && reqSuperRegion != null && reqSuperRegion.contains(sr.getType())) {
-                    meetsReqs = true;
-                }
-                if (!sr.hasOwner(playername)) {
-                    if (!sr.hasMember(playername) || !sr.getMember(playername).contains(regionName)) {
-                        player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You dont have permission from an owner of " + sr.getName()
-                                + " to create a " + regionName + " here");
-                        return true;
+            HashMap<String, Integer> reqSuperRegion = currentRegionType.getSuperRegions();
+            
+            boolean meetsReqs = false;
+            String limitMessage = null;
+            
+            if (reqSuperRegion != null && !reqSuperRegion.isEmpty()) {
+                int countAllTypesSR = 0;
+                for (SuperRegion sr : regionManager.getContainingSuperRegions(currentLocation)) {
+                    if (reqSuperRegion != null && reqSuperRegion.containsKey(sr.getType())) {
+                        meetsReqs = true;
+                        int limit = reqSuperRegion.get(sr.getType());
+                        if (limit > 0) {
+                            int regionCount = 0;
+                            for (Region r : regionManager.getContainedRegions(sr)) {
+                                if (r.getType().equals(currentRegionType)) {
+                                    regionCount++;
+                                    if (limit <= regionCount) {
+                                        limitMessage = ChatColor.RED + "[HeroStronghold] You can't build more than " + limit + " in this " + sr.getType();
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (!sr.hasOwner(playername)) {
+                        if (!sr.hasMember(playername) || !sr.getMember(playername).contains(regionName)) {
+                            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You dont have permission from an owner of " + sr.getName()
+                                    + " to create a " + regionName + " here");
+                            return true;
+                        }
                     }
                 }
+            } else {
+                meetsReqs = true;
             }
+            
             if (!meetsReqs) {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] You are required to build this " + regionName + " in a:");
                 String message = ChatColor.GOLD + "";
                 int j=0;
-                for (String s : reqSuperRegion) {
+                for (String s : reqSuperRegion.keySet()) {
                     if (message.length() + s.length() + 2 > 55) {
                         player.sendMessage(message);
                         message = ChatColor.GOLD + "";
@@ -531,6 +553,10 @@ public class HeroStronghold extends JavaPlugin {
                 return true;
             }
             
+            if (limitMessage != null) {
+                player.sendMessage(limitMessage);
+                return true;
+            }
             
             //Check if it has required blocks
             if (!currentRegionType.getRequirements().isEmpty()) {
@@ -692,8 +718,8 @@ public class HeroStronghold extends JavaPlugin {
                 for (String s : children) {
                     if (!req.containsKey(s))
                         req.put(new String(s), 1);
+                    }
                 }
-            }
             
             //Check if there already is a super-region by that name, but not if it's one of the child regions
             if (regionManager.getSuperRegion(args[2]) != null && (children == null || !children.contains(regionManager.getSuperRegion(args[2]).getType()))) {
@@ -755,11 +781,21 @@ public class HeroStronghold extends JavaPlugin {
                     }
 
                     if (l.getX() - radius1 < x && l.getY() + radius1 > y && l.getY() - radius1 < y && 
-                            l.getZ() + radius1 > z && l.getZ() - radius1 < z && l.getWorld().equals(loc.getWorld()) && req.containsKey(r.getType())) {
-                        if (req.get(r.getType()) < 2) {
-                            req.remove(r.getType());
-                        } else {
-                            req.put(r.getType(), req.get(r.getType()) - 1);
+                            l.getZ() + radius1 > z && l.getZ() - radius1 < z && l.getWorld().equals(loc.getWorld())) {
+                        
+                        if (req.containsKey(r.getType())) {
+                            if (req.get(r.getType()) < 2) {
+                                req.remove(r.getType());
+                            } else {
+                                req.put(r.getType(), req.get(r.getType()) - 1);
+                            }
+                        } else if (req.containsKey(regionManager.getRegionType(r.getType()).getGroup())) {
+                            String group = regionManager.getRegionType(r.getType()).getGroup();
+                            if (req.get(group) < 2) {
+                                req.remove(group);
+                            } else {
+                                req.put(group, req.get(group) - 1);
+                            }
                         }
                     }
                 }
@@ -1476,7 +1512,7 @@ public class HeroStronghold extends JavaPlugin {
                                 itemName = iss.getMat().name();
                             } else {
                                 ItemStack ist = new ItemStack(iss.getMat(), 1, (short) iss.getDamage());
-                                itemName = ist.getItemMeta().getDisplayName();
+                                itemName = Items.itemByStack(ist).getName();
                             }
                             
                             if (addLine.equals("")) {
@@ -1514,7 +1550,7 @@ public class HeroStronghold extends JavaPlugin {
                                 itemName = iss.getMat().name();
                             } else {
                                 ItemStack ist = new ItemStack(iss.getMat(), 1, (short) iss.getDamage());
-                                itemName = ist.getItemMeta().getDisplayName();
+                                itemName = Items.itemByStack(ist).getName();
                             }
                             if (addLine.equals("")) {
                                 addLine = iss.getQty() + ":" + itemName + ", ";
@@ -1550,7 +1586,7 @@ public class HeroStronghold extends JavaPlugin {
                                 itemName = iss.getMat().name();
                             } else {
                                 ItemStack ist = new ItemStack(iss.getMat(), 1, (short) iss.getDamage());
-                                itemName = ist.getItemMeta().getDisplayName();
+                                itemName = Items.itemByStack(ist).getName();
                             }
                             
                             if (addLine.equals("")) {
@@ -1583,7 +1619,7 @@ public class HeroStronghold extends JavaPlugin {
                                 itemName = iss.getMat().name();
                             } else {
                                 ItemStack ist = new ItemStack(iss.getMat(), 1, (short) iss.getDamage());
-                                itemName = ist.getItemMeta().getDisplayName();
+                                itemName = Items.itemByStack(ist).getName();
                             }
                             
                             if (addLine.equals("")) {

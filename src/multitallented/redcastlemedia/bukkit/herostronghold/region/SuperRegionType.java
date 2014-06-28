@@ -1,5 +1,6 @@
 package multitallented.redcastlemedia.bukkit.herostronghold.region;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -10,7 +11,8 @@ import java.util.Map;
 public class SuperRegionType {
     private List<String> effects;
     private final int radius;
-    private final Map<String, Integer> requirements;
+    private Map<String, Integer> requirements;
+    private Map<String, Integer> maxRegions;
     private final double moneyRequirement;
     private final double output;
     private final String name;
@@ -23,14 +25,13 @@ public class SuperRegionType {
     private final int rawRadius;
     private final String description;
     private final int population;
-    public SuperRegionType(String name, List<String> effects, int radius, Map<String, Integer> requirements, double moneyRequirement, double output,
+    public SuperRegionType(String name, List<String> effects, int radius, List<String> requirements, double moneyRequirement, double output,
             List<String> children, int maxPower, int dailyPower, int charter, double exp, String centralStructure,
             String description, int population) {
         this.name=name;
         this.effects = effects;
         this.radius = radius;
         this.rawRadius = (int) Math.sqrt(radius);
-        this.requirements = requirements;
         this.moneyRequirement = moneyRequirement;
         this.output = output;
         this.children = children;
@@ -41,6 +42,25 @@ public class SuperRegionType {
         this.centralStructure = centralStructure;
         this.description = description;
         this.population = population;
+        setRequirements(requirements);
+    }
+    
+    private void setRequirements(List<String> reqs) {
+        Map<String, Integer> reqMap = new HashMap<String, Integer>();
+        Map<String, Integer> maxMap = new HashMap<String, Integer>();
+        for (String s : reqs) {
+            String[] args = s.split("\\.");
+            if (args.length < 2) {
+                continue;
+            } else if (args.length < 3) {
+                reqMap.put(args[0], Integer.parseInt(args[1]));
+            } else {
+                reqMap.put(args[0], Integer.parseInt(args[1]));
+                maxMap.put(args[0], Integer.parseInt(args[2]));
+            }
+        }
+        requirements = reqMap;
+        maxRegions = maxMap;
     }
     
     public int getPopulation() {

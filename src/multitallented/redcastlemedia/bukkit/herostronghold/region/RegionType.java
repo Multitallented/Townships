@@ -23,7 +23,7 @@ public class RegionType {
     private final double moneyRequirement;
     private final double moneyOutput;
     private final double exp;
-    private final List<String> superRegions;
+    private final HashMap<String, Integer> superRegions;
     private final int buildRadius;
     private final int rawBuildRadius;
     private final int rawRadius;
@@ -36,7 +36,7 @@ public class RegionType {
     
     public RegionType(String name, String group, ArrayList<String> friendlyClasses,
             ArrayList<String> enemyClasses, ArrayList<String> effects,
-            int radius, int buildRadius, ArrayList<ArrayList<HSItem>> requirements, List<String> superRegions,
+            int radius, int buildRadius, ArrayList<ArrayList<HSItem>> requirements, HashMap<String, Integer> superRegions,
             ArrayList<ArrayList<HSItem>> reagents, ArrayList<ArrayList<HSItem>> upkeep,
             ArrayList<ArrayList<HSItem>> output, double upkeepChance,
             double moneyRequirement, double moneyOutput, double exp,
@@ -92,7 +92,7 @@ public class RegionType {
         return buildRadius;
     }
     
-    public List<String> getSuperRegions() {
+    public HashMap<String, Integer> getSuperRegions() {
         return superRegions;
     }
     
