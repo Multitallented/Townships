@@ -2018,6 +2018,8 @@ public class HeroStronghold extends JavaPlugin {
             player.sendMessage(ChatColor.GRAY + "[HeroStronghold] list of Region Types");
             String message = ChatColor.GOLD + "";
             boolean permNull = perms == null;
+            ArrayList<RegionType> regions = new ArrayList<RegionType>();
+            guiListener.openListInventory(regions);
             boolean createAll = permNull || perms.has(player, "herostronghold.create.all");
             for (String s : regionManager.getRegionTypes()) {
                 if (createAll || permNull || perms.has(player, "herostronghold.create." + s)) {

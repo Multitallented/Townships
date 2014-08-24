@@ -4,7 +4,9 @@ package multitallented.redcastlemedia.bukkit.herostronghold.listeners;
  *
  * @author Autumn
  */
+import java.util.ArrayList;
 import multitallented.redcastlemedia.bukkit.herostronghold.HeroStronghold;
+import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionType;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -24,6 +26,10 @@ public class GUIListener implements Listener {
     
     public GUIListener(HeroStronghold hs) {
         this.hs=hs;
+    }
+    
+    public void openListInventory(ArrayList<RegionType> regions) {
+        
     }
     
     private void openGUI(Player player) {
@@ -64,7 +70,7 @@ public class GUIListener implements Listener {
             return;  
         }
         switch(event.getCurrentItem().getType()) {
-            case WOODEN_DOOR:
+            case WOOD_DOOR:
                 player.closeInventory();
                 player.sendMessage(String.format("%sHeroStronghold Regions: %sHouses", 
                         ChatColor.DARK_RED, ChatColor.GOLD));
