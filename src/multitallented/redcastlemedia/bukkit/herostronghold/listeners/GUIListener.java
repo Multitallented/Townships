@@ -4,6 +4,7 @@ package multitallented.redcastlemedia.bukkit.herostronghold.listeners;
  *
  * @author Autumn
  */
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import multitallented.redcastlemedia.bukkit.herostronghold.HeroStronghold;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionType;
@@ -41,6 +42,7 @@ public class GUIListener implements Listener {
         Inventory inv = Bukkit.createInventory(null, size, ChatColor.DARK_RED 
                 + "HeroStronghold Regions");
         
+        NumberFormat formatter = NumberFormat.getCurrencyInstance();
         int i = 0;
         for (RegionType r : regions) {
             ItemStack is = new ItemStack(r.getIcon());
@@ -53,7 +55,14 @@ public class GUIListener implements Listener {
         for (SuperRegionType sr : superRegions) {
             ItemStack is = new ItemStack(sr.getIcon());
             ItemMeta isMeta = is.getItemMeta();
-            isMeta.setDisplayName(sr.getName());
+            String displayName = ChatColor.RESET + sr.getName();
+            ArrayList<String> lore = new ArrayList<String>();
+            lore.add(ChatColor.RESET + "" + ChatColor.GRAY + "Super Region");
+            if (sr.getMoneyRequirement() > 0) {
+                lore.add("Cost: " + formatter.format(sr.getMoneyRequirement()));
+            }
+            isMeta.setDisplayName(displayName);
+            isMeta.setLore(lore);
             is.setItemMeta(isMeta);
             inv.setItem(i, is);
             i++;
@@ -114,12 +123,6 @@ public class GUIListener implements Listener {
                 player.closeInventory();
                 break;
         }
-    }
-    
-    @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event) {
-        event.getPlayer().getInventory()
-                .addItem(new ItemStack(Material.COMPASS));
     }
     
     @EventHandler
