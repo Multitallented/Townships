@@ -1,15 +1,10 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-package multitallented.redcastlemedia.bukkit.herostronghold.gui;
+package multitallented.redcastlemedia.bukkit.herostronghold.listeners;
 
 /**
  *
  * @author Autumn
  */
+import multitallented.redcastlemedia.bukkit.herostronghold.HeroStronghold;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -23,19 +18,19 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.plugin.java.JavaPlugin;
         
-public class gui extends JavaPlugin implements Listener {
+public class GUIListener implements Listener {
+    private final HeroStronghold hs;
     
-    public void onEnable() {
-        getServer().getPluginManager().registerEvent(this, this);
+    public GUIListener(HeroStronghold hs) {
+        this.hs=hs;
     }
     
     private void openGUI(Player player) {
         Inventory inv = Bukkit.createInventory(null, 9, ChatColor.DARK_RED 
                 + "HeroStronghold Regions");
         
-        ItemStack house = new ItemStack(Material.WOODEN_DOOR);
+        ItemStack house = new ItemStack(Material.WOOD_DOOR);
         ItemMeta houseMeta = house.getItemMeta();
         ItemStack cobblequery = new ItemStack(Material.COBBLESTONE);
         ItemMeta cobblequeryMeta = cobblequery.getItemMeta();
@@ -56,8 +51,9 @@ public class gui extends JavaPlugin implements Listener {
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         if (!ChatColor.stripColor(event.getInventory().getName())
-                .equalsIgnoreCase("HeroStronghold Regions"))
+                .equalsIgnoreCase("HeroStronghold Regions")) {
             return;
+        }
         Player player = (Player) event.getWhoClicked();
         event.setCancelled(true);
         
@@ -95,11 +91,12 @@ public class gui extends JavaPlugin implements Listener {
         Action a = event.getAction();
         ItemStack is = event.getItem();
         
-        if(a == Action.PHYSICAL || is == null || is.getType()==Material.AIR)
+        if(a == Action.PHYSICAL || is == null || is.getType()==Material.AIR) {
             return;
+        }
         
-        if(is.getType() == Material.COMPASS)
+        if(is.getType() == Material.COMPASS) {
             openGUI(event.getPlayer());
-    }
-            
+        }
+    } 
 }
