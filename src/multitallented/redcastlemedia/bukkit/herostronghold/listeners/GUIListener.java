@@ -29,8 +29,37 @@ public class GUIListener implements Listener {
         this.hs=hs;
     }
     
-    public void openListInventory(ArrayList<RegionType> regions, ArrayList<SuperRegionType> superRegions) {
+    public void openListInventory(ArrayList<RegionType> regions, ArrayList<SuperRegionType> superRegions, Player player) {
+        int size = 9;
+        int actualSize = regions.size() + superRegions.size();
+        if (actualSize > size) {
+            size = actualSize + 9 - (actualSize % 9);
+            if (actualSize % 9 == 0) {
+                size -= 9;
+            }
+        }
+        Inventory inv = Bukkit.createInventory(null, size, ChatColor.DARK_RED 
+                + "HeroStronghold Regions");
         
+        int i = 0;
+        for (RegionType r : regions) {
+            ItemStack is = new ItemStack(r.getIcon());
+            ItemMeta isMeta = is.getItemMeta();
+            isMeta.setDisplayName(r.getName());
+            is.setItemMeta(isMeta);
+            inv.setItem(i, is);
+            i++;
+        }
+        for (SuperRegionType sr : superRegions) {
+            ItemStack is = new ItemStack(sr.getIcon());
+            ItemMeta isMeta = is.getItemMeta();
+            isMeta.setDisplayName(sr.getName());
+            is.setItemMeta(isMeta);
+            inv.setItem(i, is);
+            i++;
+        }
+        
+        player.openInventory(inv);
     }
     
     private void openGUI(Player player) {

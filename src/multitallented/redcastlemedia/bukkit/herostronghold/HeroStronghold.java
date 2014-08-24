@@ -2047,7 +2047,7 @@ public class HeroStronghold extends JavaPlugin {
                     superRegions.add(regionManager.getSuperRegionType(s));
                 }
             }
-            guiListener.openListInventory(regions, superRegions);
+            guiListener.openListInventory(regions, superRegions, player);
             /*if (!message.equals(ChatColor.GOLD + "")) {
                 player.sendMessage(message.substring(0, message.length() - 2));
             }*/
