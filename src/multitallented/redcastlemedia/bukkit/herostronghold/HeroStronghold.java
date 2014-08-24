@@ -501,15 +501,14 @@ public class HeroStronghold extends JavaPlugin {
             String limitMessage = null;
             
             if (reqSuperRegion != null && !reqSuperRegion.isEmpty()) {
-                int countAllTypesSR = 0;
                 for (SuperRegion sr : regionManager.getContainingSuperRegions(currentLocation)) {
-                    if (reqSuperRegion != null && reqSuperRegion.containsKey(sr.getType())) {
+                    if (reqSuperRegion.containsKey(sr.getType())) {
                         meetsReqs = true;
                         int limit = reqSuperRegion.get(sr.getType());
                         if (limit > 0) {
                             int regionCount = 0;
                             for (Region r : regionManager.getContainedRegions(sr)) {
-                                if (r.getType().equals(currentRegionType)) {
+                                if (r.getType().equals(currentRegionType.getName())) {
                                     regionCount++;
                                     if (limit <= regionCount) {
                                         limitMessage = ChatColor.RED + "[HeroStronghold] You can't build more than " + limit + " in this " + sr.getType();
