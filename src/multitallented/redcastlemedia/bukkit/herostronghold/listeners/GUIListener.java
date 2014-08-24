@@ -39,6 +39,21 @@ public class GUIListener implements Listener {
         for (RegionType r : regions) {
             ItemStack is = new ItemStack(r.getIcon());
             ItemMeta isMeta = is.getItemMeta();
+            String displayName = ChatColor.RESET + r.getName();
+            ArrayList<String> lore = new ArrayList<String>();
+            lore.add(ChatColor.RESET + "" + ChatColor.GRAY + "Region");
+            if (r.getDescription() != null && !r.getDescription().equals("")) {
+                lore.add(ChatColor.GOLD + r.getDescription());
+            }
+            if (r.getMoneyRequirement() > 0) {
+                lore.add("Cost: " + formatter.format(r.getMoneyRequirement()));
+            }
+            if (r.getRequirements().size() > 0) {
+                lore.add(ChatColor.BLUE + "Requirements:");
+                for (String s : r.getRequirements().keySet()) {
+                    lore.add(ChatColor.BLUE + " " + r.getRequirement(s) + " " + s);
+                }
+            }
             isMeta.setDisplayName(r.getName());
             is.setItemMeta(isMeta);
             inv.setItem(i, is);
