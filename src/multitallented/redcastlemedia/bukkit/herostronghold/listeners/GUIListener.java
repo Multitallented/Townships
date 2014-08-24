@@ -39,8 +39,7 @@ public class GUIListener implements Listener {
                 size -= 9;
             }
         }
-        Inventory inv = Bukkit.createInventory(null, size, ChatColor.DARK_RED 
-                + "HeroStronghold Regions");
+        Inventory inv = Bukkit.createInventory(null, size, "HeroStronghold Regions");
         
         NumberFormat formatter = NumberFormat.getCurrencyInstance();
         int i = 0;
@@ -58,8 +57,37 @@ public class GUIListener implements Listener {
             String displayName = ChatColor.RESET + sr.getName();
             ArrayList<String> lore = new ArrayList<String>();
             lore.add(ChatColor.RESET + "" + ChatColor.GRAY + "Super Region");
+            if (sr.getDescription() != null && !sr.getDescription().equals("")) {
+                lore.add(ChatColor.GOLD + sr.getDescription());
+            }
+            if (sr.getChildren().size() > 0) {
+                lore.add(ChatColor.GREEN + "Upgrade from:");
+                int lineCount = 0;
+                String childString = "";
+                for (String srt : sr.getChildren()) {
+                    if (!childString.equals("")) {
+                        childString += ", ";
+                    } else {
+                        childString += ChatColor.GREEN + "";
+                    }
+                    lineCount += srt.length();
+                    if (lineCount > 50) {
+                        lore.add(childString);
+                        childString = new String();
+                        lineCount = srt.length();
+                    }
+                    childString += srt;
+                }
+                lore.add(childString);
+            }
             if (sr.getMoneyRequirement() > 0) {
                 lore.add("Cost: " + formatter.format(sr.getMoneyRequirement()));
+            }
+            if (sr.getRequirements().size() > 0) {
+                lore.add(ChatColor.BLUE + "Requirements:");
+                for (String s : sr.getRequirements().keySet()) {
+                    lore.add(ChatColor.BLUE + " " + sr.getRequirement(s) + " " + s);
+                }
             }
             isMeta.setDisplayName(displayName);
             isMeta.setLore(lore);
