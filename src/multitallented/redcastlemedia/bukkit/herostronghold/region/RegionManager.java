@@ -130,7 +130,9 @@ public class RegionManager {
                         rConfig.getDouble("exp", 0),
                         rConfig.getString("central-structure"),
                         rConfig.getString("description"),
-                        rConfig.getInt("population", 0)));
+                        rConfig.getInt("population", 0),
+                        Util.stringToItemStack(rConfig.getString("icon","1"))
+                ));
             } catch (Exception e) {
                 plugin.warning("[HeroStronghold] failed to load " + currentRegionFile.getName());
             }

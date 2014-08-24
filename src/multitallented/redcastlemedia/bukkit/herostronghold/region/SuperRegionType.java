@@ -3,6 +3,7 @@ package multitallented.redcastlemedia.bukkit.herostronghold.region;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.bukkit.inventory.ItemStack;
 
 /**
  *
@@ -25,9 +26,10 @@ public class SuperRegionType {
     private final int rawRadius;
     private final String description;
     private final int population;
+    private final ItemStack icon;
     public SuperRegionType(String name, List<String> effects, int radius, List<String> requirements, double moneyRequirement, double output,
             List<String> children, int maxPower, int dailyPower, int charter, double exp, String centralStructure,
-            String description, int population) {
+            String description, int population, ItemStack icon) {
         this.name=name;
         this.effects = effects;
         this.radius = radius;
@@ -42,6 +44,7 @@ public class SuperRegionType {
         this.centralStructure = centralStructure;
         this.description = description;
         this.population = population;
+        this.icon = icon;
         setRequirements(requirements);
     }
     
@@ -61,6 +64,10 @@ public class SuperRegionType {
         }
         requirements = reqMap;
         maxRegions = maxMap;
+    }
+    
+    public ItemStack getIcon() {
+        return icon;
     }
     
     public int getPopulation() {
