@@ -129,16 +129,12 @@ public class HeroStronghold extends JavaPlugin {
     
     @Override
     public boolean onCommand(CommandSender sender, org.bukkit.command.Command command, String label, String[] args) {
-        String debug = label;
-        for (String s : args) {
-            debug += " " + s;
-        }
-        System.out.println("[HeroStronghold] " + debug);
         Player player = null;
         try {
             player = (Player) sender;
         } catch (Exception e) {
-
+            warning("Only players can use HS commands");
+            return true;
         }
         if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
             if (player != null && !(HeroStronghold.perms == null || HeroStronghold.perms.has(player, "herostronghold.admin"))) {
@@ -2015,15 +2011,15 @@ public class HeroStronghold extends JavaPlugin {
             return true;
         } else if (args.length > 0 && args[0].equalsIgnoreCase("list")) {
             int j=0;
-            player.sendMessage(ChatColor.GRAY + "[HeroStronghold] list of Region Types");
-            String message = ChatColor.GOLD + "";
+            /*player.sendMessage(ChatColor.GRAY + "[HeroStronghold] list of Region Types");
+            String message = ChatColor.GOLD + "";*/
             boolean permNull = perms == null;
             ArrayList<RegionType> regions = new ArrayList<RegionType>();
-            guiListener.openListInventory(regions);
+            ArrayList<SuperRegionType> superRegions = new ArrayList<SuperRegionType>();
             boolean createAll = permNull || perms.has(player, "herostronghold.create.all");
             for (String s : regionManager.getRegionTypes()) {
                 if (createAll || permNull || perms.has(player, "herostronghold.create." + s)) {
-                    if (message.length() + s.length() + 2 > 55) {
+                    /*if (message.length() + s.length() + 2 > 55) {
                         player.sendMessage(message);
                         message = ChatColor.GOLD + "";
                         j++;
@@ -2032,12 +2028,13 @@ public class HeroStronghold extends JavaPlugin {
                         break;
                     } else {
                         message += s + ", ";
-                    }
+                    }*/
+                    regions.add(regionManager.getRegionType(s));
                 }
             }
             for (String s : regionManager.getSuperRegionTypes()) {
                 if (createAll || permNull || perms.has(player, "herostronghold.create." + s)) {
-                    if (message.length() + s.length() + 2 > 55) {
+                    /*if (message.length() + s.length() + 2 > 55) {
                         player.sendMessage(message);
                         message = ChatColor.GOLD + "";
                         j++;
@@ -2046,12 +2043,14 @@ public class HeroStronghold extends JavaPlugin {
                         break;
                     } else {
                         message += s + ", ";
-                    }
+                    }*/
+                    superRegions.add(regionManager.getSuperRegionType(s));
                 }
             }
-            if (!message.equals(ChatColor.GOLD + "")) {
+            guiListener.openListInventory(regions, superRegions);
+            /*if (!message.equals(ChatColor.GOLD + "")) {
                 player.sendMessage(message.substring(0, message.length() - 2));
-            }
+            }*/
             return true;
         } else if (args.length > 2 && args[0].equalsIgnoreCase("rename")) {
             //Check if valid super-region

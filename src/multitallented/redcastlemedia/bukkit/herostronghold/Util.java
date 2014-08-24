@@ -403,4 +403,39 @@ public class Util {
     public static boolean hasRequiredBlocks(Region region, RegionManager rm) {
         return Util.hasRequiredBlocks(region.getLocation(), rm.getRegionType(region.getType()), rm);
     }
+    
+    public static ItemStack stringToItemStack(String input) {
+        try {
+            String[] inputArray = input.split("\\.");
+            ItemStack returnStack;
+            if (inputArray.length > 2) {
+                int qty = Integer.parseInt(inputArray[2]);
+                int damage = Integer.parseInt(inputArray[1]);
+                Material mat = Material.getMaterial(inputArray[0]);
+                if (mat == null) {
+                    returnStack = new ItemStack(Integer.parseInt(inputArray[0]), qty, (short) damage);
+                } else {
+                    returnStack = new ItemStack(Material.getMaterial(inputArray[0]), qty, (short) damage);
+                }
+            } else if (inputArray.length > 1) {
+                int qty = Integer.parseInt(inputArray[1]);
+                Material mat = Material.getMaterial(inputArray[0]);
+                if (mat == null) {
+                    returnStack = new ItemStack(Integer.parseInt(inputArray[0]), qty);
+                } else {
+                    returnStack = new ItemStack(Material.getMaterial(inputArray[0]), qty);
+                }
+            } else {
+                Material mat = Material.getMaterial(inputArray[0]);
+                if (mat == null) {
+                    returnStack = new ItemStack(Integer.parseInt(inputArray[0]));
+                } else {
+                    returnStack = new ItemStack(Material.getMaterial(inputArray[0]));
+                }
+            }
+            return returnStack;
+        } catch (Exception e) {
+            return new ItemStack(1);
+        }
+    }
 }

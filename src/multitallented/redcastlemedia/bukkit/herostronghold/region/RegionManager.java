@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 import multitallented.redcastlemedia.bukkit.herostronghold.ConfigManager;
 import multitallented.redcastlemedia.bukkit.herostronghold.HeroStronghold;
 import multitallented.redcastlemedia.bukkit.herostronghold.PermSet;
+import multitallented.redcastlemedia.bukkit.herostronghold.Util;
 import multitallented.redcastlemedia.bukkit.herostronghold.effect.Effect;
 import multitallented.redcastlemedia.bukkit.herostronghold.events.RegionCreatedEvent;
 import multitallented.redcastlemedia.bukkit.herostronghold.events.RegionDestroyedEvent;
@@ -92,7 +93,9 @@ public class RegionManager {
                         rConfig.getString("description"),
                         rConfig.getInt("power-drain", 0),
                         rConfig.getInt("housing", 0),
-                        rConfig.getStringList("biome")));
+                        rConfig.getStringList("biome"),
+                        Util.stringToItemStack(rConfig.getString("icon","1"))
+                ));
             } catch (Exception e) {
                 plugin.warning("[HeroStronghold] failed to load " + currentRegionFile.getName());
                 e.printStackTrace();
@@ -281,8 +284,6 @@ public class RegionManager {
             Logger log = plugin.getLogger();
             log.warning("[HeroStronghold] failed to load war.yml");
         }
-        
-        
     }
     
     private HashMap<String, Integer> processSRList(List<String> input) {

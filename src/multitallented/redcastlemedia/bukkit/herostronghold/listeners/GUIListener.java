@@ -7,6 +7,7 @@ package multitallented.redcastlemedia.bukkit.herostronghold.listeners;
 import java.util.ArrayList;
 import multitallented.redcastlemedia.bukkit.herostronghold.HeroStronghold;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionType;
+import multitallented.redcastlemedia.bukkit.herostronghold.region.SuperRegionType;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -28,7 +29,7 @@ public class GUIListener implements Listener {
         this.hs=hs;
     }
     
-    public void openListInventory(ArrayList<RegionType> regions) {
+    public void openListInventory(ArrayList<RegionType> regions, ArrayList<SuperRegionType> superRegions) {
         
     }
     
