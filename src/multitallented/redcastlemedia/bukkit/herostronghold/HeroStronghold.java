@@ -33,7 +33,6 @@ public class HeroStronghold extends JavaPlugin {
     protected FileConfiguration config;
     private RegionManager regionManager;
     private RegionBlockListener blockListener;
-    private GUIListener guiListener;
     public static Economy econ;
     public static Permission perms;
     private RegionEntityListener regionEntityListener;
@@ -70,7 +69,6 @@ public class HeroStronghold extends JavaPlugin {
         blockListener = new RegionBlockListener(this);
         dpeListener = new RegionPlayerInteractListener(this);
         regionEntityListener = new RegionEntityListener(this);
-        guiListener = new GUIListener(this);
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvents(blockListener, this);
         
@@ -82,7 +80,8 @@ public class HeroStronghold extends JavaPlugin {
         
         pm.registerEvents(new CustomListener(this), this);
         
-        pm.registerEvents(guiListener, this);
+        pm.registerEvents(new GUIListener(), this);
+        pm.registerEvents(new InfoGUIListener(), this);
         log = Logger.getLogger("Minecraft");
         
         //Check for Heroes
@@ -2047,7 +2046,7 @@ public class HeroStronghold extends JavaPlugin {
                     superRegions.add(regionManager.getSuperRegionType(s));
                 }
             }
-            guiListener.openListInventory(regions, superRegions, player);
+            GUIListener.openListInventory(regions, superRegions, player);
             /*if (!message.equals(ChatColor.GOLD + "")) {
                 player.sendMessage(message.substring(0, message.length() - 2));
             }*/

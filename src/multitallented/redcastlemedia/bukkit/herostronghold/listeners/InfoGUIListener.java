@@ -6,8 +6,6 @@ package multitallented.redcastlemedia.bukkit.herostronghold.listeners;
  */
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import multitallented.redcastlemedia.bukkit.herostronghold.HeroStronghold;
-import multitallented.redcastlemedia.bukkit.herostronghold.region.HSItem;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionType;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.SuperRegionType;
 import org.bukkit.Bukkit;
@@ -21,18 +19,11 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
         
-public class GUIListener implements Listener {
+public class InfoGUIListener implements Listener {
     
-    public static void openListInventory(ArrayList<RegionType> regions, ArrayList<SuperRegionType> superRegions, Player player) {
+    public void openListInventory(RegionType region, Player player) {
         int size = 9;
-        int actualSize = regions.size() + superRegions.size();
-        if (actualSize > size) {
-            size = actualSize + 9 - (actualSize % 9);
-            if (actualSize % 9 == 0) {
-                size -= 9;
-            }
-        }
-        Inventory inv = Bukkit.createInventory(null, size, "HeroStronghold Regions");
+        Inventory inv = Bukkit.createInventory(null, size, "Region Info");
         
         NumberFormat formatter = NumberFormat.getCurrencyInstance();
         int i = 0;
