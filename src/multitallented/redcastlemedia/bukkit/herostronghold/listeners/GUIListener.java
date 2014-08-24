@@ -48,13 +48,18 @@ public class GUIListener implements Listener {
             if (r.getMoneyRequirement() > 0) {
                 lore.add("Cost: " + formatter.format(r.getMoneyRequirement()));
             }
-            if (r.getRequirements().size() > 0) {
-                lore.add(ChatColor.BLUE + "Requirements:");
-                for (String s : r.getRequirements().keySet()) {
-                    lore.add(ChatColor.BLUE + " " + r.getRequirement(s) + " " + s);
+            for (ArrayList<HSItem> items : r.getReagents()) {
+                String reagents = "";
+                for (HSItem item : items) {
+                    if (!reagents.equals("")) {
+                        reagents += " or ";
+                    }
+                    reagents += item.getQty() + " " + (new ItemStack(item.getMat(), item.getQty(), (short) item.getDamage())).getItemMeta().getDisplayName();
                 }
+                lore.add(reagents);
             }
-            isMeta.setDisplayName(r.getName());
+            isMeta.setDisplayName(displayName);
+            isMeta.setLore(lore);
             is.setItemMeta(isMeta);
             inv.setItem(i, is);
             i++;

@@ -26,59 +26,7 @@ public class InfoGUIListener implements Listener {
         Inventory inv = Bukkit.createInventory(null, size, "Region Info");
         
         NumberFormat formatter = NumberFormat.getCurrencyInstance();
-        int i = 0;
-        for (RegionType r : regions) {
-            ItemStack is = new ItemStack(r.getIcon());
-            ItemMeta isMeta = is.getItemMeta();
-            isMeta.setDisplayName(r.getName());
-            is.setItemMeta(isMeta);
-            inv.setItem(i, is);
-            i++;
-        }
-        for (SuperRegionType sr : superRegions) {
-            ItemStack is = new ItemStack(sr.getIcon());
-            ItemMeta isMeta = is.getItemMeta();
-            String displayName = ChatColor.RESET + sr.getName();
-            ArrayList<String> lore = new ArrayList<String>();
-            lore.add(ChatColor.RESET + "" + ChatColor.GRAY + "Super Region");
-            if (sr.getDescription() != null && !sr.getDescription().equals("")) {
-                lore.add(ChatColor.GOLD + sr.getDescription());
-            }
-            if (sr.getChildren().size() > 0) {
-                lore.add(ChatColor.GREEN + "Upgrade from:");
-                int lineCount = 0;
-                String childString = "";
-                for (String srt : sr.getChildren()) {
-                    if (!childString.equals("")) {
-                        childString += ", ";
-                    } else {
-                        childString += ChatColor.GREEN + "";
-                    }
-                    lineCount += srt.length();
-                    if (lineCount > 50) {
-                        lore.add(childString);
-                        childString = new String();
-                        lineCount = srt.length();
-                    }
-                    childString += srt;
-                }
-                lore.add(childString);
-            }
-            if (sr.getMoneyRequirement() > 0) {
-                lore.add("Cost: " + formatter.format(sr.getMoneyRequirement()));
-            }
-            if (sr.getRequirements().size() > 0) {
-                lore.add(ChatColor.BLUE + "Requirements:");
-                for (String s : sr.getRequirements().keySet()) {
-                    lore.add(ChatColor.BLUE + " " + sr.getRequirement(s) + " " + s);
-                }
-            }
-            isMeta.setDisplayName(displayName);
-            isMeta.setLore(lore);
-            is.setItemMeta(isMeta);
-            inv.setItem(i, is);
-            i++;
-        }
+        
         
         player.openInventory(inv);
     }
