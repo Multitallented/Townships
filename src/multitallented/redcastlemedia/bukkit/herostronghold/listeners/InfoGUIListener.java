@@ -21,12 +21,37 @@ import org.bukkit.inventory.meta.ItemMeta;
         
 public class InfoGUIListener implements Listener {
     
-    public void openListInventory(RegionType region, Player player) {
-        int size = 9;
+    public static void openInfoInventory(RegionType region, Player player) {
+        int size = 18;
         Inventory inv = Bukkit.createInventory(null, size, "Region Info");
         
         NumberFormat formatter = NumberFormat.getCurrencyInstance();
         
+        ItemStack iconStack = new ItemStack(region.getIcon());
+        ItemMeta iconMeta = iconStack.getItemMeta();
+        iconMeta.setDisplayName(region.getName());
+        ArrayList<String> lore = new ArrayList<String>();
+        if (region.getDescription() != null && !region.getDescription().equals("")) {
+            String sendMe = new String(region.getDescription());
+            String[] sends = sendMe.split(" ");
+            String outString = "";
+            for (String s : sends) {
+                if (outString.length() > 40) {
+                    lore.add(outString);
+                    outString = "";
+                }
+                if (!outString.equals("")) {
+                    outString += ChatColor.RESET + "" + ChatColor.GOLD + " ";
+                } else {
+                    outString += ChatColor.RESET + "" + ChatColor.GOLD;
+                }
+                outString += s;
+            }
+            lore.add(outString);
+        }
+        iconMeta.setLore(lore);
+        iconStack.setItemMeta(iconMeta);
+        inv.setItem(9, iconStack);
         
         player.openInventory(inv);
     }
