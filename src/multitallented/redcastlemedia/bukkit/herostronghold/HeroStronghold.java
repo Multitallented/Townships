@@ -2014,7 +2014,9 @@ public class HeroStronghold extends JavaPlugin {
             String message = ChatColor.GOLD + "";*/
             boolean permNull = perms == null;
             ArrayList<RegionType> regions = new ArrayList<RegionType>();
+            
             ArrayList<SuperRegionType> superRegions = new ArrayList<SuperRegionType>();
+            
             boolean createAll = permNull || perms.has(player, "herostronghold.create.all");
             for (String s : regionManager.getRegionTypes()) {
                 if (createAll || permNull || perms.has(player, "herostronghold.create." + s)) {
@@ -2031,6 +2033,13 @@ public class HeroStronghold extends JavaPlugin {
                     regions.add(regionManager.getRegionType(s));
                 }
             }
+            Collections.sort(regions, new Comparator<RegionType>() {
+
+                @Override
+                public int compare(RegionType o1, RegionType o2) {
+                    return o1.getName().compareTo(o2.getName());
+                }
+            });
             for (String s : regionManager.getSuperRegionTypes()) {
                 if (createAll || permNull || perms.has(player, "herostronghold.create." + s)) {
                     /*if (message.length() + s.length() + 2 > 55) {
@@ -2046,6 +2055,13 @@ public class HeroStronghold extends JavaPlugin {
                     superRegions.add(regionManager.getSuperRegionType(s));
                 }
             }
+            Collections.sort(superRegions, new Comparator<SuperRegionType>() {
+
+                @Override
+                public int compare(SuperRegionType o1, SuperRegionType o2) {
+                    return o1.getName().compareTo(o2.getName());
+                }
+            });
             GUIListener.openListInventory(regions, superRegions, player);
             /*if (!message.equals(ChatColor.GOLD + "")) {
                 player.sendMessage(message.substring(0, message.length() - 2));
