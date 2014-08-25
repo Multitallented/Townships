@@ -68,6 +68,21 @@ public class InfoGUIListener implements Listener {
         costStack.setItemMeta(costMeta);
         inv.setItem(9, costStack);
         
+        ItemStack requireStack = new ItemStack(Material.CHEST);
+        inv.setItem(10, requireStack);
+        
+        ItemStack reagentStack = new ItemStack(Material.HOPPER);
+        inv.setItem(11, reagentStack);
+        
+        ItemStack outputStack = new ItemStack(Material.DISPENSER);
+        inv.setItem(12, outputStack);
+        
+        ItemStack effectsStack = new ItemStack(Material.POTION, 1, (short) 1);
+        inv.setItem(13, effectsStack);
+        
+        ItemStack backStack = new ItemStack(2259);
+        inv.setItem(17, backStack);
+        
         player.openInventory(inv);
     }
     
