@@ -10,6 +10,8 @@ import multitallented.redcastlemedia.bukkit.herostronghold.HeroStronghold;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.HSItem;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionType;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.SuperRegionType;
+import net.milkbowl.vault.item.ItemInfo;
+import net.milkbowl.vault.item.Items;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -43,20 +45,45 @@ public class GUIListener implements Listener {
             ArrayList<String> lore = new ArrayList<String>();
             lore.add(ChatColor.RESET + "" + ChatColor.GRAY + "Region");
             if (r.getDescription() != null && !r.getDescription().equals("")) {
-                lore.add(ChatColor.GOLD + r.getDescription());
+                String sendMe = new String(r.getDescription());
+                String[] sends = sendMe.split(" ");
+                String outString = "";
+                for (String s : sends) {
+                    if (outString.length() > 40) {
+                        lore.add(outString);
+                        outString = "";
+                    }
+                    if (!outString.equals("")) {
+                        outString += ChatColor.RESET + "" + ChatColor.GOLD + " ";
+                    } else {
+                        outString += ChatColor.RESET + "" + ChatColor.GOLD;
+                    }
+                    outString += s;
+                }
+                lore.add(outString);
             }
             if (r.getMoneyRequirement() > 0) {
-                lore.add("Cost: " + formatter.format(r.getMoneyRequirement()));
+                lore.add(ChatColor.RESET + "" + ChatColor.BLUE + "Cost: " + formatter.format(r.getMoneyRequirement()));
             }
-            for (ArrayList<HSItem> items : r.getReagents()) {
-                String reagents = "";
-                for (HSItem item : items) {
-                    if (!reagents.equals("")) {
-                        reagents += " or ";
+            if (r.getRequirements().size() > 0) {
+                lore.add("Requirements");
+                for (ArrayList<HSItem> items : r.getRequirements()) {
+                    String reagents = "";
+                    for (HSItem item : items) {
+                        if (!reagents.equals("")) {
+                            reagents += " or ";
+                        }
+                        String itemName = "";
+                        if (item.isWildDamage()) {
+                            itemName = item.getMat().name().replace("_", " ").toLowerCase();
+                        } else {
+                            ItemStack ist = new ItemStack(item.getMat(), 1, (short) item.getDamage());
+                            itemName = Items.itemByStack(ist).getName();
+                        }
+                        reagents += item.getQty() + " " + itemName;
                     }
-                    reagents += item.getQty() + " " + (new ItemStack(item.getMat(), item.getQty(), (short) item.getDamage())).getItemMeta().getDisplayName();
+                    lore.add(reagents);
                 }
-                lore.add(reagents);
             }
             isMeta.setDisplayName(displayName);
             isMeta.setLore(lore);
