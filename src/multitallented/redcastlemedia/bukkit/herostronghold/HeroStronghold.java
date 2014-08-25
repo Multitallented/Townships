@@ -1443,6 +1443,8 @@ public class HeroStronghold extends JavaPlugin {
                 return true;
             }
             if (rt != null) {
+                RequirementsGUIListener.openListInventory(player);
+                
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Info for region type " + ChatColor.GOLD + args[1] + ":");
                 
                 String message = "";
