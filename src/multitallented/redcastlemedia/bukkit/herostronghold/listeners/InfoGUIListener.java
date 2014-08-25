@@ -51,7 +51,22 @@ public class InfoGUIListener implements Listener {
         }
         iconMeta.setLore(lore);
         iconStack.setItemMeta(iconMeta);
-        inv.setItem(9, iconStack);
+        inv.setItem(0, iconStack);
+        
+        ItemStack costStack = new ItemStack(Material.EMERALD);
+        ItemMeta costMeta = costStack.getItemMeta();
+        costMeta.setDisplayName(ChatColor.RESET + "" + ChatColor.GREEN + "Money:");
+        if (region.getMoneyRequirement() > 0) {
+            lore.add(ChatColor.RESET + "" + ChatColor.RED + "Build Cost: " + formatter.format(region.getMoneyRequirement()));
+        }
+        if (region.getMoneyOutput() > 0) {
+            lore.add(ChatColor.RESET + "" + ChatColor.GREEN + "Per Use: +" + formatter.format(region.getMoneyOutput()));
+        } else if (region.getMoneyOutput() < 0) {
+            lore.add(ChatColor.RESET + "" + ChatColor.RED + "Per Use: " + formatter.format(region.getMoneyOutput()));
+        }
+        costMeta.setLore(lore);
+        costStack.setItemMeta(costMeta);
+        inv.setItem(9, costStack);
         
         player.openInventory(inv);
     }
