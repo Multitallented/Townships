@@ -6,8 +6,10 @@ package multitallented.redcastlemedia.bukkit.herostronghold.listeners;
  */
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import multitallented.redcastlemedia.bukkit.herostronghold.region.HSItem;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionType;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.SuperRegionType;
+import net.milkbowl.vault.item.Items;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -69,18 +71,66 @@ public class InfoGUIListener implements Listener {
         inv.setItem(9, costStack);
         
         ItemStack requireStack = new ItemStack(Material.CHEST);
+        ItemMeta requireMeta = requireStack.getItemMeta();
+        requireMeta.setDisplayName(ChatColor.RESET + "" + ChatColor.GOLD + "Requirements:");
+        
+        if (region.getRequirements().size() > 0) {
+                lore.add("Requirements");
+                for (ArrayList<HSItem> items : region.getRequirements()) {
+                    String requirements = "";
+                    for (HSItem item : items) {
+                        if (!requirements.equals("")) {
+                            requirements += " or ";
+                        }
+                        String itemName = "";
+                        if (item.isWildDamage()) {
+                            itemName = item.getMat().name().replace("_", " ").toLowerCase();
+                        } else {
+                            ItemStack ist = new ItemStack(item.getMat(), 1, (short) item.getDamage());
+                            itemName = Items.itemByStack(ist).getName();
+                        }
+                        requirements += item.getQty() + " " + itemName;
+                    }
+                    lore.add(requirements);
+        
         inv.setItem(10, requireStack);
         
         ItemStack reagentStack = new ItemStack(Material.HOPPER);
+        
+        if (region.getReagents().size() > 0) {
+                lore.add("Reagents");
+                for (ArrayList<HSItem> items : region.getReagents()) {
+                    String reagents = "";
+                    for (HSItem item : items) {
+                        if (!reagents.equals("")) {
+                            reagents += " or ";
+                        }
+                        String itemName = "";
+                        if (item.isWildDamage()) {
+                            itemName = item.getMat().name().replace("_", " ").toLowerCase();
+                        } else {
+                            ItemStack ist = new ItemStack(item.getMat(), 1, (short) item.getDamage());
+                            itemName = Items.itemByStack(ist).getName();
+                        }
+                        reagents += item.getQty() + " " + itemName;
+                    }
+                    lore.add(reagents);
+        
         inv.setItem(11, reagentStack);
         
         ItemStack outputStack = new ItemStack(Material.DISPENSER);
+        ItemMeta outputMeta = outputStack.getItemMeta();
+        outputMeta.setDisplayName(ChatColor.RESET + "" + ChatColor.GOLD + "Output:");
         inv.setItem(12, outputStack);
         
         ItemStack effectsStack = new ItemStack(Material.POTION, 1, (short) 1);
+        ItemMeta effectMeta = effectsStack.getItemMeta();
+        effectMeta.setDisplayName(ChatColor.RESET + "" + ChatColor.GOLD + "Effects:");
         inv.setItem(13, effectsStack);
         
         ItemStack backStack = new ItemStack(2259);
+        ItemMeta backMeta = backStack.getItemMeta();
+        backMeta.setDisplayName(ChatColor.RESET + "" + ChatColor.GOLD + "Press to go BACK");
         inv.setItem(17, backStack);
         
         player.openInventory(inv);
