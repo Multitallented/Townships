@@ -11,6 +11,7 @@ import multitallented.redcastlemedia.bukkit.herostronghold.region.Region;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionManager;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionType;
 import net.milkbowl.vault.item.Items;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -34,6 +35,27 @@ public class Util {
             throw new IllegalStateException(
                     "File Name " + fileName + " results in a empty fileName!");
         return newFileName;
+    }
+    
+    public static ArrayList<String> textWrap(String prefix, String input) {
+        ArrayList<String> lore = new ArrayList<String>();
+        String sendMe = new String(input);
+        String[] sends = sendMe.split(" ");
+        String outString = "";
+        for (String s : sends) {
+            if (outString.length() > 40) {
+                lore.add(outString);
+                outString = "";
+            }
+            if (!outString.equals("")) {
+                outString += prefix + " ";
+            } else {
+                outString += prefix;
+            }
+            outString += s;
+        }
+        lore.add(outString);
+        return lore;
     }
     
     public static boolean containsItems(ArrayList<ArrayList<HSItem>> req, Inventory inv) {
