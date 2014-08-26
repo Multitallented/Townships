@@ -31,7 +31,7 @@ import org.bukkit.inventory.meta.ItemMeta;
         
 public class RequirementsGUIListener implements Listener {
 
-    public static void openListInventory(Player player) {
+    public static void openRequirementsInventory(RegionType region, Player player) {
         int size = 9;
         Inventory inv = Bukkit.createInventory(null, size, ChatColor.GREEN + "Regions");
         

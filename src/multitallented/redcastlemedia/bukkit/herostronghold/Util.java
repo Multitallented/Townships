@@ -4,6 +4,8 @@
  */
 package multitallented.redcastlemedia.bukkit.herostronghold;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.HSItem;
@@ -11,10 +13,15 @@ import multitallented.redcastlemedia.bukkit.herostronghold.region.Region;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionManager;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionType;
 import net.milkbowl.vault.item.Items;
+import net.minecraft.server.v1_7_R3.AttributeModifier;
+import net.minecraft.server.v1_7_R3.GenericAttributes;
+import net.minecraft.server.v1_7_R3.NBTTagCompound;
+import net.minecraft.server.v1_7_R3.NBTTagList;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.craftbukkit.v1_7_R3.inventory.CraftItemStack;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -56,6 +63,22 @@ public class Util {
         }
         lore.add(outString);
         return lore;
+    }
+    
+    public static ItemStack removeAttributes(ItemStack is) {
+        net.minecraft.server.v1_7_R3.ItemStack nmsStack = CraftItemStack.asNMSCopy(is);
+        NBTTagCompound tag;
+        if (!nmsStack.hasTag()){
+            tag = new NBTTagCompound();
+            nmsStack.setTag(tag);
+        }
+        else {
+            tag = nmsStack.getTag();
+        }
+        NBTTagList am = new NBTTagList();
+        tag.set("AttributeModifiers", am);
+        nmsStack.setTag(tag);
+        return CraftItemStack.asBukkitCopy(nmsStack);
     }
     
     public static boolean containsItems(ArrayList<ArrayList<HSItem>> req, Inventory inv) {

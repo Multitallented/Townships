@@ -81,7 +81,7 @@ public class HeroStronghold extends JavaPlugin {
         pm.registerEvents(new CustomListener(this), this);
         
         pm.registerEvents(new GUIListener(), this);
-        pm.registerEvents(new InfoGUIListener(), this);
+        pm.registerEvents(new InfoGUIListener(regionManager), this);
         log = Logger.getLogger("Minecraft");
         
         //Check for Heroes
