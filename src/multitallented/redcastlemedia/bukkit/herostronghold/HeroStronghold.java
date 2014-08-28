@@ -3,6 +3,8 @@ package multitallented.redcastlemedia.bukkit.herostronghold;
  *
  * @author Multitallented
  */
+import multitallented.redcastlemedia.bukkit.herostronghold.listeners.guis.InfoGUIListener;
+import multitallented.redcastlemedia.bukkit.herostronghold.listeners.guis.GUIListener;
 import com.herocraftonline.heroes.Heroes;
 import com.herocraftonline.heroes.characters.Hero;
 import com.herocraftonline.heroes.characters.classes.HeroClass.ExperienceType;
@@ -80,7 +82,7 @@ public class HeroStronghold extends JavaPlugin {
         
         pm.registerEvents(new CustomListener(this), this);
         
-        pm.registerEvents(new GUIListener(), this);
+        pm.registerEvents(new GUIListener(regionManager), this);
         pm.registerEvents(new InfoGUIListener(regionManager), this);
         log = Logger.getLogger("Minecraft");
         
@@ -1443,7 +1445,7 @@ public class HeroStronghold extends JavaPlugin {
                 return true;
             }
             if (rt != null) {
-                InfoGUIListener.openInfoInventory(rt, player);
+                InfoGUIListener.openInfoInventory(rt, player, null);
                 
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Info for region type " + ChatColor.GOLD + args[1] + ":");
                 

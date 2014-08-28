@@ -76,10 +76,6 @@ public class HSItem {
     
     @Override
     public HSItem clone() {
-        try {
-            return (HSItem) super.clone();
-        } catch (CloneNotSupportedException e) {
-            return new HSItem(mat, id, qty, damage, (int) chance);
-        }
+        return new HSItem(mat, id, qty, damage, (int) chance);
     }
 }

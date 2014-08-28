@@ -4,8 +4,6 @@
  */
 package multitallented.redcastlemedia.bukkit.herostronghold;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.HSItem;
@@ -13,17 +11,15 @@ import multitallented.redcastlemedia.bukkit.herostronghold.region.Region;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionManager;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionType;
 import net.milkbowl.vault.item.Items;
-import net.minecraft.server.v1_7_R3.AttributeModifier;
-import net.minecraft.server.v1_7_R3.GenericAttributes;
 import net.minecraft.server.v1_7_R3.NBTTagCompound;
 import net.minecraft.server.v1_7_R3.NBTTagList;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_7_R3.inventory.CraftItemStack;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 /**
  *
@@ -31,6 +27,64 @@ import org.bukkit.inventory.ItemStack;
  * @author Alex_M
  */
 public class Util {
+    public static CycleItems cycles = new CycleItems();
+    
+    public static class CycleItems implements Runnable {
+        private final HashMap<Inventory, HashMap<Integer, HashMap<Integer, ArrayList<HSItem>>>> threads = new HashMap<Inventory, HashMap<Integer, HashMap<Integer, ArrayList<HSItem>>>>();
+        
+        @Override
+        public void run() {
+            while (!threads.isEmpty()) {
+                for (Inventory inv : threads.keySet()) {
+                    for (Integer index : threads.get(inv).keySet()) {
+                        HashMap<Integer, ArrayList<HSItem>> data = threads.get(inv).get(index);
+                        
+                        for (Integer position : data.keySet()) {
+                            int pos = position;
+                            if (data.get(position).size() - 2 > position) {
+                                pos = 0;
+                            }
+                            HSItem nextItem = data.get(pos).get(pos);
+                            ItemStack is;
+                            if (nextItem.isWildDamage()) {
+                                is = new ItemStack(nextItem.getMat(), nextItem.getQty());
+                                ItemMeta isMeta = is.getItemMeta();
+                                ArrayList<String> lore = new ArrayList<String>();
+                                lore.add("Any type acceptable");
+                                isMeta.setLore(lore);
+                                is.setItemMeta(isMeta);
+                            } else {
+                                is = new ItemStack(nextItem.getMat(), nextItem.getQty(), (short) nextItem.getDamage());
+                            }
+                            inv.setItem(index, is);
+                            break;
+                        }
+                    }
+                }
+                try {
+                    this.wait(2000);
+                } catch (Exception e) {
+                    
+                }
+            }
+        }
+        
+        public void addItemCycle(Inventory inv, int index, ArrayList<HSItem> items) {
+            HashMap<Integer, HashMap<Integer, ArrayList<HSItem>>> indexes = new HashMap<Integer, HashMap<Integer, ArrayList<HSItem>>>();
+            HashMap<Integer, ArrayList<HSItem>> positions = new HashMap<Integer, ArrayList<HSItem>>();
+            indexes.put(index, positions);
+            threads.put(inv, indexes);
+            
+            if (threads.size() < 2) {
+                run();
+            }
+        }
+        
+        public void removeCycleItem(Inventory inv) {
+            threads.remove(inv);
+        }
+    }
+    
     public static boolean validateFileName(String fileName) {
         return fileName.matches("^[^.\\\\/:*?\"<>|]?[^\\\\/:*?\"<>|]*") 
         && getValidFileName(fileName).length()>0;

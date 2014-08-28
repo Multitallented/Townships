@@ -1,4 +1,4 @@
-package multitallented.redcastlemedia.bukkit.herostronghold.listeners;
+package multitallented.redcastlemedia.bukkit.herostronghold.listeners.guis;
 
 /**
  *
@@ -7,6 +7,8 @@ package multitallented.redcastlemedia.bukkit.herostronghold.listeners;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import multitallented.redcastlemedia.bukkit.herostronghold.Util;
+import multitallented.redcastlemedia.bukkit.herostronghold.listeners.guis.RequirementsGUIListener;
+import multitallented.redcastlemedia.bukkit.herostronghold.region.HSItem;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionManager;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionType;
 import org.bukkit.Bukkit;
@@ -27,7 +29,7 @@ public class InfoGUIListener implements Listener {
         this.rm = rm;
     }
     
-    public static void openInfoInventory(RegionType region, Player player) {
+    public static void openInfoInventory(RegionType region, Player player, String back) {
         int size = 18;
         Inventory inv = Bukkit.createInventory(null, size, "Region Info");
         
@@ -120,6 +122,13 @@ public class InfoGUIListener implements Listener {
         ItemStack backStack = new ItemStack(Material.RECORD_4);
         ItemMeta backMeta = backStack.getItemMeta();
         backMeta.setDisplayName(ChatColor.RESET + "" + ChatColor.GOLD + "Press to go BACK");
+        lore = new ArrayList<String>();
+        if (back == null) {
+            lore.add(ChatColor.RESET + "" + ChatColor.RED + "Exit");
+        } else {
+            lore.add(ChatColor.RESET + "" + ChatColor.RED + back);
+        }
+        backStack.setItemMeta(backMeta);
         inv.setItem(8, backStack);
         
         player.openInventory(inv);
@@ -141,7 +150,12 @@ public class InfoGUIListener implements Listener {
         }
         if (event.getCurrentItem().getType() == Material.RECORD_4) {
             player.closeInventory();
-            player.performCommand("hs list");
+            String backState = ChatColor.stripColor(event.getCurrentItem().getItemMeta().getLore().get(0));
+            if (backState.equals("hs list")) {
+                player.performCommand("hs list");
+            } else if (backState.split(" ").length > 1 && backState.split(" ")[0].equals("who")) {
+                player.performCommand("hs who " + backState.split(" ")[1]);
+            }
             return;
         }
         
@@ -149,7 +163,7 @@ public class InfoGUIListener implements Listener {
         
         if (event.getCurrentItem().getType() == Material.IRON_PICKAXE) {
             player.closeInventory();
-            RequirementsGUIListener.openRequirementsInventory(rt, player);
+            RequirementsGUIListener.openRequirementsInventory(new ArrayList<ArrayList<HSItem>>(rt.getRequirements()), player, "Building Requirements");
             return;
         }
         player.closeInventory();

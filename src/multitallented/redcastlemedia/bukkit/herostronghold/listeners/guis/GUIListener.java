@@ -1,4 +1,4 @@
-package multitallented.redcastlemedia.bukkit.herostronghold.listeners;
+package multitallented.redcastlemedia.bukkit.herostronghold.listeners.guis;
 
 /**
  *
@@ -6,11 +6,10 @@ package multitallented.redcastlemedia.bukkit.herostronghold.listeners;
  */
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import multitallented.redcastlemedia.bukkit.herostronghold.HeroStronghold;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.HSItem;
+import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionManager;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionType;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.SuperRegionType;
-import net.milkbowl.vault.item.ItemInfo;
 import net.milkbowl.vault.item.Items;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -24,6 +23,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
         
 public class GUIListener implements Listener {
+    private final RegionManager rm;
+    public GUIListener(RegionManager rm) {
+        this.rm = rm;
+    }
     
     public static void openListInventory(ArrayList<RegionType> regions, ArrayList<SuperRegionType> superRegions, Player player) {
         int size = 9;
@@ -156,5 +159,6 @@ public class GUIListener implements Listener {
         }
         player.closeInventory();
         player.performCommand("hs info " + ChatColor.stripColor(event.getCurrentItem().getItemMeta().getDisplayName()));
+        InfoGUIListener.openInfoInventory(rm.getRegionType(ChatColor.stripColor(event.getCurrentItem().getItemMeta().getDisplayName())), player, "hs list");
     }
 }
