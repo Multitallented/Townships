@@ -26,6 +26,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -162,16 +163,36 @@ public class RequirementsGUIListener implements Listener {
             inv.setItem(pIndex, is);
         }
         
-        for (Integer cycleIndex : cycleItems.keySet()) {
-            Util.cycles.addItemCycle(inv, cycleIndex, cycleItems.get(cycleIndex));
-        }
-        
         player.openInventory(inv);
+        
+        for (Integer cycleIndex : cycleItems.keySet()) {
+            Util.cycles.addItemCycle(player, inv, cycleIndex, cycleItems.get(cycleIndex));
+        }
+    }
+    
+    @EventHandler
+    public void closeInventory(InventoryCloseEvent event) {
+        Bukkit.getPlayer("Multitallented").sendMessage("begin closing");
+        if (!(event.getPlayer() instanceof Player)) {
+            return;
+        }
+        Player player = (Player) event.getPlayer();
+        if (Util.cycles.containsItemCycle(player)) {
+            Bukkit.getPlayer("Multitallented").sendMessage("closing");
+            Util.cycles.removeCycleItem(player);
+        }
     }
  
     @EventHandler
     public void click(InventoryClickEvent event) {
-        if (event.getInventory().getSize() == 9) {
+        String name = ChatColor.stripColor(event.getInventory().getName());
+        if (!name.equals("Requirements") &&
+                !name.equals("Reagents") &&
+                !name.equals("Upkeep") &&
+                !name.equals("Output")) {
+            return;
+        }
+        /*if (event.getInventory().getSize() == 9) {
             event.setCancelled(true);
             if (event.getCurrentItem().getType() == Material.TRAP_DOOR) {
                 // Teleport to "spawn"
@@ -181,8 +202,9 @@ public class RequirementsGUIListener implements Listener {
                 // Teleport to "pvp zone"
                 ((Player) event.getWhoClicked()).sendMessage("pvp");
             }
-        }
-        Util.cycles.removeCycleItem(event.getInventory());
-        event.getWhoClicked().closeInventory();
+        }*/
+        //Util.cycles.removeCycleItem(event.getInventory());
+        //event.getWhoClicked().closeInventory();
+        event.setCancelled(true);
     }
 }

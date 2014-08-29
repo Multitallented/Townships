@@ -3,8 +3,6 @@ package multitallented.redcastlemedia.bukkit.herostronghold;
  *
  * @author Multitallented
  */
-import multitallented.redcastlemedia.bukkit.herostronghold.listeners.guis.InfoGUIListener;
-import multitallented.redcastlemedia.bukkit.herostronghold.listeners.guis.GUIListener;
 import com.herocraftonline.heroes.Heroes;
 import com.herocraftonline.heroes.characters.Hero;
 import com.herocraftonline.heroes.characters.classes.HeroClass.ExperienceType;
@@ -14,6 +12,9 @@ import multitallented.redcastlemedia.bukkit.herostronghold.checkregiontask.Check
 import multitallented.redcastlemedia.bukkit.herostronghold.effect.EffectManager;
 import multitallented.redcastlemedia.bukkit.herostronghold.events.CommandEffectEvent;
 import multitallented.redcastlemedia.bukkit.herostronghold.listeners.*;
+import multitallented.redcastlemedia.bukkit.herostronghold.listeners.guis.GUIListener;
+import multitallented.redcastlemedia.bukkit.herostronghold.listeners.guis.InfoGUIListener;
+import multitallented.redcastlemedia.bukkit.herostronghold.listeners.guis.RequirementsGUIListener;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.*;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.item.Items;
@@ -84,6 +85,7 @@ public class HeroStronghold extends JavaPlugin {
         
         pm.registerEvents(new GUIListener(regionManager), this);
         pm.registerEvents(new InfoGUIListener(regionManager), this);
+        pm.registerEvents(new RequirementsGUIListener(), this);
         log = Logger.getLogger("Minecraft");
         
         //Check for Heroes
@@ -1444,10 +1446,11 @@ public class HeroStronghold extends JavaPlugin {
                 player.sendMessage(ChatColor.GRAY + "[HeroStronghold] There is no region type called " + args[1]);
                 return true;
             }
-            if (rt != null) {
+            if (rt != null || srt != null) {
                 InfoGUIListener.openInfoInventory(rt, player, null);
+            }
                 
-                player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Info for region type " + ChatColor.GOLD + args[1] + ":");
+                /*player.sendMessage(ChatColor.GRAY + "[HeroStronghold] Info for region type " + ChatColor.GOLD + args[1] + ":");
                 
                 String message = "";
                 if (rt.getMoneyRequirement() != 0) {
@@ -1750,7 +1753,7 @@ public class HeroStronghold extends JavaPlugin {
                     }
                     player.sendMessage(message.substring(0, message.length()-2));
                 }
-            }
+            }*/
             return true;
         } else if (args.length > 1 && args[0].equalsIgnoreCase("addowner")) {
             String playername = args[1];

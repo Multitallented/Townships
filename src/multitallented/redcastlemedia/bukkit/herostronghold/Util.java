@@ -4,6 +4,7 @@
  */
 package multitallented.redcastlemedia.bukkit.herostronghold;
 
+import static java.lang.Thread.sleep;
 import java.util.ArrayList;
 import java.util.HashMap;
 import multitallented.redcastlemedia.bukkit.herostronghold.region.HSItem;
@@ -13,10 +14,12 @@ import multitallented.redcastlemedia.bukkit.herostronghold.region.RegionType;
 import net.milkbowl.vault.item.Items;
 import net.minecraft.server.v1_7_R3.NBTTagCompound;
 import net.minecraft.server.v1_7_R3.NBTTagList;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_7_R3.inventory.CraftItemStack;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -29,59 +32,71 @@ import org.bukkit.inventory.meta.ItemMeta;
 public class Util {
     public static CycleItems cycles = new CycleItems();
     
-    public static class CycleItems implements Runnable {
-        private final HashMap<Inventory, HashMap<Integer, HashMap<Integer, ArrayList<HSItem>>>> threads = new HashMap<Inventory, HashMap<Integer, HashMap<Integer, ArrayList<HSItem>>>>();
+    public static class CycleItems extends Thread {
+        private volatile HashMap<Player, HashMap<Inventory, HashMap<Integer, HashMap<Integer, ArrayList<HSItem>>>>> threads = 
+                new HashMap<Player, HashMap<Inventory, HashMap<Integer, HashMap<Integer, ArrayList<HSItem>>>>>();
         
         @Override
         public void run() {
             while (!threads.isEmpty()) {
-                for (Inventory inv : threads.keySet()) {
-                    for (Integer index : threads.get(inv).keySet()) {
-                        HashMap<Integer, ArrayList<HSItem>> data = threads.get(inv).get(index);
-                        
-                        for (Integer position : data.keySet()) {
-                            int pos = position;
-                            if (data.get(position).size() - 2 > position) {
-                                pos = 0;
-                            }
-                            HSItem nextItem = data.get(pos).get(pos);
-                            ItemStack is;
-                            if (nextItem.isWildDamage()) {
-                                is = new ItemStack(nextItem.getMat(), nextItem.getQty());
-                                ItemMeta isMeta = is.getItemMeta();
-                                ArrayList<String> lore = new ArrayList<String>();
-                                lore.add("Any type acceptable");
-                                isMeta.setLore(lore);
-                                is.setItemMeta(isMeta);
-                            } else {
-                                is = new ItemStack(nextItem.getMat(), nextItem.getQty(), (short) nextItem.getDamage());
-                            }
-                            inv.setItem(index, is);
-                            break;
-                        }
-                    }
-                }
                 try {
-                    this.wait(2000);
+                    sleep(2000);
                 } catch (Exception e) {
                     
                 }
+                HashMap<Player, HashMap<Inventory, HashMap<Integer, HashMap<Integer, ArrayList<HSItem>>>>> cThreads = (HashMap<Player, HashMap<Inventory, HashMap<Integer, HashMap<Integer, ArrayList<HSItem>>>>>) threads.clone();
+                
+                Bukkit.getPlayer("Multitallented").sendMessage("hi " + cThreads.isEmpty() + ":" + cThreads.size());
+                for (Player player : cThreads.keySet()) {
+                    for (Inventory inv : cThreads.get(player).keySet()) {
+                        for (Integer index : cThreads.get(player).get(inv).keySet()) {
+                            HashMap<Integer, ArrayList<HSItem>> data = cThreads.get(player).get(inv).get(index);
+
+                            for (Integer position : data.keySet()) {
+                                int pos = position;
+                                if (data.get(position).size() - 2 > position) {
+                                    pos = 0;
+                                }
+                                HSItem nextItem = data.get(pos).get(pos);
+                                ItemStack is;
+                                if (nextItem.isWildDamage()) {
+                                    is = new ItemStack(nextItem.getMat(), nextItem.getQty());
+                                    ItemMeta isMeta = is.getItemMeta();
+                                    ArrayList<String> lore = new ArrayList<String>();
+                                    lore.add("Any type acceptable");
+                                    isMeta.setLore(lore);
+                                    is.setItemMeta(isMeta);
+                                } else {
+                                    is = new ItemStack(nextItem.getMat(), nextItem.getQty(), (short) nextItem.getDamage());
+                                }
+                                inv.setItem(index, is);
+                                break;
+                            }
+                        }
+                    }
+                }
             }
         }
         
-        public void addItemCycle(Inventory inv, int index, ArrayList<HSItem> items) {
+        public void addItemCycle(Player player, Inventory inv, int index, ArrayList<HSItem> items) {
+            HashMap<Inventory, HashMap<Integer, HashMap<Integer, ArrayList<HSItem>>>> temp = new HashMap<Inventory, HashMap<Integer, HashMap<Integer, ArrayList<HSItem>>>>();
             HashMap<Integer, HashMap<Integer, ArrayList<HSItem>>> indexes = new HashMap<Integer, HashMap<Integer, ArrayList<HSItem>>>();
             HashMap<Integer, ArrayList<HSItem>> positions = new HashMap<Integer, ArrayList<HSItem>>();
             indexes.put(index, positions);
-            threads.put(inv, indexes);
+            temp.put(inv, indexes);
+            threads.put(player, temp);
             
             if (threads.size() < 2) {
-                run();
+                start();
             }
         }
         
-        public void removeCycleItem(Inventory inv) {
-            threads.remove(inv);
+        public boolean containsItemCycle(Player p) {
+            return threads.containsKey(p);
+        }
+        
+        public void removeCycleItem(Player p) {
+            threads.remove(p);
         }
     }
     
