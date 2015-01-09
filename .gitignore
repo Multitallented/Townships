@@ -1,10 +1,30 @@
-$ cat .gitignore
+# Eclipse stuff
+/.classpath
+/.project
+/.settings
 
-.gitignore
-a/*
-nbproject/*
-dist/*
-build/*
+# netbeans
+/nbproject
+
+# maven
+/target
+
+# vim
+.*.sw[a-p]
+
+# various other potential build files
+/build
+/bin
+/dist
 manifest.mf
-pom.xml
-build.xml
+
+# Mac filesystem dust
+.DS_Store
+
+# intellij
+*.iml
+*.ipr
+*.iws
+.idea/
+/modules/Townships-Plugin/target/
+/modules/Townships-Effects/target/

@@ -1,0 +1,131 @@
+<project name="Townships-Effects" default="build" basedir=".">
+    <description>
+        Townships Effects Ant File Compiler
+    </description>
+
+    <!-- Define ant plugins used by this build -->
+    <path id="ant-contrib.classpath" path="../../ant/ant-contrib-1.0b3.jar" />
+    <taskdef resource="net/sf/antcontrib/antlib.xml">
+        <classpath>
+            <pathelement location="../../ant/ant-contrib-1.0b3.jar"/>
+        </classpath>
+    </taskdef>
+
+    <!-- Set global properties for this build -->
+    <property environment="env"/>
+    <property name="build.compiler" value="extJavac" />
+    <property name="project.root" value="../.." />
+    <property name="dir.plugin.build" value="${project.root}/modules/Townships-Plugin/target/" />
+    <property name="sources.root" value="." />
+    <property name="dir.workspace" value="temp" />
+    <property name="dir.build" value="build" />
+    <property name="dir.build.final" value="${project.root}/${dir.build}" />
+    <property name="dir.maven" value="maven" />
+    <property name="dir.prioritybuild" value="priority" />
+
+    <!-- User Variables -->
+    <property name="priorityeffects" value="SPACE_DELIMITED_SEQUENCE" /> <!-- Build these effects first - i.e. for dependencies -->
+
+    <!-- Define Classpath Used for Compiled Jars -->
+    <path id="classpath">
+        <fileset id="priority.effects" dir="${dir.prioritybuild}" />
+        <fileset id="priority.effects" dir="${dir.maven}" />
+        <pathelement path="${maven.classpath}"/>
+    </path>
+
+    <!-- Define Build -->
+    <target name="build">
+
+        <!-- Clean -->
+        <delete dir="${dir.build.final}" />
+
+        <!-- Create directories required for build -->
+        <mkdir dir="${dir.workspace}" />
+        <mkdir dir="${dir.build}" />
+        <mkdir dir="${dir.prioritybuild}" />
+        <mkdir dir="${dir.build.final}" />
+
+        <!-- Compile Priority Effects (API) Source and Package -->
+        <foreach target="compile-package-source" param="dir.effectname">
+            <param name="dir.target" value="${dir.prioritybuild}" />
+            <path>
+                <dirset dir="${sources.root}" includes="${priorityeffects}" />
+            </path>
+        </foreach>
+
+        <!-- Compile All other Effects and Package -->
+        <foreach target="compile-package-source" param="dir.effectname">
+            <param name="dir.target" value="${dir.build}" />
+            <path>
+                <dirset dir="${sources.root}">
+                    <include name="Effect*" />
+                    <exclude name="${priorityeffects}" />
+                </dirset>
+            </path>
+
+        </foreach>
+
+        <!-- Copy Compiled Priority Effects to Distribution Folder -->
+        <copy todir="${dir.build}" >
+            <fileset dir="${dir.prioritybuild}" includes="**"/>
+        </copy>
+
+        <!-- Zip Result -->
+        <zip destfile="${dir.build.final}/Townships-Effects.zip">
+            <fileset dir="${dir.build}" includes="**/*.jar"/>
+        </zip>
+
+        <!-- Copy Compiled Townships Plugin to Distribution Folder -->
+        <copy todir="${dir.build.final}" >
+            <fileset dir="${dir.plugin.build}" includes="**.jar"/>
+        </copy>
+
+        <!-- Cleanup -->
+        <delete dir="${dir.prioritybuild}" />
+        <delete dir="${dir.workspace}" />
+        <delete dir="${dir.build}" />
+        <delete dir="${dir.maven}" />
+    </target>
+
+    <!-- Define Compilation and Effect Packaging -->
+    <target name="compile-package-source">
+        <!-- Determine the Base Name of the Effect -->
+        <basename file="${dir.effectname}" property="effectname" />
+
+        <!-- Create Workspace Directory -->
+        <mkdir dir="${dir.workspace}/${effectname}" />
+
+        <!-- Compile Sources -->
+        <javac srcdir="${sources.root}/${effectname}" debug = "on" destdir="${dir.workspace}/${effectname}" encoding="UTF-8"
+               classpathref="classpath" includeantruntime="true" target="1.7"/>
+
+        <!-- Generate effect.info -->
+        <foreach target="create-effect-info" param="dir.pathtofile">
+            <param name="effectname" value="${effectname}" />
+            <path>
+                <fileset dir="${dir.workspace}/${effectname}">
+                    <include name="**/Effect*.class" />
+                    <exclude name="**/Effect*$*.class" />
+                </fileset>
+            </path>
+        </foreach>
+
+        <!-- Package JAR -->
+        <jar jarfile="${dir.target}/${effectname}.jar" basedir="${dir.workspace}/${effectname}"
+             includes="**/*.class effect.info">
+        </jar>
+    </target>
+
+    <!-- Generate effect.info -->
+    <target name="create-effect-info">
+        <echo file="${dir.workspace}/${effectname}/effect.info" message="main-class: ${dir.pathtofile}" />
+        <replace file="${dir.workspace}/${effectname}/effect.info" token="${basedir}/${dir.workspace}/${effectname}/"
+                 value=""/>
+        <replace file="${dir.workspace}/${effectname}/effect.info" token="${basedir}\${dir.workspace}\${effectname}\"
+                 value=""/>
+        <replace file="${dir.workspace}/${effectname}/effect.info" token="/" value="."/>
+        <replace file="${dir.workspace}/${effectname}/effect.info" token="\" value="."/>
+        <replace file="${dir.workspace}/${effectname}/effect.info" token=".class" value=""/>
+    </target>
+
+</project>

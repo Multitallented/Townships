@@ -1,2 +1,2 @@
-~ Welcome to HeroStronghold ~
+~ Welcome to Townships ~
 

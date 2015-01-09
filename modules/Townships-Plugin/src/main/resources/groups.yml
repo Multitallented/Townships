@@ -1,0 +1,11 @@
+default:
+  priority: 1
+  limits: []
+example:
+  priority: 2
+  limits:
+    shelter: 1
+    arrowturret: 3
+admin:
+  priority: 99
+  limits: []
