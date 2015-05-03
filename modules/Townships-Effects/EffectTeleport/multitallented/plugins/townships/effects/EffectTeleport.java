@@ -39,7 +39,8 @@ public class EffectTeleport extends Effect {
         
         @EventHandler
         public void onCustomEvent(ToPlayerInRegionEvent event) {
-            if (!event.getLocation().getBlock().getRelative(BlockFace.UP).equals(event.getPlayer().getLocation().getBlock())) {
+            if (!event.getLocation().getBlock().getRelative(BlockFace.UP).equals(event.getPlayer().getLocation().getBlock()) &&
+                    !event.getLocation().getBlock().equals(event.getPlayer().getLocation().getBlock())) {
                 return;
             }
             Location l = event.getLocation();
