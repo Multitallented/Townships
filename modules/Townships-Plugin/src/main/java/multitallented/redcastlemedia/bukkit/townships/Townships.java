@@ -26,6 +26,7 @@ import multitallented.redcastlemedia.bukkit.townships.region.RegionManager;
 import multitallented.redcastlemedia.bukkit.townships.region.RegionType;
 import multitallented.redcastlemedia.bukkit.townships.region.SuperRegion;
 import multitallented.redcastlemedia.bukkit.townships.region.SuperRegionType;
+import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.*;
@@ -45,6 +46,7 @@ public class Townships extends JavaPlugin {
     private RegionBlockListener blockListener;
     public static Economy econ;
     public static Permission perms;
+    public static Chat chat;
     private RegionEntityListener regionEntityListener;
     private RegionPlayerInteractListener dpeListener;
     private Map<String, String> pendingInvites = new HashMap<String, String>();
@@ -76,6 +78,7 @@ public class Townships extends JavaPlugin {
         
         setupPermissions();
         setupEconomy();
+        setupChat();
         
         //Register Listeners Here
         serverListener = new PluginServerListener(this);
@@ -2658,7 +2661,14 @@ public class Townships extends JavaPlugin {
         }
         return (perms != null);
     }
-    
+    private boolean setupChat()
+    {
+        RegisteredServiceProvider<Chat> chatProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.chat.Chat.class);
+        if (chatProvider != null) {
+            chat = chatProvider.getProvider();
+        }
+        return (chat != null);
+    }
     public RegionManager getRegionManager() {
         return regionManager;
     }

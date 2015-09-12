@@ -351,7 +351,7 @@ public class InfoGUIListener implements Listener {
         if (rt != null && event.getCurrentItem().getType() == Material.IRON_AXE) {
             player.closeInventory();
             player.performCommand("to create " + rt.getName());
-	        return;
+            return;
         }
         if (event.getCurrentItem().getType() == Material.CHEST) {
             player.closeInventory();

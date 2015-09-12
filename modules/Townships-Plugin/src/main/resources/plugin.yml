@@ -6,9 +6,8 @@ description: Allows you to create structures and towns.
 main: multitallented.redcastlemedia.bukkit.townships.Townships
 name: Townships
 startup: postworld
-version: 2.1.0-b059
+version: 3.0.1-b060
 depend: [Vault]
-softdepend: [Heroes]
 commands:
    hs:
       aliases: ['township', 'townships', 'towns', 'town', 'to', 'hs']

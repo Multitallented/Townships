@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import multitallented.redcastlemedia.bukkit.townships.ConfigManager;
 import multitallented.redcastlemedia.bukkit.townships.Townships;
 import multitallented.redcastlemedia.bukkit.townships.events.ToPlayerExitRegionEvent;
 import multitallented.redcastlemedia.bukkit.townships.events.ToPlayerExitSRegionEvent;
@@ -68,15 +70,29 @@ public class RegionPlayerInteractListener implements Listener {
             plugin.getCheckRegionTask().lastRegion.remove(p);
         }
     }
-    
-    @EventHandler(priority=EventPriority.HIGH)
-    public void onPlayerChat(PlayerChatEvent event) {
+
+    @EventHandler
+    public void onPlayerAsyncChat(AsyncPlayerChatEvent event) {
         if (event.isCancelled()) {
             return;
         }
         Player player = event.getPlayer();
         String channel = channels.get(player);
         if (channel == null || channel.equals("")) {
+            if (!Townships.getConfigManager().getUseTownPrefixes()) {
+                return;
+            }
+
+            SuperRegion sr = getPlayerPrimaryTown(player);
+            if (sr != null) {
+                String prefix = ChatColor.RESET + "[" + ChatColor.GREEN + sr.getName() + ChatColor.RESET + "]";
+                if (Townships.chat != null) {
+                    Townships.chat.setPlayerPrefix(player, prefix);
+                } else {
+                    event.setFormat(prefix + event.getFormat());
+                }
+            }
+
             return;
         }
         event.setCancelled(true);
@@ -100,9 +116,76 @@ public class RegionPlayerInteractListener implements Listener {
         try {
             smt.run();
         } catch (Exception e) {
-            
+
         }
     }
+
+    private SuperRegion getPlayerPrimaryTown(Player p) {
+        SuperRegion  superRegion = null;
+        int biggestTowns = 0;
+        int biggestMemberTowns = 0;
+        for (SuperRegion sr : rm.getSortedSuperRegions()) {
+            for (String name : sr.getOwners()) {
+                if (!name.equals(p.getName())) {
+                    continue;
+                }
+                if (sr.getPopulation() > biggestTowns) {
+                    superRegion = sr;
+                }
+                biggestTowns = Math.max(biggestTowns, sr.getPopulation());
+            }
+            if (biggestTowns > 0) {
+                continue;
+            }
+            for (String name : sr.getMembers().keySet()) {
+                if (!name.equals(p.getName())) {
+                    continue;
+                }
+                if (sr.getPopulation() > biggestMemberTowns) {
+                    superRegion = sr;
+                }
+                biggestMemberTowns = Math.max(biggestMemberTowns, sr.getPopulation());
+            }
+        }
+        return superRegion;
+    }
+
+//    @EventHandler(priority=EventPriority.HIGH)
+//    public void onPlayerChat(PlayerChatEvent event) {
+//        if (event.isCancelled()) {
+//            return;
+//        }
+//        Player player = event.getPlayer();
+//        String channel = channels.get(player);
+//        if (channel == null || channel.equals("")) {
+//
+//
+//
+//        }
+//        event.setCancelled(true);
+//        String title = null;
+//        SuperRegion sr = rm.getSuperRegion(channel);
+//        if (sr == null) {
+//            return;
+//        }
+//        ArrayList<String> memberPerms = (ArrayList<String>) sr.getMember(player.getName());
+//        if (memberPerms == null || memberPerms.isEmpty() || !memberPerms.contains("member")) {
+//            return;
+//        }
+//        for (String s : memberPerms) {
+//            if (s.contains("title:")) {
+//                title = s.replace("title:", "");
+//            }
+//        }
+//        SendMessageThread smt = new SendMessageThread(plugin, channel, channels, title, player, event.getMessage());
+//        String message = "[" + channel + "] " + player.getDisplayName() + ": " + event.getMessage();
+//        Logger.getLogger("Minecraft").log(Level.INFO, message);
+//        try {
+//            smt.run();
+//        } catch (Exception e) {
+//
+//        }
+//    }
     
     public void setPlayerChannel(Player p, String s) {
         if (s.equals("")) {

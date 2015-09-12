@@ -41,6 +41,7 @@ public class ConfigManager {
     private final long spawnKill;
     private final long gracePeriod;
     private final HashMap<String, String> itemGroups;
+    private final boolean useTownPrefixes;
     
     public ConfigManager(FileConfiguration config, Townships plugin) {
         this.config = config;
@@ -68,6 +69,7 @@ public class ConfigManager {
         autoDeposit = config.getDouble("auto-deposit", 0.0);
         defaultSalvage = config.getDouble("default-salvage", 0.0) / 100;
         explosionOverride = config.getBoolean("explosion-override", false);
+        useTownPrefixes = config.getBoolean("use-town-prefixes", false);
         gracePeriod = config.getLong("grace-period-minutes", 0) * 600000;
         itemGroups = processGroups(config.getConfigurationSection("item-groups"));
         loadCharters();
@@ -144,7 +146,11 @@ public class ConfigManager {
     public long getSpawnKill() {
         return spawnKill;
     }
-    
+
+    public boolean getUseTownPrefixes() {
+        return useTownPrefixes;
+    }
+
     public double getSalvage() {
         return defaultSalvage;
     }
@@ -224,7 +230,8 @@ public class ConfigManager {
     }
     
     public synchronized void removeCharter(String name) {
-        File charter = new File(plugin.getDataFolder() + "/charters", name + ".yml");
+        File charterFolder = new File(plugin.getDataFolder(), "charters");
+        File charter = new File(charterFolder, name + ".yml");
         if (!charter.exists()) {
             plugin.warning("Unable to delete non-existent charter " + name + ".yml");
             return;

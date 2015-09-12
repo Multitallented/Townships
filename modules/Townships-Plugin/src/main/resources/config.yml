@@ -5,7 +5,8 @@ destroy-if-no-money: true
 destroy-if-no-power: true
 use-power: true
 rename-cost: 500.0
-help-page: http://hc.to/townships
+help-page: https://www.spigotmc.org/resources/townships.1892/
+use-town-prefixes: true
 war:
   use-war: false
   declare-war-base-cost: 2000.0
