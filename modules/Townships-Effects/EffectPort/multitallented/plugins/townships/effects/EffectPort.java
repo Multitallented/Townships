@@ -1,6 +1,5 @@
 package multitallented.plugins.townships.effects;
 
-import com.herocraftonline.heroes.characters.Hero;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -131,12 +130,8 @@ public class EffectPort extends Effect {
                 return;
             }
             Player player = event.getPlayer();
-            Hero hero = null;
             Economy econ = Townships.econ;
-            if (Townships.heroes != null) {
-                hero = Townships.heroes.getCharacterManager().getHero(player);
-            }
-            
+
             //Check if on cooldown
             if (cooldowns.containsKey(player) && cooldowns.get(player) + cooldown > System.currentTimeMillis()) {
                 player.sendMessage(ChatColor.GRAY + "[Townships] You can't port for another " + (cooldowns.get(player) + cooldown - System.currentTimeMillis()) + "s");
@@ -144,13 +139,8 @@ public class EffectPort extends Effect {
             }
             
             //Check if has enough mana
-            if (hero != null && mana > 0) {
-                if (hero.getMana() < mana) {
-                    player.sendMessage(ChatColor.GRAY + "[Townships] You have " + mana + " mana to port");
-                    return;
-                }
-            }
-            
+            //TODO mana check
+
             //Check if has enough hp
             if (damage > 0 && player.getHealth() <= damage) {
                 player.sendMessage(ChatColor.GRAY + "[Townships] You need " + damage + " health to port");
@@ -211,7 +201,6 @@ public class EffectPort extends Effect {
             effect.forceUpkeep(r.getLocation());
             
             final Player p = player;
-            final Hero h = hero;
             final Location l = r.getLocation().getBlock().getRelative(BlockFace.UP).getLocation();
             
             long delay = 1L;
@@ -225,14 +214,15 @@ public class EffectPort extends Effect {
                     if (!p.isOnline() || p.isDead()) {
                         return;
                     }
-                    if (h != null && h.isInCombat()) {
-                        p.sendMessage(ChatColor.RED + "[Townships] You cant use that while in combat");
-                        return;
-                    }
-                    if (mana > h.getMana()) {
-                        p.sendMessage(ChatColor.RED + "[Townships] You dont have enough mana to port");
-                        return;
-                    }
+                    //TODO combat check
+//                    if (h != null && h.isInCombat()) {
+//                        p.sendMessage(ChatColor.RED + "[Townships] You cant use that while in combat");
+//                        return;
+//                    }
+//                    if (mana > h.getMana()) {
+//                        p.sendMessage(ChatColor.RED + "[Townships] You dont have enough mana to port");
+//                        return;
+//                    }
                     if (money > 0 && Townships.econ != null) {
                         if (money > Townships.econ.getBalance(p.getName())) {
                             p.sendMessage(ChatColor.RED + "[Townships] You dont have enough money to port");
@@ -240,7 +230,7 @@ public class EffectPort extends Effect {
                         }
                         Townships.econ.withdrawPlayer(p.getName(), money);
                     }
-                    h.setMana(h.getMana() - mana);
+//                    h.setMana(h.getMana() - mana);
                     if (damage > 0) {
                         Bukkit.getPluginManager().callEvent(new EntityDamageEvent(p, DamageCause.CUSTOM, damage));
                     }

@@ -3,9 +3,6 @@ package multitallented.redcastlemedia.bukkit.townships;
  *
  * @author Multitallented
  */
-import com.herocraftonline.heroes.Heroes;
-import com.herocraftonline.heroes.characters.Hero;
-import com.herocraftonline.heroes.characters.classes.HeroClass.ExperienceType;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.logging.Logger;
@@ -36,7 +33,6 @@ import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -54,7 +50,6 @@ public class Townships extends JavaPlugin {
     private Map<String, String> pendingInvites = new HashMap<String, String>();
     private static ConfigManager configManager;
     private Map<String, List<String>> pendingCharters = new HashMap<String, List<String>>();
-    public static Heroes heroes = null;
     private HashSet<String> effectCommands = new HashSet<String>();
     private GUIManager guiManager;
     private static EffectManager effectManager;
@@ -106,16 +101,6 @@ public class Townships extends JavaPlugin {
         pm.registerEvents(new RequirementsGUIListener(this), this);
         pm.registerEvents(new ShopGUIListener(this), this);
         log = Logger.getLogger("Minecraft");
-        
-        //Check for Heroes
-        log.info("[Townships] is looking for Heroes...");
-        Plugin currentPlugin = pm.getPlugin("Heroes");
-        if (currentPlugin != null) {
-            log.info("[Townships] found Heroes!");
-            heroes = ((Heroes) currentPlugin);
-        } else {
-            log.info("[Townships] didnt find Heroes, waiting for Heroes to be enabled.");
-        }
         
         effectManager = new EffectManager(this);
         
@@ -757,9 +742,6 @@ public class Townships extends JavaPlugin {
                 econ.withdrawPlayer(player, costCheck);
             }
 
-            if (heroes != null) {
-                heroes.getCharacterManager().getHero(player).gainExp(currentRegionType.getExp(), ExperienceType.EXTERNAL, player.getLocation());
-            }
             regionManager.addRegion(currentLocation, regionName, owners);
             player.sendMessage(ChatColor.GRAY + "[Townships] " + ChatColor.WHITE + "You successfully created a " + ChatColor.RED + regionName);
 
@@ -1073,15 +1055,7 @@ public class Townships extends JavaPlugin {
             if (costCheck > 0) {
                 econ.withdrawPlayer(player, costCheck);
             }
-            
-            if (heroes != null) {
-                Hero hero = heroes.getCharacterManager().getHero(player);
-                if (hero.hasParty()) {
-                    hero.getParty().gainExp(currentRegionType.getExp(), ExperienceType.EXTERNAL, player.getLocation());
-                } else {
-                    heroes.getCharacterManager().getHero(player).gainExp(currentRegionType.getExp(), ExperienceType.EXTERNAL, player.getLocation());
-                }
-            }
+
             if (quietDestroy.isEmpty()) {
                 balance += getConfigManager().getAutoDeposit();
             }

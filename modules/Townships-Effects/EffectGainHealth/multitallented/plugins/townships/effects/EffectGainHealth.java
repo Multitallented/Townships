@@ -1,7 +1,5 @@
 package multitallented.plugins.townships.effects;
 
-import com.herocraftonline.heroes.api.events.HeroRegainHealthEvent;
-import com.herocraftonline.heroes.characters.Hero;
 import multitallented.redcastlemedia.bukkit.townships.Townships;
 import multitallented.redcastlemedia.bukkit.townships.effect.Effect;
 import multitallented.redcastlemedia.bukkit.townships.events.ToPlayerInRegionEvent;
@@ -72,18 +70,8 @@ public class EffectGainHealth extends Effect {
             effect.forceUpkeep(event);
             
             //grant the player hp
-            if (Townships.heroes == null) {
-                EntityRegainHealthEvent e = new EntityRegainHealthEvent(player, addHealth, RegainReason.CUSTOM);
-                effect.aPlugin.getServer().getPluginManager().callEvent(e);
-            } else {
-                Hero hero = Townships.heroes.getCharacterManager().getHero(player);
-                hero.heal(addHealth);
-            }
-            /*if (player.getHealth() + addHealth < player.getMaxHealth()) {
-                player.setHealth(player.getHealth() + addHealth);
-            } else {
-                player.setHealth(player.getMaxHealth());
-            }*/
+            EntityRegainHealthEvent e = new EntityRegainHealthEvent(player, addHealth, RegainReason.CUSTOM);
+            effect.aPlugin.getServer().getPluginManager().callEvent(e);
         }
     }
     

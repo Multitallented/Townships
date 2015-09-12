@@ -1,8 +1,8 @@
 package multitallented.redcastlemedia.bukkit.townships.listeners;
 
-import com.griefcraft.scripting.Module;
-import com.griefcraft.scripting.event.LWCBlockInteractEvent;
-import com.griefcraft.scripting.event.LWCProtectionInteractEvent;
+//import com.griefcraft.scripting.Module;
+//import com.griefcraft.scripting.event.LWCBlockInteractEvent;
+//import com.griefcraft.scripting.event.LWCProtectionInteractEvent;
 import multitallented.redcastlemedia.bukkit.townships.Townships;
 import multitallented.redcastlemedia.bukkit.townships.effect.Effect;
 import multitallented.redcastlemedia.bukkit.townships.events.ToRegionDestroyedEvent;
@@ -34,36 +34,36 @@ public class CustomListener implements Listener {
     
     
     
-    public void onLWCCreate(LWCBlockInteractEvent event) {
-        System.out.println("Block Interacted");
-        
-        
-        System.out.println("LWC actions: " + event.getActions().toString());
-        System.out.println("LWC name: " + event.getResult().name());
-        
-        Player player = event.getPlayer();
-        Block block = event.getBlock();
-
-        RegionManager rm = hs.getRegionManager();
-        for (Region r : rm.getContainingBuildRegions(block.getLocation())) {
-            if (r.getLocation().getBlock().equals(block)) {
-                System.out.println("[Townships] cancel region chest");
-                event.setResult(Module.Result.CANCEL);
-                return;
-            }
-
-            if (!(r.isOwner(player.getName()) || Effect.isMemberRegion(player, r.getLocation(), rm))) {
-                System.out.println("[Townships] cancel region non-member");
-                event.setResult(Module.Result.CANCEL);
-                return;
-            }
-        }
-        for (SuperRegion sr : rm.getContainingSuperRegions(block.getLocation())) {
-            if (!(sr.hasOwner(player.getName()) || sr.hasMember(player.getName()))) {
-                System.out.println("[Townships] cancel sregion non-member");
-                event.setResult(Module.Result.CANCEL);
-                return;
-            }
-        }
-    }
+//    public void onLWCCreate(LWCBlockInteractEvent event) {
+//        System.out.println("Block Interacted");
+//
+//
+//        System.out.println("LWC actions: " + event.getActions().toString());
+//        System.out.println("LWC name: " + event.getResult().name());
+//
+//        Player player = event.getPlayer();
+//        Block block = event.getBlock();
+//
+//        RegionManager rm = hs.getRegionManager();
+//        for (Region r : rm.getContainingBuildRegions(block.getLocation())) {
+//            if (r.getLocation().getBlock().equals(block)) {
+//                System.out.println("[Townships] cancel region chest");
+//                event.setResult(Module.Result.CANCEL);
+//                return;
+//            }
+//
+//            if (!(r.isOwner(player.getName()) || Effect.isMemberRegion(player, r.getLocation(), rm))) {
+//                System.out.println("[Townships] cancel region non-member");
+//                event.setResult(Module.Result.CANCEL);
+//                return;
+//            }
+//        }
+//        for (SuperRegion sr : rm.getContainingSuperRegions(block.getLocation())) {
+//            if (!(sr.hasOwner(player.getName()) || sr.hasMember(player.getName()))) {
+//                System.out.println("[Townships] cancel sregion non-member");
+//                event.setResult(Module.Result.CANCEL);
+//                return;
+//            }
+//        }
+//    }
 }

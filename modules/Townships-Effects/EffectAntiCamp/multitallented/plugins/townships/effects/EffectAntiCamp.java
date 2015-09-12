@@ -1,6 +1,5 @@
 package multitallented.plugins.townships.effects;
 
-import com.herocraftonline.heroes.characters.Hero;
 import java.util.ArrayList;
 import java.util.HashMap;
 import multitallented.redcastlemedia.bukkit.townships.Townships;
@@ -222,15 +221,6 @@ public class EffectAntiCamp extends Effect {
 
                         if (sr.hasMember(p.getName()) || sr.hasOwner(p.getName())) {
                             break;
-                        }
-
-                        if (Townships.heroes != null) {
-                            Hero hero = Townships.heroes.getCharacterManager().getHero(p);
-                            if (!hero.isInCombat()) {
-                                break;
-                            } else {
-                                hero.refreshCombat();
-                            }
                         }
 
                         p.damage(damage);

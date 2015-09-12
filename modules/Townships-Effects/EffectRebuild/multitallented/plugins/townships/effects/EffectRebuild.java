@@ -1,13 +1,11 @@
 package multitallented.plugins.townships.effects;
 
-import com.herocraftonline.heroes.characters.classes.HeroClass.ExperienceType;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import multitallented.redcastlemedia.bukkit.townships.Townships;
-import static multitallented.redcastlemedia.bukkit.townships.Townships.heroes;
 import multitallented.redcastlemedia.bukkit.townships.Util;
 import multitallented.redcastlemedia.bukkit.townships.effect.Effect;
 import multitallented.redcastlemedia.bukkit.townships.events.ToCommandEffectEvent;
@@ -260,10 +258,6 @@ public class EffectRebuild extends Effect {
             
             if (econ != null && costCheck > 0) {
                 econ.withdrawPlayer(player, costCheck);
-            }
-            
-            if (heroes != null) {
-                heroes.getCharacterManager().getHero(player).gainExp(currentRegionType.getExp(), ExperienceType.EXTERNAL, player.getLocation());
             }
             
             player.sendMessage(ChatColor.GRAY + "[Townships] " + ChatColor.WHITE + 

@@ -1,6 +1,5 @@
 package multitallented.redcastlemedia.bukkit.townships.listeners;
 
-import com.herocraftonline.heroes.characters.Hero;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -76,20 +75,7 @@ public class RegionEntityListener implements Listener {
         int powerLoss = cm.getPowerPerKill();
         
         Player player = (Player) event.getEntity();
-        
-        Hero hDamagee;
-        Hero hDamager;
-        if (powerLoss > 0 && Townships.heroes != null) {
-            hDamagee = Townships.heroes.getCharacterManager().getHero(player);
-            hDamager = Townships.heroes.getCharacterManager().getHero(dPlayer);
-            int deLevel = hDamagee.getTieredLevel(hDamagee.getHeroClass());
-            int drLevel = hDamager.getTieredLevel(hDamager.getHeroClass());
-            
-            if (Math.abs(deLevel - drLevel) > Townships.getConfigManager().getLevelDifference()) {
-                powerLoss = 0;
-            }
-        }
-        
+
         long spawnKill = Townships.getConfigManager().getSpawnKill();
         long currentTime = new Date().getTime();
         if (powerLoss > 0 && lastDeath.containsKey(player.getName()) && 
@@ -201,13 +187,8 @@ public class RegionEntityListener implements Listener {
             return;
         }
         boolean isInCombat = false;
-        if (Townships.heroes != null) {
-            Hero hero = Townships.heroes.getCharacterManager().getHero(player);
-            if (hero != null) {
-                isInCombat = hero.isInCombat();
-            }
-        }
-        
+        //TODO add combat check here
+
         Location loc = player.getLocation();
         for (SuperRegion sr : rm.getContainingSuperRegions(loc)) {
             boolean notMember = player == null;

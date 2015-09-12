@@ -1,6 +1,5 @@
 package multitallented.plugins.townships.effects;
 
-import com.herocraftonline.heroes.characters.Hero;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -125,23 +124,24 @@ public class EffectRepulse extends Effect {
                         break;
                     }
 
-                    if (Townships.heroes != null) {
-                        Hero hero = Townships.heroes.getCharacterManager().getHero(p);
-                        if (!hero.isInCombat() &&
-                                (!poisonedPlayers.containsKey(sr.getName()) ||
-                                        !poisonedPlayers.get(sr.getName()).contains(p.getName()))) {
-                            break;
-                        } else {
-                            hero.refreshCombat();
-
-                            if (!poisonedPlayers.containsKey(sr.getName())) {
-                                poisonedPlayers.put(p.getName(), new HashSet<String>());
-                            }
-                            if (!poisonedPlayers.get(sr.getName()).contains(p.getName())) {
-                                poisonedPlayers.get(sr.getName()).add(p.getName());
-                            }
-                        }
-                    }
+                    //check combat
+//                    if (Townships.heroes != null) {
+//                        Hero hero = Townships.heroes.getCharacterManager().getHero(p);
+//                        if (!hero.isInCombat() &&
+//                                (!poisonedPlayers.containsKey(sr.getName()) ||
+//                                        !poisonedPlayers.get(sr.getName()).contains(p.getName()))) {
+//                            break;
+//                        } else {
+//                            hero.refreshCombat();
+//
+//                            if (!poisonedPlayers.containsKey(sr.getName())) {
+//                                poisonedPlayers.put(p.getName(), new HashSet<String>());
+//                            }
+//                            if (!poisonedPlayers.get(sr.getName()).contains(p.getName())) {
+//                                poisonedPlayers.get(sr.getName()).add(p.getName());
+//                            }
+//                        }
+//                    }
                     
                     p.damage(damage);
                 }
