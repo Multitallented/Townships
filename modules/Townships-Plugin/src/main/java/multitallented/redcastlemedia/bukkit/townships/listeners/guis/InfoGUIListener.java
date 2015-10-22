@@ -47,7 +47,7 @@ public class InfoGUIListener implements Listener {
         ArrayList<String> lore = new ArrayList<String>();
 
         int diameter = (int) (Math.floor(region.getRawBuildRadius()) * 2 + 1);
-	    int effectDiameter = (int) (Math.floor(region.getRawRadius()) * 2 + 1);
+        int effectDiameter = (int) (Math.floor(region.getRawRadius()) * 2 + 1);
 
         String sizeString = diameter + "x" + diameter + "x" + diameter;
         String rangeString = effectDiameter + "x" + effectDiameter + "x" + effectDiameter;

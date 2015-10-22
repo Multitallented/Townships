@@ -86,11 +86,11 @@ public class RegionPlayerInteractListener implements Listener {
             SuperRegion sr = getPlayerPrimaryTown(player);
             if (sr != null) {
                 String prefix = ChatColor.RESET + "[" + ChatColor.GREEN + sr.getName() + ChatColor.RESET + "]";
-                if (Townships.chat != null) {
-                    Townships.chat.setPlayerPrefix(player, prefix);
-                } else {
+//                if (Townships.chat != null) {
+//                    Townships.chat.setPlayerPrefix(player, prefix);
+//                } else {
                     event.setFormat(prefix + event.getFormat());
-                }
+//                }
             }
 
             return;

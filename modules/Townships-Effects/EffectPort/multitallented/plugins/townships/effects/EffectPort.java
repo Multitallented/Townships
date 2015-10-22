@@ -9,6 +9,8 @@ import multitallented.redcastlemedia.bukkit.townships.Townships;
 import multitallented.redcastlemedia.bukkit.townships.effect.Effect;
 import multitallented.redcastlemedia.bukkit.townships.events.ToCommandEffectEvent;
 import multitallented.redcastlemedia.bukkit.townships.region.Region;
+import multitallented.redcastlemedia.bukkit.townships.region.RegionType;
+import multitallented.redcastlemedia.bukkit.townships.region.SuperRegion;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -123,10 +125,10 @@ public class EffectPort extends Effect {
             this.effect = effect;
             this.plugin = plugin;
         }
-        
+
         @EventHandler
         public void onCommandEffectEvent(ToCommandEffectEvent event) {
-            if (!event.getArgs()[0].equalsIgnoreCase("port")) {
+            if (!event.getArgs()[0].equalsIgnoreCase("port") && !event.getArgs()[0].equalsIgnoreCase("spawn")) {
                 return;
             }
             Player player = event.getPlayer();
@@ -137,28 +139,25 @@ public class EffectPort extends Effect {
                 player.sendMessage(ChatColor.GRAY + "[Townships] You can't port for another " + (cooldowns.get(player) + cooldown - System.currentTimeMillis()) + "s");
                 return;
             }
-            
-            //Check if has enough mana
-            //TODO mana check
 
             //Check if has enough hp
             if (damage > 0 && player.getHealth() <= damage) {
                 player.sendMessage(ChatColor.GRAY + "[Townships] You need " + damage + " health to port");
                 return;
             }
-            
+
             //Check if player has enough money
             if (econ != null && econ.getBalance(player) < money) {
                 player.sendMessage(ChatColor.GRAY + "[Townships] You need " + money + " to port");
                 return;
             }
-            
+
             //Check if player has enough stamina
             if (stamina > 0 && player.getFoodLevel() < stamina) {
                 player.sendMessage(ChatColor.GRAY + "[Townships] You need " + (stamina - player.getFoodLevel()) + " stamina to port");
                 return;
             }
-            
+
             //Check if player has reagents
             for (ItemStack is : reagents) {
                 if (!player.getInventory().contains(is.getType(), is.getAmount())) {
@@ -166,25 +165,54 @@ public class EffectPort extends Effect {
                     return;
                 }
             }
-            
-            int j=-1;
+
+            int j = -1;
             Region r = null;
-            //Check if region is a port
-            try {
-                j = Integer.parseInt(event.getArgs()[1]);
-                r = plugin.getRegionManager().getRegionByID(j);
-                if (r==null) {
-                    player.sendMessage(ChatColor.GRAY + "[Townships] There is no port at that number");
+            Location destination = null;
+            if (event.getArgs()[0].equalsIgnoreCase("port")) {
+                //Check if region is a port
+                try {
+                    j = Integer.parseInt(event.getArgs()[1]);
+                    r = plugin.getRegionManager().getRegionByID(j);
+                    if (r == null) {
+                        player.sendMessage(ChatColor.GRAY + "[Townships] There is no port at that number");
+                        return;
+                    }
+                    if (!plugin.getRegionManager().getRegionType(r.getType()).getEffects().contains("port.1")) {
+                        player.sendMessage(ChatColor.GRAY + "[Townships] There is no port at that number");
+                        return;
+                    }
+                } catch (Exception e) {
+                    player.sendMessage(ChatColor.GRAY + "[Townships] Port names are numbers");
                     return;
                 }
-                if (!plugin.getRegionManager().getRegionType(r.getType()).getEffects().contains("port.1")) {
-                    player.sendMessage(ChatColor.GRAY + "[Townships] There is no port at that number");
+            } else if (event.getArgs()[0].equalsIgnoreCase("spawn") && event.getArgs().length > 1) {
+                String townName = event.getArgs()[1];
+                SuperRegion sr = plugin.getRegionManager().getSuperRegion(townName);
+                if (sr == null) {
+                    player.sendMessage(ChatColor.GRAY + "[Townships] There is no town named " + townName);
                     return;
                 }
-            } catch (Exception e) {
-                player.sendMessage(ChatColor.GRAY + "[Townships] Port names are numbers");
+                outer: for (Region region : plugin.getRegionManager().getContainedRegions(sr)) {
+                    RegionType rt = plugin.getRegionManager().getRegionType(region.getType());
+                    for (String effectName : rt.getEffects()) {
+                        if (effectName.contains("port.")) {
+                            if (!(effect.isMemberOfRegion(player, r.getLocation()) || effect.isOwnerOfRegion(player, r.getLocation()))) {
+                                continue;
+                            }
+                            r = region;
+                            break outer;
+                        }
+                    }
+                }
+                if (r == null) {
+                    player.sendMessage(ChatColor.GRAY + "[Townships] There are no ports in " + townName);
+                    return;
+                }
+            } else {
                 return;
             }
+            destination = r.getLocation().getBlock().getRelative(BlockFace.UP).getLocation();
             
             //Check if player is owner or member of that port
             if (!(effect.isMemberOfRegion(player, r.getLocation()) || effect.isOwnerOfRegion(player, r.getLocation()))) {
@@ -201,7 +229,7 @@ public class EffectPort extends Effect {
             effect.forceUpkeep(r.getLocation());
             
             final Player p = player;
-            final Location l = r.getLocation().getBlock().getRelative(BlockFace.UP).getLocation();
+            final Location l = destination;
             
             long delay = 1L;
             if (warmup / 50 > 0) {

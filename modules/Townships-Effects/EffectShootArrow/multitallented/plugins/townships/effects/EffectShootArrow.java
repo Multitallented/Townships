@@ -10,6 +10,7 @@ import multitallented.redcastlemedia.bukkit.townships.region.Region;
 import multitallented.redcastlemedia.bukkit.townships.region.RegionManager;
 import multitallented.redcastlemedia.bukkit.townships.region.RegionType;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -100,6 +101,18 @@ public class EffectShootArrow extends Effect {
 
             Player player = event.getPlayer();
 
+
+            //Check if the player is invincible
+            if (player.getGameMode() != GameMode.SURVIVAL || player.getGameMode() != GameMode.ADVENTURE) {
+                return;
+            }
+
+            EntityDamageEvent damageEvent = new EntityDamageEvent(null, DamageCause.CUSTOM, 0);
+            Bukkit.getPluginManager().callEvent(damageEvent);
+            if (damageEvent.isCancelled()) {
+                return;
+            }
+
             //Check if the player owns or is a member of the region
             if (effect.isOwnerOfRegion(player, l) || effect.isMemberOfRegion(player, l)) {
                 return;
@@ -154,7 +167,7 @@ public class EffectShootArrow extends Effect {
 
         @EventHandler
         public void onEntityDamageByEntityEvent(EntityDamageEvent event) {
-            if (event.isCancelled() || !(event instanceof EntityDamageByEntityEvent)) {
+            if (event.isCancelled() || event.getDamage() < 1 || !(event instanceof EntityDamageByEntityEvent)) {
                 return;
             }
             EntityDamageByEntityEvent edby = (EntityDamageByEntityEvent) event;
@@ -182,7 +195,7 @@ public class EffectShootArrow extends Effect {
             //if (player != null) {
             //    damagee.damage(damage, player);
             //} else {
-                EntityDamageEvent damageEvent = new EntityDamageEvent(damagee, DamageCause.CUSTOM, damage);
+                EntityDamageEvent damageEvent = new EntityDamageEvent(damagee, DamageCause.PROJECTILE, damage);
                 Bukkit.getPluginManager().callEvent(damageEvent);
                 //damagee.damage(damage);
             //}

@@ -217,11 +217,11 @@ public class Townships extends JavaPlugin {
             if (regions.size() > 1) {
                 Collections.sort(regions, new Comparator<RegionType>() {
 
-                    @Override
-                    public int compare(RegionType o1, RegionType o2) {
-                        return GUIManager.compareRegions(o1, o2);
-                    }
-                });
+					@Override
+					public int compare(RegionType o1, RegionType o2) {
+						return GUIManager.compareRegions(o1, o2);
+					}
+				});
             }
             if (category.equals("towns")) {
                 for (String s : regionManager.getSuperRegionTypes()) {
@@ -234,11 +234,11 @@ public class Townships extends JavaPlugin {
             if (superRegions.size() > 1) {
                 Collections.sort(superRegions, new Comparator<SuperRegionType>() {
 
-                    @Override
-                    public int compare(SuperRegionType o1, SuperRegionType o2) {
-                        return GUIManager.compareSRegions(o1, o2);
-                    }
-                });
+					@Override
+					public int compare(SuperRegionType o1, SuperRegionType o2) {
+						return GUIManager.compareSRegions(o1, o2);
+					}
+				});
             }
             ShopGUIListener.openListShop(regions, superRegions, player, category);
             
@@ -636,7 +636,16 @@ public class Townships extends JavaPlugin {
             }
 
             //Check if too close to other region
-            if (!regionManager.getContainingBuildRegions(currentLocation, currentRegionType.getRawBuildRadius()).isEmpty()) {
+            ArrayList<Region> containingRegions = regionManager.getContainingBuildRegions(currentLocation, currentRegionType.getRawBuildRadius());
+            if (!containingRegions.isEmpty()) {
+
+                //If the player is an owner of the region, then try to rebuild instead
+                if (!containingRegions.get(0).getOwners().isEmpty() &&
+                        containingRegions.get(0).getOwners().contains(player.getName()) &&
+                        perms.has(player, "townships.rebuild." + containingRegions.get(0).getType().toLowerCase())) {
+                    player.performCommand("to rebuild " + containingRegions.get(0).getType().toLowerCase());
+                    return true;
+                }
                 player.sendMessage (ChatColor.GRAY + "[Townships] You are too close to another region");
                 return true;
             }
@@ -1493,7 +1502,7 @@ public class Townships extends JavaPlugin {
             }
             regionManager.setOwner(sr, playername);
             return true;
-        } else if (args.length > 2 && args[0].equalsIgnoreCase("remove")) {
+        } else if (args.length > 2 && (args[0].equalsIgnoreCase("remove") || args[0].equalsIgnoreCase("leave") || args[0].equalsIgnoreCase("kick"))) {
             Player p = getServer().getPlayer(args[1]);
             String playername = args[1];
 
@@ -2022,7 +2031,7 @@ public class Townships extends JavaPlugin {
 
             player.sendMessage(ChatColor.GRAY + "[Townships] You're not standing in a region.");
             return true;
-        } else if (args.length > 1 && args[0].equalsIgnoreCase("addmember")) {
+        } else if (args.length > 1 && (args[0].equalsIgnoreCase("addmember") || args[0].equalsIgnoreCase("add"))) {
             String playername = args[1];
             Player aPlayer = getServer().getPlayer(playername);
             if (aPlayer == null) {
@@ -2252,7 +2261,7 @@ public class Townships extends JavaPlugin {
             String category = "";
 
             if (args.length == 1 && regionManager.getRegionCategories().size() > 1) {
-                GUIListener.openCategoryInventory(player);
+				GUIListener.openCategoryInventory(player);
                 return true;
             }
             if (args.length != 1) {
@@ -2347,7 +2356,7 @@ public class Townships extends JavaPlugin {
                     }
                 });
             }
-            GUIListener.openListInventory(regions, superRegions, player, category);
+			GUIListener.openListInventory(regions, superRegions, player, category);
             /*if (!message.equals(ChatColor.GOLD + "")) {
                 player.sendMessage(message.substring(0, message.length() - 2));
             }*/
@@ -2545,10 +2554,10 @@ public class Townships extends JavaPlugin {
                     player.sendMessage(message.substring(0, message.length() - 2));
                 }
                 return true;
-            }
+			}
 
-            player.sendMessage(ChatColor.GRAY + "[Townships] Could not find player or super-region by that name");
-            player.performCommand("to info " + args[1]);
+			player.sendMessage(ChatColor.GRAY + "[Townships] Could not find player or super-region by that name");
+			player.performCommand("to info " + args[1]);
             return true;
         } else if (args.length > 0 && effectCommands.contains(args[0])) {
             Bukkit.getServer().getPluginManager().callEvent(new ToCommandEffectEvent(args, player));
