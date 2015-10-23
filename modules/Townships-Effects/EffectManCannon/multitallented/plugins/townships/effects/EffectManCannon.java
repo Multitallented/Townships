@@ -1,5 +1,7 @@
 package multitallented.plugins.townships.effects;
 
+import fr.neatmonster.nocheatplus.checks.CheckType;
+import fr.neatmonster.nocheatplus.hooks.NCPExemptionManager;
 import multitallented.redcastlemedia.bukkit.townships.Townships;
 import multitallented.redcastlemedia.bukkit.townships.effect.Effect;
 import multitallented.redcastlemedia.bukkit.townships.events.ToPlayerInRegionEvent;
@@ -70,8 +72,10 @@ public class EffectManCannon extends Effect {
             }
             float multiplier = ((90f + pitch) / 50f);
             Vector v = player.getVelocity().setY(1).add(player.getLocation().getDirection().setY(0).normalize().multiply(multiplier * jumpForwards));
+            NCPExemptionManager.exemptPermanently(player, CheckType.MOVING);
             player.setVelocity(v.multiply(jumpMult));
             player.setFallDistance(-8f * jumpMult);
+            NCPExemptionManager.unexempt(player, CheckType.MOVING);
         }
     }
     

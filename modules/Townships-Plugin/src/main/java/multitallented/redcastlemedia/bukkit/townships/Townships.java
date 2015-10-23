@@ -643,7 +643,7 @@ public class Townships extends JavaPlugin {
                 if (!containingRegions.get(0).getOwners().isEmpty() &&
                         containingRegions.get(0).getOwners().contains(player.getName()) &&
                         perms.has(player, "townships.rebuild." + containingRegions.get(0).getType().toLowerCase())) {
-                    player.performCommand("to rebuild " + containingRegions.get(0).getType().toLowerCase());
+                    player.performCommand("to rebuild " + currentRegionType.getName());
                     return true;
                 }
                 player.sendMessage (ChatColor.GRAY + "[Townships] You are too close to another region");

@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.herocraftonline</groupId>
+        <groupId>org.redcastlemedia</groupId>
         <artifactId>Townships-Parent</artifactId>
         <version>STATIC-PARENT</version>
         <relativePath>../..</relativePath>
@@ -28,6 +28,14 @@
             <version>1.7.10-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>fr.neatmonster.nocheatplus</groupId>
+            <artifactId>NoCheatPlus</artifactId>
+            <version>3.12.0-BETA2</version>
+            <scope>system</scope>
+            <optional>true</optional>
+            <systemPath>D:/champions test server/plugins/NoCheatPlus.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.griefcraft</groupId>
