@@ -14,6 +14,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerQuitEvent;
+
+import java.util.HashMap;
 
 /**
  *
@@ -21,6 +24,7 @@ import org.bukkit.event.Listener;
  */
 public class EffectIntruder extends Effect {
     private final Townships plugin;
+    private final HashMap<String, Long> lastMessage = new HashMap<String, Long>();
     public EffectIntruder(Townships plugin) {
         super(plugin);
         this.plugin = plugin;
@@ -37,7 +41,14 @@ public class EffectIntruder extends Effect {
         public IntruderListener(EffectIntruder effect) {
             this.effect = effect;
         }
-        
+
+        @EventHandler
+        public void onPlayerQuit(PlayerQuitEvent event) {
+            if (lastMessage.containsKey(event.getPlayer().getName())) {
+                lastMessage.remove(event.getPlayer().getName());
+            }
+        }
+
         @EventHandler
         public void onSRegionEnter(ToPlayerEnterSRegionEvent event) {
             RegionManager rm = getPlugin().getRegionManager();
@@ -113,6 +124,13 @@ public class EffectIntruder extends Effect {
         }
 
         private void broadcastMessageToAllTownMembers(SuperRegion sr, boolean entering, String playername) {
+            if (lastMessage.containsKey(playername)) {
+                if (lastMessage.get(playername) + 60000 > System.currentTimeMillis()) {
+                    return;
+                }
+            }
+            lastMessage.put(playername, System.currentTimeMillis());
+
             String message = ChatColor.GRAY + "[Townships] " + ChatColor.WHITE + playername + ChatColor.GRAY + " has ";
             if (entering) {
                 message += "entered " + ChatColor.WHITE + sr.getName();

@@ -69,6 +69,7 @@ public class EffectAntiCamp extends Effect {
             Player damagee = (Player) event.getEntity();
             Player damager2 = (Player) damager;
 
+            //record damage for when they die
             lastDamager.put(damager2.getName(), damagee.getName());
         }
 
@@ -90,17 +91,22 @@ public class EffectAntiCamp extends Effect {
             Player player = event.getEntity();
             RegionManager rm = getPlugin().getRegionManager();
 
+            //If you die, then remove them you from lastDamager
             if (lastDamager.containsKey(player.getName())) {
+
+                //remove the killer from deathCounts
                 if (deathCounts.containsKey(lastDamager.get(player.getName()))) {
                     deathCounts.remove(lastDamager.get(player.getName()));
                 }
                 lastDamager.remove(player.getName());
             }
 
+            //if the person who's dying has died more than twice, then I don't care
             if (deathCounts.containsKey(player.getName()) && deathCounts.get(player.getName()) > 2) {
                 return;
             }
 
+            //If they died outside of a super region then I don't care
             ArrayList<SuperRegion> superRegions = rm.getContainingSuperRegions(player.getLocation());
             if (superRegions.isEmpty()) {
                 return;
@@ -123,6 +129,7 @@ public class EffectAntiCamp extends Effect {
                     continue;
                 }
 
+                //If the person dying was a member, then increment their deathCount
                 if (sr.hasOwner(player.getName()) || sr.hasMember(player.getName())) {
                     if (deathCounts.containsKey(player.getName())) {
                         deathCounts.put(player.getName(), deathCounts.get(player.getName()) + 1);
@@ -138,49 +145,61 @@ public class EffectAntiCamp extends Effect {
         @EventHandler
         public void onTwoSeconds(ToTwoSecondEvent event) {
             RegionManager rm = plugin.getRegionManager();
-            //TODO fix concurrent exceptions
+
             //Activate poison
+            ArrayList<String> removeMeDeathCounts = new ArrayList<String>();
+
+            //Go through everyone who has died in their own town
             for (String name : deathCounts.keySet()) {
-                if (deathCounts.get(name) > 2 && lastDeathTown.containsKey(name)) {
-                    deathCounts.remove(name);
-                    SuperRegion sr = rm.getSuperRegion(lastDeathTown.get(name));
-                    lastDeathTown.remove(name);
-                    if (sr == null) {
-                        continue;
-                    }
-                    SuperRegionType srt = rm.getSuperRegionType(sr.getType());
-                    if (srt == null) {
-                        return;
-                    }
-                    long period = 0;
-                    boolean hasEffect = false;
-                    for (String s : srt.getEffects()) {
-                        String[] parts = s.split("\\.");
-                        if (parts.length > 2 && parts[0].equalsIgnoreCase("anticamp")) {
-                            try {
-                                period = Integer.parseInt(parts[2]);
-                            } catch (Exception e) {
-                                break;
-                            }
-                            hasEffect = true;
+
+                //Skip people who haven't died enough
+                if (deathCounts.get(name) < 3 || !lastDeathTown.containsKey(name)) {
+                    continue;
+                }
+
+                removeMeDeathCounts.add(name);
+                SuperRegion sr = rm.getSuperRegion(lastDeathTown.get(name));
+                lastDeathTown.remove(name);
+                if (sr == null) {
+                    continue;
+                }
+                SuperRegionType srt = rm.getSuperRegionType(sr.getType());
+                if (srt == null) {
+                    return;
+                }
+                long period = 0;
+                boolean hasEffect = false;
+                for (String s : srt.getEffects()) {
+                    String[] parts = s.split("\\.");
+                    if (parts.length > 2 && parts[0].equalsIgnoreCase("anticamp")) {
+                        try {
+                            period = Integer.parseInt(parts[2]);
+                        } catch (Exception e) {
                             break;
                         }
+                        hasEffect = true;
+                        break;
                     }
-                    if (!hasEffect || period < 1) {
-                        continue;
-                    }
-
-                    lastPoison.put(sr.getName(), System.currentTimeMillis() + (period * 1000));
                 }
+                if (!hasEffect || period < 1) {
+                    continue;
+                }
+
+                lastPoison.put(sr.getName(), System.currentTimeMillis() + (period * 1000));
+            }
+            for (String s : removeMeDeathCounts) {
+                deathCounts.remove(s);
             }
 
             //Deal Poison Damage
+            ArrayList<String> removeMePoison = new ArrayList<String>();
             for (String srName : lastPoison.keySet()) {
 
                 Long lastPoisonTime = lastPoison.get(srName);
 
                 if (lastPoisonTime == null || System.currentTimeMillis() > lastPoisonTime) {
-                    lastPoison.remove(srName);
+                    removeMePoison.add(srName);
+//                    lastPoison.remove(srName);
                     continue;
                 }
 
@@ -226,6 +245,9 @@ public class EffectAntiCamp extends Effect {
                         p.damage(damage);
                     }
                 }
+            }
+            for (String s : removeMePoison) {
+                lastPoison.remove(s);
             }
         }
     }
