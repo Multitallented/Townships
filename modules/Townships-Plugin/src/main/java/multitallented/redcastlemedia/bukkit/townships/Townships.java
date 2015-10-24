@@ -2261,7 +2261,7 @@ public class Townships extends JavaPlugin {
             String category = "";
 
             if (args.length == 1 && regionManager.getRegionCategories().size() > 1) {
-				GUIListener.openCategoryInventory(player);
+                GUIListener.openCategoryInventory(player);
                 return true;
             }
             if (args.length != 1) {

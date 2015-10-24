@@ -175,14 +175,22 @@ public class GUIManager implements Listener {
         for (TOItem item : items.values()) {
             Material mat = item.getMat();
             if (mat == Material.BED_BLOCK) {
+                if (item.getQty() > 1) {
+                    item.setQty(Math.round(item.getQty() / 2));
+                }
                 item.setQty(Math.round(item.getQty() / 2));
                 item.setMat(Material.BED);
             } else if (mat == Material.WOODEN_DOOR) {
-                item.setQty(Math.round(item.getQty() / 2));
+                if (item.getQty() > 1) {
+                    item.setQty(Math.round(item.getQty() / 2));
+                }
                 item.setMat(Material.WOOD_DOOR);
             } else if (mat == Material.REDSTONE_WIRE) {
                 item.setMat(Material.REDSTONE);
             } else if (mat == Material.IRON_DOOR_BLOCK) {
+                if (item.getQty() > 1) {
+                    item.setQty(Math.round(item.getQty() / 2));
+                }
                 item.setMat(Material.IRON_DOOR);
             } else if (mat == Material.WALL_SIGN) {
                 item.setMat(Material.SIGN);

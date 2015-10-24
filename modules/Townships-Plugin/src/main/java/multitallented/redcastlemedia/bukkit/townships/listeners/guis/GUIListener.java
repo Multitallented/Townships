@@ -8,6 +8,8 @@ package multitallented.redcastlemedia.bukkit.townships.listeners.guis;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import multitallented.redcastlemedia.bukkit.townships.Townships;
 import multitallented.redcastlemedia.bukkit.townships.Util;
 import multitallented.redcastlemedia.bukkit.townships.region.RegionManager;
 import multitallented.redcastlemedia.bukkit.townships.region.RegionType;
@@ -51,6 +53,20 @@ public class GUIListener implements Listener {
         
         int i = 0;
         for (String category : categories.keySet()) {
+
+            //Determine if the player has permissions for any of these
+            boolean hasAtLeastOne = false;
+            for (String regionName : rm.getRegionCategories().get(category)) {
+                if (Townships.perms.has(player, "townships.create." + regionName)) {
+                    hasAtLeastOne = true;
+                    break;
+                }
+            }
+
+            if (!hasAtLeastOne) {
+                continue;
+            }
+
             if (category.equals("")) {
                 category = "Other";
             }
@@ -62,11 +78,21 @@ public class GUIListener implements Listener {
             i++;
         }
         if (hasSuperRegions) {
-            ItemStack is = new ItemStack(Material.CHEST);
-            ItemMeta isMeta = is.getItemMeta();
-            isMeta.setDisplayName(ChatColor.RESET + "Towns");
-            is.setItemMeta(isMeta);
-            inv.setItem(i, is);
+            boolean hasAtLeastOne = false;
+            for (String regionName : rm.getSuperRegionTypes()) {
+                if (Townships.perms.has(player, "townships.create." + regionName)) {
+                    hasAtLeastOne = true;
+                    break;
+                }
+            }
+
+            if (hasAtLeastOne) {
+                ItemStack is = new ItemStack(Material.CHEST);
+                ItemMeta isMeta = is.getItemMeta();
+                isMeta.setDisplayName(ChatColor.RESET + "Towns");
+                is.setItemMeta(isMeta);
+                inv.setItem(i, is);
+            }
         }
         
         player.openInventory(inv);
