@@ -23,7 +23,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 public class EffectRing extends Effect {
     private final RegionManager rm;
     private final Townships aPlugin;
-    private final int Y_LEVEL = 150;
+    private final int Y_LEVEL = 80;
     public EffectRing(Townships plugin) {
         super(plugin);
         this.rm = plugin.getRegionManager();
@@ -40,31 +40,31 @@ public class EffectRing extends Effect {
         private int x= 0;
         private int z= 0;
         
-        @EventHandler
-        public void onRingBreak(BlockBreakEvent event) {
-            if (event.isCancelled() ||
-                    event.getBlock().getType() != Material.GLOWSTONE ||
-                    Math.floor(event.getBlock().getLocation().getY()) != Y_LEVEL) {
-                return;
-            }
-            if (Townships.perms != null && Townships.perms.has(event.getPlayer(), "townships.admin")) {
-                return;
-            }
-            event.setCancelled(true);
-        }
+//        @EventHandler
+//        public void onRingBreak(BlockBreakEvent event) {
+//            if (event.isCancelled() ||
+//                    event.getBlock().getType() != Material.GLOWSTONE ||
+//                    Math.floor(event.getBlock().getLocation().getY()) != Y_LEVEL) {
+//                return;
+//            }
+//            if (Townships.perms != null && Townships.perms.has(event.getPlayer(), "townships.admin")) {
+//                return;
+//            }
+//            event.setCancelled(true);
+//        }
         
-        @EventHandler
-        public void onRingBuild(BlockPlaceEvent event) {
-            if (event.isCancelled() ||
-                    event.getBlock().getType() != Material.GLOWSTONE ||
-                    Math.floor(event.getBlock().getLocation().getY()) != 150) {
-                return;
-            }
-            if (Townships.perms != null && Townships.perms.has(event.getPlayer(), "townships.admin")) {
-                return;
-            }
-            event.setCancelled(true);
-        }
+//        @EventHandler
+//        public void onRingBuild(BlockPlaceEvent event) {
+//            if (event.isCancelled() ||
+//                    event.getBlock().getType() != Material.GLOWSTONE ||
+//                    Math.floor(event.getBlock().getLocation().getY()) != 150) {
+//                return;
+//            }
+//            if (Townships.perms != null && Townships.perms.has(event.getPlayer(), "townships.admin")) {
+//                return;
+//            }
+//            event.setCancelled(true);
+//        }
         
         @EventHandler
         public void onCustomEvent(ToSuperRegionCreatedEvent event) {
@@ -80,6 +80,10 @@ public class EffectRing extends Effect {
             }
             
             final Location l = sr.getLocation();
+            int baseY = (int) l.getWorld().getHighestBlockAt(l).getY();
+            baseY = baseY < 64 ? 64 : baseY;
+            baseY = baseY + Y_LEVEL > l.getWorld().getMaxHeight() ? l.getWorld().getMaxHeight() - 1 : baseY + Y_LEVEL;
+            final int yL = baseY;
             final int radius = (int) rm.getSuperRegionType(sr.getType()).getRawRadius();
             final World world = l.getWorld();
             x = 0;
@@ -95,10 +99,10 @@ public class EffectRing extends Effect {
                                 int asdf = (int) Math.sqrt(radius*radius - (x * x));
                                 int zp = asdf + (int) l.getZ();
                                 int zn = (int) l.getZ() - asdf;
-                                world.getBlockAt(xp, Y_LEVEL, zp).setType(Material.GLOWSTONE);
-                                world.getBlockAt(xn, Y_LEVEL, zp).setType(Material.GLOWSTONE);
-                                world.getBlockAt(xp, Y_LEVEL, zn).setType(Material.GLOWSTONE);
-                                world.getBlockAt(xn, Y_LEVEL, zn).setType(Material.GLOWSTONE);
+                                world.getBlockAt(xp, yL, zp).setType(Material.GLOWSTONE);
+                                world.getBlockAt(xn, yL, zp).setType(Material.GLOWSTONE);
+                                world.getBlockAt(xp, yL, zn).setType(Material.GLOWSTONE);
+                                world.getBlockAt(xn, yL, zn).setType(Material.GLOWSTONE);
                                     
                             }
                             x++;
@@ -115,10 +119,10 @@ public class EffectRing extends Effect {
                                 int asdf = (int) Math.sqrt(radius*radius - (z * z));
                                 int xp = asdf + (int) l.getX();
                                 int xn = (int) l.getX() - asdf;
-                                world.getBlockAt(xp, Y_LEVEL, zp).setType(Material.GLOWSTONE);
-                                world.getBlockAt(xn, Y_LEVEL, zp).setType(Material.GLOWSTONE);
-                                world.getBlockAt(xp, Y_LEVEL, zn).setType(Material.GLOWSTONE);
-                                world.getBlockAt(xn, Y_LEVEL, zn).setType(Material.GLOWSTONE);
+                                world.getBlockAt(xp, yL, zp).setType(Material.GLOWSTONE);
+                                world.getBlockAt(xn, yL, zp).setType(Material.GLOWSTONE);
+                                world.getBlockAt(xp, yL, zn).setType(Material.GLOWSTONE);
+                                world.getBlockAt(xn, yL, zn).setType(Material.GLOWSTONE);
                                     
                             }
                             z++;
