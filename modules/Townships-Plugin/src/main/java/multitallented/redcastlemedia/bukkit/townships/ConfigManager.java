@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.ConfigurationSection;
@@ -42,6 +44,7 @@ public class ConfigManager {
     private final long gracePeriod;
     private final HashMap<String, String> itemGroups;
     private final boolean useTownPrefixes;
+    private final List<String> blackListWorlds;
     
     public ConfigManager(FileConfiguration config, Townships plugin) {
         this.config = config;
@@ -72,7 +75,26 @@ public class ConfigManager {
         useTownPrefixes = config.getBoolean("use-town-prefixes", false);
         gracePeriod = config.getLong("grace-period-minutes", 0) * 600000;
         itemGroups = processGroups(config.getConfigurationSection("item-groups"));
+        blackListWorlds = processWorldList(config.getStringList("black-list-worlds"));
         loadCharters();
+    }
+
+    public List<String> getBlackListWorlds() {
+        return blackListWorlds;
+    }
+
+    private List<String> processWorldList(List<String> input) {
+        ArrayList<String> removeMe = new ArrayList<String>();
+        for (String worldName : input) {
+            if (Bukkit.getWorld(worldName) == null) {
+                removeMe.add(worldName);
+                plugin.getLogger().warning("Can't find world " + worldName + " in black list");
+            }
+        }
+        for (String s : removeMe) {
+            input.remove(s);
+        }
+        return input;
     }
 
     private HashMap<String, String> processGroups(ConfigurationSection cs) {

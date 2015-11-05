@@ -71,12 +71,12 @@ public class RegionType {
         this.maxY = maxY;
         this.unlockCost = unlockCost;
         this.namedItems = namedItems;
-	    this.salvageValue = salvageValue;
+        this.salvageValue = salvageValue;
     }
 
-	public double getSalvage() {
-		return salvageValue;
-	}
+    public double getSalvage() {
+        return salvageValue;
+    }
     
     public HashMap<String, ArrayList<String>> getNamedItems() {
         return namedItems;
@@ -121,9 +121,9 @@ public class RegionType {
         return buildRadius;
     }
 
-	public double getRadius() {
-		return radius;
-	}
+    public double getRadius() {
+        return radius;
+    }
     
     public List<String> getSuperRegions() {
         return superRegions;

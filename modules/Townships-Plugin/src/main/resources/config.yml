@@ -16,3 +16,6 @@ war:
 multiple-town-membership:
   allow: true
   whitelist: []
+black-list-worlds:
+- ResourceWorld
+- Hub

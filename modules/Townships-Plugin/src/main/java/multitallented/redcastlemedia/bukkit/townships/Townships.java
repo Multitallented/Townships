@@ -147,6 +147,11 @@ public class Townships extends JavaPlugin {
             warning("Only players can use Township commands");
             return true;
         }
+        if (getConfigManager().getBlackListWorlds().contains(player.getWorld().getName())) {
+            sender.sendMessage(ChatColor.RED + "[Townships] is disabled on this world");
+            return true;
+        }
+
         if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
             if (player != null && !(Townships.perms == null || Townships.perms.has(player, "townships.admin"))) {
                 return true;
