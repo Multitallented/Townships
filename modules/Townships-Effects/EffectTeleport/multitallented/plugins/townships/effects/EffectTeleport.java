@@ -59,12 +59,13 @@ public class EffectTeleport extends Effect {
             }
 
             Sign sign = (Sign) block.getState();
-            if (!sign.getLine(0).equalsIgnoreCase("[Teleport]")) {
-                return;
+            String destinationRegionId = sign.getLine(0);
+            if (destinationRegionId.equalsIgnoreCase("[Teleport]")) {
+                destinationRegionId = sign.getLine(1);
             }
             Region currentRegion = null;
             try {
-                currentRegion = rm.getRegionByID(Integer.parseInt(sign.getLine(1)));
+                currentRegion = rm.getRegionByID(Integer.parseInt(destinationRegionId));
             } catch (Exception e) {
                 return;
             }
