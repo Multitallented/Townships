@@ -192,6 +192,31 @@ public class GUIManager implements Listener {
                     item.setQty(Math.round(item.getQty() / 2));
                 }
                 item.setMat(Material.IRON_DOOR);
+            } else if (mat == Material.DARK_OAK_DOOR) {
+                if (item.getQty() > 1) {
+                    item.setQty(Math.round(item.getQty() / 2));
+                }
+                item.setMat(Material.DARK_OAK_DOOR_ITEM);
+            } else if (mat == Material.ACACIA_DOOR) {
+                if (item.getQty() > 1) {
+                    item.setQty(Math.round(item.getQty() / 2));
+                }
+                item.setMat(Material.ACACIA_DOOR_ITEM);
+            } else if (mat == Material.SPRUCE_DOOR) {
+                if (item.getQty() > 1) {
+                    item.setQty(Math.round(item.getQty() / 2));
+                }
+                item.setMat(Material.SPRUCE_DOOR_ITEM);
+            } else if (mat == Material.BIRCH_DOOR) {
+                if (item.getQty() > 1) {
+                    item.setQty(Math.round(item.getQty() / 2));
+                }
+                item.setMat(Material.BIRCH_DOOR_ITEM);
+            } else if (mat == Material.JUNGLE_DOOR) {
+                if (item.getQty() > 1) {
+                    item.setQty(Math.round(item.getQty() / 2));
+                }
+                item.setMat(Material.JUNGLE_DOOR_ITEM);
             } else if (mat == Material.WALL_SIGN) {
                 item.setMat(Material.SIGN);
             } else if (mat == Material.CROPS) {
@@ -208,6 +233,10 @@ public class GUIManager implements Listener {
               item.setMat(Material.FURNACE);
             } else if (mat == Material.REDSTONE_LAMP_ON) {
               item.setMat(Material.REDSTONE_LAMP_OFF);
+            } else if (mat == Material.STATIONARY_WATER) {
+              item.setMat(Material.WATER_BUCKET);
+            } else if (mat == Material.STATIONARY_LAVA) {
+              item.setMat(Material.LAVA_BUCKET);
             }
         }
         return items;

@@ -12,7 +12,9 @@ import multitallented.redcastlemedia.bukkit.townships.region.Region;
 import multitallented.redcastlemedia.bukkit.townships.region.RegionManager;
 import multitallented.redcastlemedia.bukkit.townships.region.RegionType;
 import multitallented.redcastlemedia.bukkit.townships.region.SuperRegion;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -43,13 +45,42 @@ public class EffectGraveyard extends Effect {
     public class UpkeepListener implements Listener {
         private final EffectGraveyard effect;
         private RegionManager rm;
+        private World defaultWorld = null;
         
         public HashMap<String, Region> respawnLocations = new HashMap<String, Region>();
         
         public UpkeepListener(EffectGraveyard effect) {
             this.effect = effect;
             rm = effect.getPlugin().getRegionManager();
-            
+
+            //Get the default world
+            getDefaultWorld: {
+                File folder = getPlugin().getDataFolder();
+                if (!folder.exists()) {
+                    if (!folder.mkdir()) {
+                        break getDefaultWorld;
+                    }
+                }
+                File configFile = new File(folder, "config.yml");
+                if (!configFile.exists()) {
+                    try {
+                        if (!configFile.createNewFile()) {
+                            break getDefaultWorld;
+                        }
+                    } catch (Exception e) {
+                        break getDefaultWorld;
+                    }
+                }
+                FileConfiguration config = new YamlConfiguration();
+                try {
+                    config.load(configFile);
+                    String worldName = config.getString("graveyard.world", "world");
+                    defaultWorld = Bukkit.getWorld(worldName);
+                } catch (Exception e) {
+                    break getDefaultWorld;
+                }
+            }
+
             for (Region graveyard : rm.getSortedRegions()) {
                 RegionType rt = rm.getRegionType(graveyard.getType());
                 if (rt == null) {
@@ -96,13 +127,18 @@ public class EffectGraveyard extends Effect {
         
         @EventHandler(priority=HIGH)
         public void onPlayerDeath(PlayerDeathEvent event) {
-            if (!(event.getEntity() instanceof Player)) {
+            if (event.getEntity() == null) {
                 return;
             }
             Player player = (Player) event.getEntity();
             
-            Location deathLocation = event.getEntity().getLocation();
-            
+            Location deathLocation = player.getLocation();
+
+            if (defaultWorld != null && !defaultWorld.equals(player.getWorld())) {
+                deathLocation = new Location(defaultWorld, deathLocation.getX(), deathLocation.getY(), deathLocation.getZ());
+            }
+
+            //If you die in jail, then bypass jail
             Region jail = null;
             boolean bypassJail = false;
             for (Region r : rm.getContainingBuildRegions(deathLocation)) {
@@ -115,9 +151,14 @@ public class EffectGraveyard extends Effect {
                     break;
                 }
             }
-            
+
+            //If you didn't die in a jail, check if you died in a town with a jail
             if (!bypassJail) {
                 outer: for (SuperRegion sr : rm.getContainingSuperRegions(deathLocation)) {
+                    if (sr.hasMember(player.getName()) || sr.hasOwner(player.getName())) {
+                        continue;
+                    }
+
                     for (Region r : rm.getContainedRegions(sr)) {
                         RegionType rt = rm.getRegionType(r.getType());
                         if (rt == null) {
@@ -131,7 +172,8 @@ public class EffectGraveyard extends Effect {
                     }
                 }
             }
-            
+
+            //If you died in a town with a jail, then put their respawn point in the jail
             if (jail != null) {
                 File regionFolder = new File(getPlugin().getDataFolder(), "data");
                 File regionFile = new File(regionFolder, jail.getID() + ".yml");
@@ -164,7 +206,7 @@ public class EffectGraveyard extends Effect {
                 respawnRegion = publicGraveyard;
             } else if (graveyard != null && publicGraveyard == null) {
                 respawnRegion = graveyard;
-            } else if (graveyard != null && publicGraveyard != null) {
+            } else if (graveyard != null) {
                 if (deathLocation.distanceSquared(graveyard.getLocation()) > deathLocation.distanceSquared(publicGraveyard.getLocation())) {
                     respawnRegion = publicGraveyard;
                 } else {

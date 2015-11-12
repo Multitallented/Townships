@@ -1730,53 +1730,63 @@ public class RegionManager {
     
     @Deprecated
     public boolean shouldTakeAction(Location loc, Player player, int modifier, String effectName, boolean useReagents) {
-        Effect effect = new Effect(plugin);
-        for (Region r : this.getContainingRegions(loc, modifier)) {
-            boolean nullPlayer = player == null;
-            boolean member = false;
-            if (!nullPlayer) {
-                if ((r.isMember(player.getName()) || r.isOwner(player.getName()))) {
-                    member = true;
-                } else if (r.isMember("all")) {
-                    member = true;
-                } else  {
-                    for (String s : r.getMembers()) {
-                        if (s.contains("sr:")) {
-                            SuperRegion sr = getSuperRegion(s.replace("sr:", ""));
-                            if (sr != null && (sr.hasMember(player.getName()) || sr.hasOwner(player.getName()))) {
-                                member = true;
-                            }
-                        }
-                    }
-                }
-            }
-            if (!useReagents && (nullPlayer || !member) && effect.regionHasEffect(getRegionType(r.getType()).getEffects(), effectName) != 0) {
-                return true;
-            }
-            if (useReagents && (nullPlayer || !member) && effect.regionHasEffect(getRegionType(r.getType()).getEffects(), effectName) != 0
-                    && effect.hasReagents(r.getLocation())) {
-                return true;
-            }
-        }
-        for (SuperRegion sr : this.getContainingSuperRegions(loc)) {
-            boolean nullPlayer = player == null;
-            boolean member = false;
-            if (!nullPlayer) {
-                member = (sr.hasOwner(player.getName()) || sr.hasMember(player.getName()));
-            }
-            boolean reqs = hasAllRequiredRegions(sr);
-            boolean hasEffect = getSuperRegionType(sr.getType()).hasEffect(effectName);
-            boolean hasPower = sr.getPower() > 0;
-            boolean hasMoney = sr.getBalance() > 0;
-            boolean hasGrace = refreshGracePeriod(sr, reqs && hasMoney);
-            if (useReagents && (nullPlayer || !member) && hasEffect && hasPower && ((reqs && hasMoney) || hasGrace)) {
-                return true;
-            }
-            if (!useReagents && (nullPlayer || !member) && hasEffect) {
-                return true;
-            }
-        }
-        return false;
+        return shouldTakeAction(loc, player, new RegionCondition(effectName,useReagents,modifier));
+//
+//        Effect effect = new Effect(plugin);
+//        for (Region r : this.getContainingRegions(loc, modifier)) {
+//            boolean nullPlayer = player == null;
+//            boolean member = false;
+//            if (!nullPlayer) {
+//                if ((r.isMember(player.getName()) || r.isOwner(player.getName()))) {
+//                    member = true;
+//                } else if (r.isMember("all")) {
+//                    member = true;
+//                } else  {
+//                    for (String s : r.getMembers()) {
+//                        if (s.contains("sr:")) {
+//                            SuperRegion sr = getSuperRegion(s.replace("sr:", ""));
+//                            if (sr != null && (sr.hasMember(player.getName()) || sr.hasOwner(player.getName()))) {
+//                                member = true;
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//            if (!useReagents && (nullPlayer || !member) && effect.regionHasEffect(getRegionType(r.getType()).getEffects(), effectName) != 0) {
+//                return true;
+//            }
+//            if (useReagents && (nullPlayer || !member) && effect.regionHasEffect(getRegionType(r.getType()).getEffects(), effectName) != 0
+//                    && effect.hasReagents(r.getLocation())) {
+//                return true;
+//            }
+//        }
+//        for (SuperRegion sr : this.getContainingSuperRegions(loc)) {
+//            boolean nullPlayer = player == null;
+//            boolean member = false;
+//            if (!nullPlayer) {
+//                member = (sr.hasOwner(player.getName()) || sr.hasMember(player.getName()));
+//                if (!member) {
+//                    for (SuperRegion playerSR : getSortedSuperRegions()) {
+//                        if ((playerSR.hasMember(player.getName()) || playerSR.hasOwner(player.getName())) && sr.hasMember("sr:" + playerSR.getName())) {
+//                            member = true;
+//                            break;
+//                        }
+//                    }
+//                }
+//            }
+//            boolean reqs = hasAllRequiredRegions(sr);
+//            boolean hasEffect = getSuperRegionType(sr.getType()).hasEffect(effectName);
+//            boolean hasPower = sr.getPower() > 0;
+//            boolean hasMoney = sr.getBalance() > 0;
+//            boolean hasGrace = refreshGracePeriod(sr, reqs && hasMoney);
+//            if (useReagents && (nullPlayer || !member) && hasEffect && hasPower && ((reqs && hasMoney) || hasGrace)) {
+//                return true;
+//            }
+//            if (!useReagents && (nullPlayer || !member) && hasEffect) {
+//                return true;
+//            }
+//        }
+//        return false;
     }
     
     public boolean shouldTakeAction(Location loc, Player player, RegionCondition condition) {
@@ -1816,6 +1826,14 @@ public class RegionManager {
             boolean member = false;
             if (!nullPlayer) {
                 member = (sr.hasOwner(player.getName()) || sr.hasMember(player.getName()));
+                if (!member) {
+                    for (SuperRegion playerSR : getSortedSuperRegions()) {
+                        if ((playerSR.hasMember(player.getName()) || playerSR.hasOwner(player.getName())) && sr.hasMember("sr:" + playerSR.getName())) {
+                            member = true;
+                            break;
+                        }
+                    }
+                }
             }
             boolean reqs = hasAllRequiredRegions(sr);
             boolean hasEffect = getSuperRegionType(sr.getType()).hasEffect(effectName);
@@ -1880,6 +1898,14 @@ public class RegionManager {
                 boolean member = false;
                 if (!nullPlayer) {
                     member = (sr.hasOwner(player.getName()) || sr.hasMember(player.getName()));
+                    if (!member) {
+                        for (SuperRegion playerSR : getSortedSuperRegions()) {
+                            if ((playerSR.hasMember(player.getName()) || playerSR.hasOwner(player.getName())) && sr.hasMember("sr:" + playerSR.getName())) {
+                                member = true;
+                                break;
+                            }
+                        }
+                    }
                 }
                 boolean reqs = hasAllRequiredRegions(sr);
                 boolean hasPower = sr.getPower() > 0;

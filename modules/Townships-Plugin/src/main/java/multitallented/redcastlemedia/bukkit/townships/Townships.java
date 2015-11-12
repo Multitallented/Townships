@@ -147,7 +147,9 @@ public class Townships extends JavaPlugin {
             warning("Only players can use Township commands");
             return true;
         }
-        if (getConfigManager().getBlackListWorlds().contains(player.getWorld().getName())) {
+
+        //Are they in a blacklisted world
+        if ((Townships.perms == null || !Townships.perms.has(sender, "townships.admin")) && getConfigManager().getBlackListWorlds().contains(player.getWorld().getName())) {
             sender.sendMessage(ChatColor.RED + "[Townships] is disabled on this world");
             return true;
         }
@@ -288,22 +290,22 @@ public class Townships extends JavaPlugin {
             //hs war mySR urSR
 
             //Check for valid super-regions
-            SuperRegion sr1 = regionManager.getSuperRegion(args[2]);
-            SuperRegion sr2 = regionManager.getSuperRegion(args[1]);
-            if (sr1 == null || sr2 == null) {
+            SuperRegion myTown = regionManager.getSuperRegion(args[2]);
+            SuperRegion enemyTown = regionManager.getSuperRegion(args[1]);
+            if (myTown == null || enemyTown == null) {
                 player.sendMessage(ChatColor.GRAY + "[Townships] That isn't a valid super-region.");
                 return true;
             }
 
             //Check if already at war
-            if (regionManager.hasWar(sr1, sr2)) {
-                player.sendMessage(ChatColor.GRAY + "[Townships] " + sr1.getName() + " is already at war!");
+            if (regionManager.hasWar(myTown, enemyTown)) {
+                player.sendMessage(ChatColor.GRAY + "[Townships] " + myTown.getName() + " is already at war!");
                 return true;
             }
 
             //Check owner
-            if (!sr1.hasOwner(player.getName())) {
-                player.sendMessage(ChatColor.GRAY + "[Townships] You are not an owner of " + sr1.getName());
+            if (!myTown.hasOwner(player.getName())) {
+                player.sendMessage(ChatColor.GRAY + "[Townships] You are not an owner of " + myTown.getName());
                 return true;
             }
 
@@ -313,22 +315,22 @@ public class Townships extends JavaPlugin {
                 player.sendMessage(ChatColor.GRAY + "[Townships] This command is disabled in config.yml");
                 return true;
             }
-            double cost = cm.getDeclareWarBase() + cm.getDeclareWarPer() * (sr1.getOwners().size() + sr1.getMembers().size() +
-                    sr2.getOwners().size() + sr2.getMembers().size());
+            double cost = cm.getDeclareWarBase() + cm.getDeclareWarPer() * (myTown.getOwners().size() + myTown.getMembers().size() +
+                    enemyTown.getOwners().size() + enemyTown.getMembers().size());
 
             //Check money
             if (Townships.econ != null) {
-                if (sr1.getBalance() < cost) {
-                    player.sendMessage(ChatColor.GRAY + "[Townships] " + sr1.getName() + " doesn't have enough money to war with " + sr2.getName());
+                if (myTown.getBalance() < cost) {
+                    player.sendMessage(ChatColor.GRAY + "[Townships] " + myTown.getName() + " doesn't have enough money to war with " + enemyTown.getName());
                     return true;
                 } else {
-                    regionManager.addBalance(sr1, -1 * cost);
+                    regionManager.addBalance(myTown, -1 * cost);
                 }
             }
 
-            regionManager.setWar(sr1, sr2);
-            final SuperRegion sr1a = sr1;
-            final SuperRegion sr2a = sr2;
+            regionManager.setWar(myTown, enemyTown);
+            final SuperRegion sr1a = myTown;
+            final SuperRegion sr2a = enemyTown;
             new Runnable() {
                   @Override
                   public void run()
@@ -341,22 +343,22 @@ public class Townships extends JavaPlugin {
             //hs peace mySR urSR
 
             //Check for valid super-regions
-            SuperRegion sr1 = regionManager.getSuperRegion(args[1]);
-            SuperRegion sr2 = regionManager.getSuperRegion(args[2]);
-            if (sr1 == null || sr2 == null) {
+            SuperRegion myTown = regionManager.getSuperRegion(args[2]);
+            SuperRegion enemyTown = regionManager.getSuperRegion(args[1]);
+            if (myTown == null || enemyTown == null) {
                 player.sendMessage(ChatColor.GRAY + "[Townships] That isn't a valid super-region.");
                 return true;
             }
 
             //Check if already at war
-            if (!regionManager.hasWar(sr1, sr2)) {
-                player.sendMessage(ChatColor.GRAY + "[Townships] " + sr1.getName() + " isn't at war.");
+            if (!regionManager.hasWar(myTown, enemyTown)) {
+                player.sendMessage(ChatColor.GRAY + "[Townships] " + myTown.getName() + " isn't at war.");
                 return true;
             }
 
             //Check owner
-            if (!sr1.hasOwner(player.getName())) {
-                player.sendMessage(ChatColor.GRAY + "[Townships] You are not an owner of " + sr1.getName());
+            if (!myTown.hasOwner(player.getName())) {
+                player.sendMessage(ChatColor.GRAY + "[Townships] You are not an owner of " + myTown.getName());
                 return true;
             }
 
@@ -366,22 +368,22 @@ public class Townships extends JavaPlugin {
                 player.sendMessage(ChatColor.GRAY + "[Townships] This command is disabled in config.yml");
                 return true;
             }
-            double cost = cm.getMakePeaceBase() + cm.getMakePeacePer() * (sr1.getOwners().size() + sr1.getMembers().size() +
-                    sr2.getOwners().size() + sr2.getMembers().size());
+            double cost = cm.getMakePeaceBase() + cm.getMakePeacePer() * (myTown.getOwners().size() + myTown.getMembers().size() +
+                    enemyTown.getOwners().size() + enemyTown.getMembers().size());
 
             //Check money
             if (Townships.econ != null) {
-                if (sr1.getBalance() < cost) {
-                    player.sendMessage(ChatColor.GRAY + "[Townships] " + sr1.getName() + " doesn't have enough money to make peace with " + sr2.getName());
+                if (myTown.getBalance() < cost) {
+                    player.sendMessage(ChatColor.GRAY + "[Townships] " + myTown.getName() + " doesn't have enough money to make peace with " + enemyTown.getName());
                     return true;
                 } else {
-                    regionManager.addBalance(sr1, -1 * cost);
+                    regionManager.addBalance(myTown, -1 * cost);
                 }
             }
 
-            regionManager.setWar(sr1, sr2);
-            final SuperRegion sr1a = sr1;
-            final SuperRegion sr2a = sr2;
+            regionManager.setWar(myTown, enemyTown);
+            final SuperRegion sr1a = myTown;
+            final SuperRegion sr2a = enemyTown;
             new Runnable() {
                   @Override
                   public void run()
@@ -934,7 +936,7 @@ public class Townships extends JavaPlugin {
             SuperRegion originalChild = null;
             if (!req.isEmpty()) {
                 for (SuperRegion sr : regionManager.getContainingSuperRegions(currentLocation)) {
-                    if (children.contains(sr.getType()) && sr.hasOwner(player.getName())) {
+                    if (children != null && children.contains(sr.getType()) && sr.hasOwner(player.getName())) {
                         if (children.get(0).equals(sr.getType())) {
                             originalChild = sr;
                         }
@@ -964,7 +966,7 @@ public class Townships extends JavaPlugin {
                 double y = loc.getY();
                 double z = loc.getZ();
                 double radius1 = currentRegionType.getRawRadius();
-                for (Region r : regionManager.getSortedRegions()) {	  	
+                for (Region r : regionManager.getSortedRegions()) {
                     Location l = r.getLocation();
                     if (l.getX() + radius1 < x) {
                         break;
@@ -989,6 +991,15 @@ public class Townships extends JavaPlugin {
                         }
                     }
                 }
+                //Check to see if the new region completely contains the original child region
+                if (originalChild != null) {
+                    SuperRegionType srt = regionManager.getSuperRegionType(originalChild.getType());
+                    if (srt != null && originalChild.getLocation().distance(currentLocation) > srt.getRadius()) {
+                        player.sendMessage(ChatColor.RED + "[Townships] You must build this " + currentRegionType + " so that it completely covers your " + originalChild.getType());
+                        return true;
+                    }
+                }
+
                 if (!req.isEmpty()) {
                     for (Region r : regionManager.getContainingRegions(currentLocation)) {
                         String rType = regionManager.getRegion(r.getLocation()).getType();
@@ -1053,8 +1064,8 @@ public class Townships extends JavaPlugin {
             ArrayList<Location> childLocations = null;
             if (originalChild != null) {
                 childLocations = originalChild.getChildLocations();
-                System.out.println("[Townships] " + originalChild.getLocation().getWorld().getName() + ":" + 
-                        originalChild.getLocation().getX() + ":" + originalChild.getLocation().getY() + ":" + originalChild.getLocation().getZ());
+//                System.out.println("[Townships] " + originalChild.getLocation().getWorld().getName() + ":" +
+//                        originalChild.getLocation().getX() + ":" + originalChild.getLocation().getY() + ":" + originalChild.getLocation().getZ());
                 childLocations.add(originalChild.getLocation());
             }
 
@@ -1351,7 +1362,7 @@ public class Townships extends JavaPlugin {
             //Set the player as being in that channel
             dpeListener.setPlayerChannel(player, args[1]);
             return true;
-        } else if (args.length > 2 && args[0].equalsIgnoreCase("addmember")) {
+        } else if (args.length > 2 && (args[0].equalsIgnoreCase("addmember") || args[0].equalsIgnoreCase("add"))) {
             //Check if valid super region
             SuperRegion sr = regionManager.getSuperRegion(args[2]);
             if (sr == null) {
@@ -1377,21 +1388,22 @@ public class Townships extends JavaPlugin {
 
             //Check if valid player
             Player invitee = getServer().getPlayer(args[1]);
-            if (invitee == null) {
+            SuperRegion town = regionManager.getSuperRegion(args[1]);
+            if (invitee == null && town == null) {
                 player.sendMessage(ChatColor.GRAY + "[Townships] " + args[1] + " is not online.");
                 return true;
             }
 
             //Check permission townships.join
-            if (!perms.has(invitee, "townships.join") && !perms.has(invitee, "townships.join." + sr.getName())) {
+            if (invitee != null && !perms.has(invitee, "townships.join") && !perms.has(invitee, "townships.join." + sr.getName())) {
                 player.sendMessage(ChatColor.GRAY + "[Townships] " + args[1] + " doesnt have permission to join a super-region.");
                 return true;
             }
 
             //Check if already a town member of a blacklisted town
-            if (!configManager.getMultipleTownMembership()) {
+            if (invitee != null && !configManager.getMultipleTownMembership()) {
                 for (SuperRegion sr1 : regionManager.getSortedSuperRegions()) {
-                    if ((sr1.hasOwner(playername) || sr1.hasMember(playername)) &&
+                    if ((sr1.hasOwner(invitee.getName()) || sr1.hasMember(invitee.getName())) &&
                             !configManager.containsWhiteListTownMembership(sr1.getType())) {
                         player.sendMessage(ChatColor.GRAY + "[Townships] That player is already a member of another super-region.");
                         return true;
@@ -1406,10 +1418,28 @@ public class Townships extends JavaPlugin {
             }
 
             //Send an invite
-            pendingInvites.put(invitee.getName(), args[2].toLowerCase());
-            player.sendMessage(ChatColor.GRAY + "[Townships] You have invited " + ChatColor.GOLD + invitee.getDisplayName() + ChatColor.GRAY + " to join " + ChatColor.GOLD + args[2]);
-            if (invitee != null)
+            if (invitee != null) {
+                pendingInvites.put(invitee.getName(), args[2].toLowerCase());
+                player.sendMessage(ChatColor.GRAY + "[Townships] You have invited " + ChatColor.GOLD + invitee.getDisplayName() + ChatColor.GRAY + " to join " + ChatColor.GOLD + args[2]);
                 invitee.sendMessage(ChatColor.GOLD + "[Townships] You have been invited to join " + args[2] + ". /to accept " + args[2]);
+            } else {
+                //Add the town to the super region
+                ArrayList<String> perm = new ArrayList<String>();
+                perm.add("member");
+                regionManager.setMember(sr, "sr:" + town.getName(), perm);
+                for (String s : sr.getMembers().keySet()) {
+                    Player p = getServer().getPlayer(s);
+                    if (p != null) {
+                        p.sendMessage(ChatColor.GOLD + town.getName() + " has joined " + args[1]);
+                    }
+                }
+                for (String s : sr.getOwners()) {
+                    Player p = getServer().getPlayer(s);
+                    if (p != null) {
+                        p.sendMessage(ChatColor.GOLD + town.getName() + " has joined " + args[1]);
+                    }
+                }
+            }
             return true;
         } else if (args.length > 1 && args[0].equalsIgnoreCase("accept")) {
             //Check if player has a pending invite to that super-region
@@ -1471,7 +1501,6 @@ public class Townships extends JavaPlugin {
             }
 
 
-
             //Check if player is an owner of that region
             if (!sr.hasOwner(player.getName()) && !Townships.perms.has(player, "townships.admin")) {
                 player.sendMessage(ChatColor.GRAY + "[Townships] You arent an owner of " + args[2]);
@@ -1507,7 +1536,10 @@ public class Townships extends JavaPlugin {
             }
             regionManager.setOwner(sr, playername);
             return true;
-        } else if (args.length > 2 && (args[0].equalsIgnoreCase("remove") || args[0].equalsIgnoreCase("leave") || args[0].equalsIgnoreCase("kick"))) {
+        } else if (args.length > 1 && args[0].equalsIgnoreCase("leave")) {
+            player.performCommand("to remove " + player.getName() + " " + args[1]);
+            return true;
+        } else if (args.length > 2 && (args[0].equalsIgnoreCase("remove") || args[0].equalsIgnoreCase("kick"))) {
             Player p = getServer().getPlayer(args[1]);
             String playername = args[1];
 
@@ -1587,7 +1619,7 @@ public class Townships extends JavaPlugin {
                 }
             }
             return true;
-        } else if (args.length > 3 && args[0].equalsIgnoreCase("toggleperm")) {
+        } else if (args.length > 3 && (args[0].equalsIgnoreCase("toggleperm") || args[0].equalsIgnoreCase("perm"))) {
             Player p = getServer().getPlayer(args[1]);
             String playername = args[1];
 
@@ -2572,34 +2604,35 @@ public class Townships extends JavaPlugin {
             if (args.length > 0 && args[args.length - 1].equals("2")) {
                 sender.sendMessage(ChatColor.GRAY + "[Townships] by " + ChatColor.GOLD + "Multitallented" + ChatColor.GRAY + ": <> = required, () = optional" +
                         ChatColor.GOLD + " Page 2");
-                sender.sendMessage(ChatColor.GRAY + "/to accept <name>");
+                sender.sendMessage(ChatColor.GRAY + "/to charter <towntype> <townname>");
+                sender.sendMessage(ChatColor.GRAY + "/to charterstats <townname>");
+                sender.sendMessage(ChatColor.GRAY + "/to signcharter <townname>");
+                sender.sendMessage(ChatColor.GRAY + "/to cancelcharter <townname>");
                 sender.sendMessage(ChatColor.GRAY + "/to rename <name> <newname>");
                 sender.sendMessage(ChatColor.GRAY + "/to settaxes <amount> <name>");
                 sender.sendMessage(ChatColor.GRAY + "/to withdraw|deposit <amount> <name>");
                 sender.sendMessage(ChatColor.GRAY + "/to listperms <playername> <name>");
                 sender.sendMessage(ChatColor.GRAY + "/to listallperms");
-                sender.sendMessage(ChatColor.GRAY + "/to toggleperm <playername> <perm> <name>");
-                sender.sendMessage(ChatColor.GRAY + "/to destroy (name)");
-                sender.sendMessage(ChatColor.GRAY + "/to ch (channel) -- Use /to ch for all chat");
+                sender.sendMessage(ChatColor.GRAY + "/to perm <playername> <perm> <name>");
+                sender.sendMessage(ChatColor.GRAY + "/to ch (channel) -- Use /to ch to leave a channel");
                 sender.sendMessage(ChatColor.GRAY + "See " + getConfigManager().getHelpPage() + " for more info | " + ChatColor.GOLD + "Page 2/3");
             } else if (args.length > 0 && args[args.length - 1].equals("3")) {
                 sender.sendMessage(ChatColor.GRAY + "[Townships] by " + ChatColor.GOLD + "Multitallented" + ChatColor.GRAY + ": <> = required, () = optional" +
                         ChatColor.GOLD + " Page 3");
-                sender.sendMessage(ChatColor.GRAY + "/to war <mysuperregion> <enemysuperregion>");
-                sender.sendMessage(ChatColor.GRAY + "/to peace <mysuperregion> <enemysuperregion>");
+                sender.sendMessage(ChatColor.GRAY + "/to war <enemytown> <mytown>");
+                sender.sendMessage(ChatColor.GRAY + "/to peace <enemytown> <mytown>");
                 sender.sendMessage(ChatColor.GRAY + "See " + getConfigManager().getHelpPage() + " for more info | " + ChatColor.GOLD + "Page 3/3");
             } else {
                 sender.sendMessage(ChatColor.GRAY + "[Townships] by " + ChatColor.GOLD + "Multitallented" + ChatColor.GRAY + ": () = optional" +
                         ChatColor.GOLD + " Page 1");
                 sender.sendMessage(ChatColor.GRAY + "/to list");
-                sender.sendMessage(ChatColor.GRAY + "/to info <regiontype|superregiontype>");
-                sender.sendMessage(ChatColor.GRAY + "/to charter <superregiontype> <name>");
-                sender.sendMessage(ChatColor.GRAY + "/to charterstats <name>");
-                sender.sendMessage(ChatColor.GRAY + "/to signcharter <name>");
-                sender.sendMessage(ChatColor.GRAY + "/to cancelcharter <name>");
-                sender.sendMessage(ChatColor.GRAY + "/to create <regiontype> (name)");
-                sender.sendMessage(ChatColor.GRAY + "/to addowner|addmember|remove <playername> (name)");
+                sender.sendMessage(ChatColor.GRAY + "/to info <regiontype>");
+                sender.sendMessage(ChatColor.GRAY + "/to create <regiontype> (townname)");
+                sender.sendMessage(ChatColor.GRAY + "/to destroy (name)");
+                sender.sendMessage(ChatColor.GRAY + "/to add|addowner|remove <playername> (townname)");
+                sender.sendMessage(ChatColor.GRAY + "/to leave <townname>");
                 sender.sendMessage(ChatColor.GRAY + "/to whatshere");
+                sender.sendMessage(ChatColor.GRAY + "/to who (playername|townname)");
                 sender.sendMessage(ChatColor.GRAY + "See " + getConfigManager().getHelpPage() + " for more info |" + ChatColor.GOLD + " Page 1/3");
             }
 

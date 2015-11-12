@@ -176,6 +176,22 @@ public class RegionEntityListener implements Listener {
             }
             return;
         }
+        if (event.getEntity() instanceof Villager || event.getEntity() instanceof IronGolem) {
+            ArrayList<RegionCondition> conditions = new ArrayList<RegionCondition>();
+            conditions.add(new RegionCondition("deny_villager_damage", true, 0));
+            conditions.add(new RegionCondition("deny_villager_damage_no_reagent", false, 0));
+            Player player = null;
+            if (event.getDamager() instanceof Player) {
+                player = (Player) event.getDamager();
+            }
+            if (rm.shouldTakeAction(event.getEntity().getLocation(), player, conditions)) {
+                if (player != null) {
+                    player.sendMessage("[Townships] This region is protected");
+                }
+                event.setCancelled(true);
+            }
+            return;
+        }
 
 
         if (!(event.getEntity() instanceof Player)) {

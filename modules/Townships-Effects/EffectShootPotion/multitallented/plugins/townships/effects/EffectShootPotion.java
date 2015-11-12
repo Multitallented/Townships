@@ -15,6 +15,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.Potion;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 /**
@@ -128,6 +131,8 @@ public class EffectShootPotion extends Effect {
             //Spawn and set velocity of the arrow
             ThrownPotion potion = (ThrownPotion) l.getWorld().spawnEntity(loc, EntityType.SPLASH_POTION);
             potion.setItem(new ItemStack(Material.POTION, 1, (short) damage));
+            potion.getEffects().clear();
+            potion.getEffects().add(new PotionEffect(PotionEffectType.SLOW, 3000, 2));
             potion.setVelocity(vel);
             //Arrow arrow = l.getWorld().spawnArrow(loc, vel, (float) (speed), spread);
             //arrowDamages.put(arrow, damage);
