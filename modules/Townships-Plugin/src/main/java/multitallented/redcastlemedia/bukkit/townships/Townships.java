@@ -122,7 +122,8 @@ public class Townships extends JavaPlugin {
         System.out.println("[Townships] " + timeUntilDay + " ticks until 00:00");
         DailyTimerTask dtt = new DailyTimerTask(this);
         getServer().getScheduler().scheduleSyncRepeatingTask(this, dtt, timeUntilDay, 1728000);
-        
+
+        Permissions.assignPermissions(this);
         log.info("[Townships] is now enabled!");
     }
     
@@ -704,6 +705,15 @@ public class Townships extends JavaPlugin {
                     }
                 }
             } else {
+                for (SuperRegion sr : regionManager.getContainingSuperRegions(currentLocation)) {
+                    if (!sr.hasOwner(playername)) {
+                        if (!sr.hasMember(playername) || !sr.getMember(playername).contains(regionName)) {
+                            player.sendMessage(ChatColor.GRAY + "[Townships] You dont have permission from an owner of " + sr.getName()
+                                    + " to create a " + regionName + " here");
+                            return true;
+                        }
+                    }
+                }
                 meetsReqs = true;
             }
 

@@ -198,6 +198,10 @@ public class EffectRing extends Effect {
             final World world = l.getWorld();
             x = 0;
             z = 0;
+            int baseY = (int) l.getWorld().getHighestBlockAt(l).getY();
+            baseY = baseY < 64 ? 64 : baseY;
+            baseY = baseY + Y_LEVEL > l.getWorld().getMaxHeight() ? l.getWorld().getMaxHeight() - 1 : baseY + Y_LEVEL;
+            final int yL = baseY;
             final int threadID = aPlugin.getServer().getScheduler().scheduleSyncRepeatingTask(aPlugin,
                     new Runnable() {
                         @Override
@@ -209,10 +213,10 @@ public class EffectRing extends Effect {
                                 int asdf = (int) Math.sqrt(radius*radius - (x * x));
                                 int zp = asdf + (int) l.getZ();
                                 int zn = (int) l.getZ() - asdf;
-                                world.getBlockAt(xp, Y_LEVEL, zp).setType(Material.GRAVEL);
-                                world.getBlockAt(xn, Y_LEVEL, zp).setType(Material.GRAVEL);
-                                world.getBlockAt(xp, Y_LEVEL, zn).setType(Material.GRAVEL);
-                                world.getBlockAt(xn, Y_LEVEL, zn).setType(Material.GRAVEL);
+                                world.getBlockAt(xp, yL, zp).setType(Material.GRAVEL);
+                                world.getBlockAt(xn, yL, zp).setType(Material.GRAVEL);
+                                world.getBlockAt(xp, yL, zn).setType(Material.GRAVEL);
+                                world.getBlockAt(xn, yL, zn).setType(Material.GRAVEL);
                                     
                             }
                             x++;
@@ -229,10 +233,10 @@ public class EffectRing extends Effect {
                                 int asdf = (int) Math.sqrt(radius*radius - (z * z));
                                 int xp = asdf + (int) l.getX();
                                 int xn = (int) l.getX() - asdf;
-                                world.getBlockAt(xp, Y_LEVEL, zp).setType(Material.GRAVEL);
-                                world.getBlockAt(xn, Y_LEVEL, zp).setType(Material.GRAVEL);
-                                world.getBlockAt(xp, Y_LEVEL, zn).setType(Material.GRAVEL);
-                                world.getBlockAt(xn, Y_LEVEL, zn).setType(Material.GRAVEL);
+                                world.getBlockAt(xp, yL, zp).setType(Material.GRAVEL);
+                                world.getBlockAt(xn, yL, zp).setType(Material.GRAVEL);
+                                world.getBlockAt(xp, yL, zn).setType(Material.GRAVEL);
+                                world.getBlockAt(xn, yL, zn).setType(Material.GRAVEL);
                                     
                             }
                             z++;

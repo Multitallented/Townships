@@ -6,8 +6,10 @@ package multitallented.plugins.townships.effects;
  * @author Multitallented
  */
 import multitallented.redcastlemedia.bukkit.townships.Townships;
+import multitallented.redcastlemedia.bukkit.townships.Util;
 import multitallented.redcastlemedia.bukkit.townships.effect.Effect;
 import multitallented.redcastlemedia.bukkit.townships.region.Region;
+import multitallented.redcastlemedia.bukkit.townships.region.RegionCondition;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -16,6 +18,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.List;
 
 public class EffectRepair extends Effect
 {
@@ -101,6 +105,7 @@ public class EffectRepair extends Effect
     {
       Material mat = is.getType();
       int amt = 1;
+        System.out.println("Durability: " + mat.getMaxDurability() + ":" + is.getDurability());
       switch (mat) {
           case WOOD_HOE:
           case WOOD_PICKAXE:
@@ -161,54 +166,61 @@ public class EffectRepair extends Effect
     }
 
     @EventHandler
-    public void onPlayerInteract(PlayerInteractEvent event)
-    {
-      if ((event.isCancelled()) || !event.getAction().equals(Action.RIGHT_CLICK_BLOCK) || (!event.getClickedBlock().getType().equals(Material.IRON_BLOCK))) {
-        return;
-      }
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        if ((event.isCancelled()) || !event.getAction().equals(Action.RIGHT_CLICK_BLOCK) || (!event.getClickedBlock().getType().equals(Material.IRON_BLOCK))) {
+            return;
+        }
 
-      Region r;
-      try {
-        r = this.effect.aPlugin.getRegionManager().getContainingRegions(event.getClickedBlock().getLocation()).get(0);
+        Region r = null;
+        List<Region> potentialRegions = getPlugin().getRegionManager().getContainingBuildRegions(event.getClickedBlock().getLocation());
+        if (!potentialRegions.isEmpty()) {
+            r = potentialRegions.get(0);
+        }
+
         if (r == null) {
             return;
         }
-      } catch (Exception e) {
-          return;
-      }
-
-      if (this.effect.regionHasEffect(this.effect.aPlugin.getRegionManager().getRegionType(r.getType()).getEffects(), "repair") == 0) {
-        return;
-      }
+//
+//      if (this.effect.regionHasEffect(this.effect.aPlugin.getRegionManager().getRegionType(r.getType()).getEffects(), "repair") == 0) {
+//        return;
+//      }
 
       Player player = event.getPlayer();
 
-      if ((!r.isMember(player.getName())) && (!r.isOwner(player.getName()))) {
-        return;
+      if (getPlugin().getRegionManager().shouldTakeAction(event.getClickedBlock().getLocation(), player, new RegionCondition("repair",true, 0))) {
+          return;
       }
 
-      ItemStack is = player.getItemInHand();
+//      if ((!r.isMember(player.getName())) && (!r.isOwner(player.getName()))) {
+//        return;
+//      }
+
+        ItemStack is = player.getItemInHand();
+        if (is.getType() == Material.AIR) {
+            player.sendMessage(ChatColor.GRAY + "[Townships] You must hold the item you wish to repair.");
+            return;
+        }
       Material reagent = getRequiredReagent(is.getType());
-      if (is == null) {
-        player.sendMessage(ChatColor.GRAY + "[Townships] You must hold the item you wish to repair.");
-        return;
-      }
       int repairCost = getRepairCost(is);
       if (repairCost == 0) {
         player.sendMessage(ChatColor.GRAY + "[Townships] That item isn't something you can repair here.");
         event.setCancelled(true);
         return;
       }
-      ItemStack cost = new ItemStack(reagent, repairCost);
-      if (!hasReagentCost(player, cost)) {
-        player.sendMessage(ChatColor.RED + "[Townships] You don't have enough " + reagent.name().toLowerCase().replace("_", " "));
-        return;
+      if (reagent != null) {
+
+          System.out.println("Cost: " + reagent.name() + ":" + repairCost);
+          ItemStack cost = new ItemStack(reagent, repairCost);
+          if (!hasReagentCost(player, cost)) {
+              player.sendMessage(ChatColor.RED + "[Townships] You don't have enough " + reagent.name().toLowerCase().replace("_", " "));
+              return;
+          }
+          player.getInventory().removeItem(cost);
       }
-	  if (effect.upkeep(r.getLocation())) {
-		  player.sendMessage(ChatColor.RED + "[Townships] Not enough input materials.");
-		  return;
-	  }
-      player.getInventory().remove(cost);
+      if (!effect.upkeep(r.getLocation())) {
+          player.sendMessage(ChatColor.RED + "[Townships] Not enough reagents/input materials.");
+          return;
+      }
       is.setDurability((short) 0);
     }
 

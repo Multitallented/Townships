@@ -296,7 +296,10 @@ public class RegionPlayerInteractListener implements Listener {
             conditions.add(new RegionCondition("deny_use_circuit", true, 0));
             conditions.add(new RegionCondition("deny_use_circuit_no_reagent", false, 0));
         } else if (event.getClickedBlock().getType() == Material.WOODEN_DOOR || event.getClickedBlock().getType() == Material.TRAP_DOOR ||
-                event.getClickedBlock().getType() == Material.IRON_DOOR_BLOCK) {
+                event.getClickedBlock().getType() == Material.IRON_DOOR_BLOCK || event.getClickedBlock().getType() == Material.DARK_OAK_DOOR ||
+                event.getClickedBlock().getType() == Material.ACACIA_DOOR || event.getClickedBlock().getType() == Material.BIRCH_DOOR ||
+                event.getClickedBlock().getType() == Material.SPRUCE_DOOR || event.getClickedBlock().getType() == Material.JUNGLE_DOOR ||
+                event.getClickedBlock().getType() == Material.IRON_TRAPDOOR) {
             conditions.add(new RegionCondition("deny_use_door", true, 0));
             conditions.add(new RegionCondition("deny_use_door_no_reagent", false, 0));
         } else if (event.getClickedBlock().getType() == Material.CHEST || event.getClickedBlock().getType() == Material.FURNACE ||

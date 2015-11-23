@@ -161,6 +161,7 @@ public class RequirementsGUIListener implements Listener {
         Inventory inv = Bukkit.createInventory(new MenuHolder(Bukkit.createInventory(null, size)), size, ChatColor.RED + WordUtils.capitalize(title));
         
         GUIManager.sanitizeGUIItems(proxyInv);
+        GUIManager.sanitizeCycleItems(cycleItems);
         String regionTypeName = ChatColor.stripColor(title).split(" ")[0];
         RegionType rt = to.getRegionManager().getRegionType(regionTypeName);
         if (rt != null) {

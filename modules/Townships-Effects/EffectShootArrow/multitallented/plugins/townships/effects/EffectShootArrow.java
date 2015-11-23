@@ -103,20 +103,22 @@ public class EffectShootArrow extends Effect {
 
 
             //Check if the player is invincible
-            if (player.getGameMode() != GameMode.SURVIVAL || player.getGameMode() != GameMode.ADVENTURE) {
+            if (player.getGameMode() != GameMode.SURVIVAL && player.getGameMode() != GameMode.ADVENTURE) {
                 return;
             }
 
-            EntityDamageEvent damageEvent = new EntityDamageEvent(null, DamageCause.CUSTOM, 0);
-            Bukkit.getPluginManager().callEvent(damageEvent);
-            if (damageEvent.isCancelled()) {
-                return;
-            }
+//            EntityDamageEvent damageEvent = new EntityDamageEvent(null, DamageCause.CUSTOM, 0);
+//            Bukkit.getPluginManager().callEvent(damageEvent);
+//            if (damageEvent.isCancelled()) {
+//                System.out.println("damage cancelled");
+//                return;
+//            }
 
             //Check if the player owns or is a member of the region
             if (effect.isOwnerOfRegion(player, l) || effect.isMemberOfRegion(player, l)) {
                 return;
             }
+
 
             //Check to see if the Townships has enough reagents
             if (!effect.hasReagents(l)) {
@@ -124,11 +126,12 @@ public class EffectShootArrow extends Effect {
             }
 
             //Damage check before firing
-            EntityDamageEvent testEvent = new EntityDamageEvent(player, DamageCause.CUSTOM, 0);
-            Bukkit.getPluginManager().callEvent(testEvent);
-            if (testEvent.isCancelled()) {
-                return;
-            }
+//            EntityDamageEvent testEvent = new EntityDamageEvent(player, DamageCause.CUSTOM, 0);
+//            Bukkit.getPluginManager().callEvent(testEvent);
+//            if (testEvent.isCancelled()) {
+//                System.out.println("damage test failed");
+//                return;
+//            }
 
             HashSet<Arrow> arrows = new HashSet<Arrow>();
             for (Arrow arrow : arrowDamages.keySet()) {
@@ -140,8 +143,6 @@ public class EffectShootArrow extends Effect {
                 arrowDamages.remove(arrow);
             }
 
-            //Run upkeep but don't need to know if upkeep occured
-            effect.forceUpkeep(event);
 
             //Calculate trajectory of the arrow
             Location loc = l.getBlock().getRelative(BlockFace.UP, 2).getLocation();
@@ -150,9 +151,15 @@ public class EffectShootArrow extends Effect {
             Vector vel = new Vector(playerLoc.getX() - loc.getX(), playerLoc.getY() - loc.getY(), playerLoc.getZ() - loc.getZ());
 
             //Make sure the target is not hiding behind something
-            if (!hasCleanShot(loc, playerLoc, vel)) {
-                return;
-            }
+//            if (!hasCleanShot(loc, playerLoc)) {
+//                System.out.println("line of sight failed");
+//                return;
+//            }
+
+            //Run upkeep but don't need to know if upkeep occured
+            effect.forceUpkeep(event);
+
+
             //Location playerLoc = player.getLocation().getBlock().getRelative(BlockFace.UP).getLocation();
             //playerLoc.setX(Math.floor(playerLoc.getX()) + 0.5);
             //playerLoc.setY(Math.floor(playerLoc.getY()) + 0.5);
@@ -195,15 +202,15 @@ public class EffectShootArrow extends Effect {
             //if (player != null) {
             //    damagee.damage(damage, player);
             //} else {
-                EntityDamageEvent damageEvent = new EntityDamageEvent(damagee, DamageCause.PROJECTILE, damage);
-                Bukkit.getPluginManager().callEvent(damageEvent);
+//                damagee.damage(damage);
                 //damagee.damage(damage);
             //}
-            event.setCancelled(true);
+//            event.setCancelled(true);
+            event.setDamage(damage);
 
         }
 
-        private boolean hasCleanShot(Location shootHere, Location targetHere, Vector vel) {
+        private boolean hasCleanShot(Location shootHere, Location targetHere) {
             double x = shootHere.getX();
             double y = shootHere.getY();
             double z = shootHere.getZ();
@@ -213,8 +220,9 @@ public class EffectShootArrow extends Effect {
             double z1 = targetHere.getZ();
 
             Vector start = new Vector(x, y, z);
+            Vector end = new Vector (x1, y1, z1);
 
-            BlockIterator bi = new BlockIterator(shootHere.getWorld(), vel, vel, 0, (int) shootHere.distance(targetHere));
+            BlockIterator bi = new BlockIterator(shootHere.getWorld(), start, end, 0, (int) shootHere.distance(targetHere));
             while (bi.hasNext()) {
                 Block block = bi.next();
                 System.out.println("[Townships] " + ((int) block.getLocation().getX()) +

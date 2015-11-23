@@ -14,6 +14,9 @@ commands:
       description: Townships commands
       usage: /<command>
 permissions:
+   townships.join:
+       description: Allows players to join towns
+       default: true
    townships.unlock:
        description: Allows players to unlock new regions
        default: op

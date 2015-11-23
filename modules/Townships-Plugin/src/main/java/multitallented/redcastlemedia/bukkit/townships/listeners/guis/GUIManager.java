@@ -1,6 +1,7 @@
 package multitallented.redcastlemedia.bukkit.townships.listeners.guis;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import multitallented.redcastlemedia.bukkit.townships.Townships;
 import multitallented.redcastlemedia.bukkit.townships.region.RegionType;
@@ -171,8 +172,18 @@ public class GUIManager implements Listener {
         GUIManager.clearCycleItems(player);
     }
     
-    public static HashMap<Integer, TOItem> sanitizeGUIItems(HashMap<Integer, TOItem> items) {
-        for (TOItem item : items.values()) {
+    public static void sanitizeCycleItems(HashMap<Integer, ArrayList<TOItem>> items) {
+        for (Integer i : items.keySet()) {
+            sanitizeGUIItems(items.get(i));
+        }
+    }
+
+    public static void sanitizeGUIItems(HashMap<Integer, TOItem> items) {
+        sanitizeGUIItems(items.values());
+    }
+
+    public static void sanitizeGUIItems(Collection<TOItem> items) {
+        for (TOItem item : items) {
             Material mat = item.getMat();
             if (mat == Material.BED_BLOCK) {
                 if (item.getQty() > 1) {
@@ -239,7 +250,6 @@ public class GUIManager implements Listener {
               item.setMat(Material.LAVA_BUCKET);
             }
         }
-        return items;
     }
 
     public static int compareRegions(RegionType o1, RegionType o2) {
