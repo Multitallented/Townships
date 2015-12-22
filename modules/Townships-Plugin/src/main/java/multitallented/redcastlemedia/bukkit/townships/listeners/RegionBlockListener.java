@@ -205,7 +205,7 @@ public class RegionBlockListener implements Listener {
                 }
 
                 delete = !reqMap.isEmpty();
-                if (delete && (r.isMember(player.getName()) || r.isOwner(player.getName()))) {
+                if (delete && (effect.isMemberOfRegion(player, r.getLocation()) || r.isOwner(player.getName()))) {
                     player.sendMessage(ChatColor.GRAY + "[Townships] Breaking this, would destroy your " + r.getType());
                     player.sendMessage(ChatColor.RED + "Missing requirements:");
                     for (String s : Util.hasCreationRequirements(r.getLocation(), currentRegionType, regionManager)) {

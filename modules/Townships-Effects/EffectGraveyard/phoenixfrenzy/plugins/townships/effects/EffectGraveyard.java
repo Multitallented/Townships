@@ -2,17 +2,19 @@ package phoenixfrenzy.plugins.townships.effects;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+
 import multitallented.redcastlemedia.bukkit.townships.Townships;
 import multitallented.redcastlemedia.bukkit.townships.effect.Effect;
+import multitallented.redcastlemedia.bukkit.townships.events.ToCommandEffectEvent;
 import multitallented.redcastlemedia.bukkit.townships.events.ToTwoSecondEffectEvent;
 import multitallented.redcastlemedia.bukkit.townships.region.Region;
 import multitallented.redcastlemedia.bukkit.townships.region.RegionManager;
 import multitallented.redcastlemedia.bukkit.townships.region.RegionType;
 import multitallented.redcastlemedia.bukkit.townships.region.SuperRegion;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.BlockFace;
@@ -25,6 +27,8 @@ import static org.bukkit.event.EventPriority.HIGH;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 /**
  *
@@ -40,6 +44,7 @@ public class EffectGraveyard extends Effect {
     @Override
     public void init(Townships plugin) {
         super.init(plugin);
+        plugin.addCommand("wild");
     }
     
     public class UpkeepListener implements Listener {
@@ -119,8 +124,47 @@ public class EffectGraveyard extends Effect {
                 }
             }
         }
-        
+
         @EventHandler
+        public void onCommandEffectEvent(ToCommandEffectEvent event) {
+            if (!event.getArgs()[0].equalsIgnoreCase("wild")) {
+                return;
+            }
+            final Player player = event.getPlayer();
+            if (Townships.perms != null && !Townships.perms.has(player, "townships.wild")) {
+                player.sendMessage(ChatColor.RED + "[Townships] You don't have permission for /to wild");
+                return;
+            }
+            ArrayList<Region> graveyards = new ArrayList<Region>();
+            HashSet<String> regionTypes = new HashSet<String>();
+            for (String st : getPlugin().getRegionManager().getRegionTypes()) {
+                RegionType rt = getPlugin().getRegionManager().getRegionType(st);
+                boolean hasEffect = false;
+                for (String s : rt.getEffects()) {
+                    if (s.startsWith("graveyard_public")) {
+                        hasEffect = true;
+                        break;
+                    }
+                }
+                if (hasEffect) {
+                    regionTypes.add(st);
+                }
+            }
+
+            for (Region re : getPlugin().getRegionManager().getSortedRegions()) {
+                if (regionTypes.contains(re.getType())) {
+                    graveyards.add(re);
+                }
+            }
+            Random rand = new Random();
+            int randomInt = rand.nextInt(graveyards.size());
+            System.out.println("Wild: " + randomInt + "/" + graveyards.size());
+            Location location = graveyards.get(randomInt).getLocation().getBlock().getRelative(BlockFace.UP, 2).getLocation();
+            player.sendMessage(ChatColor.GRAY + "[Townships] You have been teleported");
+            player.teleport(location);
+        }
+
+            @EventHandler
         public void onJailTick(ToTwoSecondEffectEvent event) {
             
         }

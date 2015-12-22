@@ -52,7 +52,9 @@ public class EffectPort extends Effect {
         TeleportListener tpListener = new TeleportListener(this, plugin);
         
         plugin.addCommand("port");
-        
+        plugin.addCommand("spawn");
+        plugin.addCommand("home");
+
         File config = new File(plugin.getDataFolder(), "config.yml");
         if (!config.exists()) {
             plugin.warning("config.yml non-existent.");
@@ -128,7 +130,7 @@ public class EffectPort extends Effect {
 
         @EventHandler
         public void onCommandEffectEvent(ToCommandEffectEvent event) {
-            if (!event.getArgs()[0].equalsIgnoreCase("port") && !event.getArgs()[0].equalsIgnoreCase("spawn")) {
+            if (!event.getArgs()[0].equalsIgnoreCase("port") && !event.getArgs()[0].equalsIgnoreCase("spawn") && !event.getArgs()[0].equalsIgnoreCase("home")) {
                 return;
             }
             Player player = event.getPlayer();
@@ -169,7 +171,7 @@ public class EffectPort extends Effect {
             int j = -1;
             Region r = null;
             Location destination = null;
-            if (event.getArgs()[0].equalsIgnoreCase("port")) {
+            if (event.getArgs()[0].equalsIgnoreCase("port") && event.getArgs().length > 1) {
                 //Check if region is a port
                 try {
                     j = Integer.parseInt(event.getArgs()[1]);
@@ -186,7 +188,7 @@ public class EffectPort extends Effect {
                     player.sendMessage(ChatColor.GRAY + "[Townships] Port names are numbers");
                     return;
                 }
-            } else if (event.getArgs()[0].equalsIgnoreCase("spawn") && event.getArgs().length > 1) {
+            } else if (event.getArgs().length > 1) {
                 String townName = event.getArgs()[1];
                 SuperRegion sr = plugin.getRegionManager().getSuperRegion(townName);
                 if (sr == null) {
@@ -197,7 +199,7 @@ public class EffectPort extends Effect {
                     RegionType rt = plugin.getRegionManager().getRegionType(region.getType());
                     for (String effectName : rt.getEffects()) {
                         if (effectName.contains("port.")) {
-                            if (!(effect.isMemberOfRegion(player, r.getLocation()) || effect.isOwnerOfRegion(player, r.getLocation()))) {
+                            if (!(effect.isMemberOfRegion(player, region.getLocation()) || effect.isOwnerOfRegion(player, region.getLocation()))) {
                                 continue;
                             }
                             r = region;

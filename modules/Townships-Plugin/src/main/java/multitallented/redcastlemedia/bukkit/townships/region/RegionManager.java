@@ -350,14 +350,14 @@ public class RegionManager {
             }
             warConfig.load(warFile);
             for (String key : warConfig.getKeys(false)) {
-                if (!liveSuperRegions.containsKey(key)) {
+                if (!liveSuperRegions.containsKey(key.toLowerCase())) {
                     continue;
                 }
-                SuperRegion sr = liveSuperRegions.get(key);
+                SuperRegion sr = liveSuperRegions.get(key.toLowerCase());
                 HashSet<SuperRegion> tempSet = new HashSet<SuperRegion>();
                 for (String s : warConfig.getStringList(key)) {
-                    if (liveSuperRegions.containsKey(s)) {
-                        tempSet.add(liveSuperRegions.get(s));
+                    if (liveSuperRegions.containsKey(s.toLowerCase())) {
+                        tempSet.add(liveSuperRegions.get(s.toLowerCase()));
                     }
                 }
                 wars.put(sr, tempSet);
@@ -1140,6 +1140,10 @@ public class RegionManager {
         ConfigManager cm = Townships.getConfigManager();
         if (!cm.getUsePower()) {
             return;
+        }
+        int maxPower = sr.getMaxPower();
+        if (newPower > maxPower) {
+            newPower = maxPower;
         }
         ToPowerChangeEvent powerEvent = new ToPowerChangeEvent(sr, sr.getPower(), newPower);
         Bukkit.getPluginManager().callEvent(powerEvent);
@@ -2222,6 +2226,10 @@ public class RegionManager {
     }
     
     public boolean isAtMaxRegions(Player p, RegionType rt) {
+        return isAtMaxRegions(p, rt, 0);
+    }
+
+    public boolean isAtMaxRegions(Player p, RegionType rt, int modifier) {
         if (rt == null) {
             return false;
         }
@@ -2278,7 +2286,7 @@ public class RegionManager {
         int i = 0;
         int k = 0;
         for (Region r : sortedRegions) {
-            if (!r.isOwner(p.getName())) {
+            if (r.getOwners().isEmpty() || !r.getOwners().get(0).equals(p.getName())) {
                 continue;
             }
             if (useNames && r.getType().equals(rt.getName())) {
@@ -2288,7 +2296,7 @@ public class RegionManager {
                 k++;
             }
         }
-        return !((!useNames || maxName > i) && (!useGroups || maxGroup > k));
+        return !((!useNames || maxName > i + modifier) && (!useGroups || maxGroup > k + modifier));
     }
     
     public ArrayList<String> getPermSets(Player p) {

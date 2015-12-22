@@ -11,14 +11,25 @@ import org.bukkit.event.HandlerList;
 public class ToRegionDestroyedEvent extends Event {
     private static final HandlerList handlers = new HandlerList();
     private final Region r;
+    private final boolean checkDestroy;
     public ToRegionDestroyedEvent(Region r) {
         this.r = r;
+        this.checkDestroy = true;
     }
-    
+
+    public ToRegionDestroyedEvent(Region r, boolean checkDestroy) {
+        this.r = r;
+        this.checkDestroy = checkDestroy;
+    }
+
     public Region getRegion() {
         return r;
     }
-    
+    public boolean getCheckDestroy() {
+        return checkDestroy;
+    }
+
+
     public static HandlerList getHandlerList() {
         return handlers;
     }

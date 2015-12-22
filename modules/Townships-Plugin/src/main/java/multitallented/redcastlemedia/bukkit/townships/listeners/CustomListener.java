@@ -26,13 +26,12 @@ public class CustomListener implements Listener {
     
     @EventHandler
     public void onCustomEvent(ToRegionDestroyedEvent event) {
+        if (!event.getCheckDestroy()) {
+            return;
+        }
         //Check if a super region needs to fall if a required region was destroyed
         hs.getRegionManager().checkIfDestroyedSuperRegion(event.getRegion().getLocation());
     }
-
-
-    
-    
     
 //    public void onLWCCreate(LWCBlockInteractEvent event) {
 //        System.out.println("Block Interacted");

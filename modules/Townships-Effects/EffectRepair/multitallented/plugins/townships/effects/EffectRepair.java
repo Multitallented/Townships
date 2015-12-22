@@ -10,6 +10,7 @@ import multitallented.redcastlemedia.bukkit.townships.Util;
 import multitallented.redcastlemedia.bukkit.townships.effect.Effect;
 import multitallented.redcastlemedia.bukkit.townships.region.Region;
 import multitallented.redcastlemedia.bukkit.townships.region.RegionCondition;
+import multitallented.redcastlemedia.bukkit.townships.region.RegionType;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -185,11 +186,23 @@ public class EffectRepair extends Effect
 //        return;
 //      }
 
-      Player player = event.getPlayer();
+        Player player = event.getPlayer();
 
-      if (getPlugin().getRegionManager().shouldTakeAction(event.getClickedBlock().getLocation(), player, new RegionCondition("repair",true, 0))) {
-          return;
-      }
+        RegionType rt = getPlugin().getRegionManager().getRegionType(r.getType());
+        boolean hasEffect = false;
+        for (String s : rt.getEffects()) {
+            if (s.equals("repair.1")) {
+                hasEffect = true;
+                break;
+            }
+        }
+        if (!hasEffect) {
+            return;
+        }
+
+//      if (getPlugin().getRegionManager().shouldTakeAction(event.getClickedBlock().getLocation(), player, new RegionCondition("repair",true, 0))) {
+//          return;
+//      }
 
 //      if ((!r.isMember(player.getName())) && (!r.isOwner(player.getName()))) {
 //        return;

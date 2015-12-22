@@ -131,7 +131,7 @@ public class Townships extends JavaPlugin {
         return configManager;
     }
 
-	public static EffectManager getEffectManager() {
+    public static EffectManager getEffectManager() {
         return effectManager;
     }
     
@@ -225,11 +225,11 @@ public class Townships extends JavaPlugin {
             if (regions.size() > 1) {
                 Collections.sort(regions, new Comparator<RegionType>() {
 
-					@Override
-					public int compare(RegionType o1, RegionType o2) {
-						return GUIManager.compareRegions(o1, o2);
-					}
-				});
+                    @Override
+                    public int compare(RegionType o1, RegionType o2) {
+                        return GUIManager.compareRegions(o1, o2);
+                    }
+                });
             }
             if (category.equals("towns")) {
                 for (String s : regionManager.getSuperRegionTypes()) {
@@ -242,11 +242,11 @@ public class Townships extends JavaPlugin {
             if (superRegions.size() > 1) {
                 Collections.sort(superRegions, new Comparator<SuperRegionType>() {
 
-					@Override
-					public int compare(SuperRegionType o1, SuperRegionType o2) {
-						return GUIManager.compareSRegions(o1, o2);
-					}
-				});
+                    @Override
+                    public int compare(SuperRegionType o1, SuperRegionType o2) {
+                        return GUIManager.compareSRegions(o1, o2);
+                    }
+                });
             }
             ShopGUIListener.openListShop(regions, superRegions, player, category);
             
@@ -574,6 +574,11 @@ public class Townships extends JavaPlugin {
             boolean createAll = nullPerms || perms.has(player, "townships.create.all");
             if (!(nullPerms || createAll || perms.has(player, "townships.create." + regionName))) {
 
+                if (perms.has(player, "townships.rebuild." + regionName)) {
+                    player.performCommand("to rebuild " + regionName);
+                    return true;
+                }
+
                 player.sendMessage(ChatColor.GRAY + "[Townships] you dont have permission to create a " + regionName);
                 return true;
             }
@@ -750,7 +755,7 @@ public class Townships extends JavaPlugin {
                 if (!message.isEmpty()) {
                     player.sendMessage(ChatColor.GRAY + "[Townships] you don't have all of the required blocks in this structure.");
                     for (String s : message) {
-	                    player.sendMessage(ChatColor.GOLD + s);
+                        player.sendMessage(ChatColor.GOLD + s);
                     }
                     return true;
                 }
@@ -1065,6 +1070,11 @@ public class Townships extends JavaPlugin {
                 balance += sr.getBalance();
                 power += sr.getPower();
             }
+            power += currentRegionType.getDailyPower();
+            if (power > currentRegionType.getMaxPower()) {
+                power = currentRegionType.getMaxPower();
+            }
+
             //Check if more members needed to create the super-region
             if (owners.size() + members.size() < currentRegionType.getPopulation()) {
                 player.sendMessage(ChatColor.GRAY + "[Townships] You need " + (currentRegionType.getPopulation() - owners.size() - members.size()) + " more members.");
@@ -1098,7 +1108,7 @@ public class Townships extends JavaPlugin {
                 balance += getConfigManager().getAutoDeposit();
             }
             
-            regionManager.addSuperRegion(args[2], currentLocation, regionTypeName, owners, members, currentRegionType.getDailyPower() + power, balance, childLocations);
+            regionManager.addSuperRegion(args[2], currentLocation, regionTypeName, owners, members, power, balance, childLocations);
             player.sendMessage(ChatColor.GOLD + "[Townships] You've created a new " + args[1] + " called " + args[2]);
             return true;
         } else if (args.length > 1 && args[0].equalsIgnoreCase("disable")) {
@@ -2177,14 +2187,19 @@ public class Townships extends JavaPlugin {
                 return true;
             }
 
+
             Location loc = player.getLocation();
-	        ArrayList<Region> containedRegions = regionManager.getContainingBuildRegions(loc);
+            ArrayList<Region> containedRegions = regionManager.getContainingBuildRegions(loc);
             for (Region r : regionManager.getContainingBuildRegions(aPlayer.getLocation())) {
+                if (regionManager.isAtMaxRegions(aPlayer, regionManager.getRegionType(r.getType()))) {
+                    player.sendMessage(ChatColor.GRAY + "[Townships] " + ChatColor.RED + playername + " cannot own more " + r.getType());
+                    return true;
+                }
                 if (r.isOwner(player.getName()) || (perms != null && perms.has(player, "townships.admin"))) {
                     //Check if too far away
-	                if (!containedRegions.contains(r)) {
-		                continue;
-	                }
+                    if (!containedRegions.contains(r)) {
+                        continue;
+                    }
 
                     if (r.isMember(playername)) {
                         regionManager.setMember(r, playername);
@@ -2192,9 +2207,9 @@ public class Townships extends JavaPlugin {
                     regionManager.setMember(r, player.getName());
                     regionManager.setOwner(r, player.getName());
                     regionManager.setPrimaryOwner(r, playername);
-                    player.sendMessage(ChatColor.GRAY + "[Townships] " + ChatColor.WHITE + "Added " + playername + " as an owner.");
+                    player.sendMessage(ChatColor.GRAY + "[Townships] " + ChatColor.WHITE + "Set " + playername + " as the owner.");
 
-                    aPlayer.sendMessage(ChatColor.GRAY + "[Townships] " + ChatColor.WHITE + "You're now a co-owner of " + player.getDisplayName() + "'s " + r.getType());
+                    aPlayer.sendMessage(ChatColor.GRAY + "[Townships] " + ChatColor.WHITE + "You're now the owner of " + player.getDisplayName() + "'s " + r.getType());
                     return true;
                 } else {
                     player.sendMessage(ChatColor.GRAY + "[Townships] You don't own this region.");
@@ -2202,12 +2217,12 @@ public class Townships extends JavaPlugin {
                 }
             }
 
-	        if (containedRegions.isEmpty()) {
-		        player.sendMessage(ChatColor.GRAY + "[Townships] You're not standing in a region.");
-		        return true;
-	        }
+            if (containedRegions.isEmpty()) {
+                player.sendMessage(ChatColor.GRAY + "[Townships] You're not standing in a region.");
+                return true;
+            }
 
-	        player.sendMessage(ChatColor.GRAY + "[Townships] " + playername + " must be close by also.");
+            player.sendMessage(ChatColor.GRAY + "[Townships] " + playername + " must be close by also.");
             return true;
         } else if (args.length > 1 && args[0].equalsIgnoreCase("remove")) {
             String playername = args[1];
@@ -2403,7 +2418,7 @@ public class Townships extends JavaPlugin {
                     }
                 });
             }
-			GUIListener.openListInventory(regions, superRegions, player, category);
+            GUIListener.openListInventory(regions, superRegions, player, category);
             /*if (!message.equals(ChatColor.GOLD + "")) {
                 player.sendMessage(message.substring(0, message.length() - 2));
             }*/
@@ -2487,7 +2502,7 @@ public class Townships extends JavaPlugin {
                 player.sendMessage(ChatColor.GRAY + "Population: " + ChatColor.GOLD + population + "/" + housing + ChatColor.GRAY +
                         " Bank: " + (sr.getBalance() < srt.getOutput() ? ChatColor.RED : ChatColor.GOLD) + formatter.format(sr.getBalance()) + ChatColor.GRAY +
                         " Power: " + (sr.getPower() < srt.getDailyPower() ? ChatColor.RED : ChatColor.GOLD) + sr.getPower() + 
-                        " (+" + srt.getDailyPower() + ") / " + srt.getMaxPower());
+                        " (+" + srt.getDailyPower() + ") / " + sr.getMaxPower());
                 player.sendMessage(ChatColor.GRAY + "Taxes: " + ChatColor.GOLD + formatter.format(sr.getTaxes())
                         + ChatColor.GRAY + " Total Revenue: " + (revenue < 0 ? ChatColor.RED : ChatColor.GOLD) + formatter.format(revenue) +
                         ChatColor.GRAY + " Disabled: " + (notDisabled ? (ChatColor.GOLD + "false") : (ChatColor.RED + "true")));
@@ -2601,10 +2616,10 @@ public class Townships extends JavaPlugin {
                     player.sendMessage(message.substring(0, message.length() - 2));
                 }
                 return true;
-			}
+            }
 
-			player.sendMessage(ChatColor.GRAY + "[Townships] Could not find player or super-region by that name");
-			player.performCommand("to info " + args[1]);
+            player.sendMessage(ChatColor.GRAY + "[Townships] Could not find player or super-region by that name");
+            player.performCommand("to info " + args[1]);
             return true;
         } else if (args.length > 0 && effectCommands.contains(args[0])) {
             Bukkit.getServer().getPluginManager().callEvent(new ToCommandEffectEvent(args, player));

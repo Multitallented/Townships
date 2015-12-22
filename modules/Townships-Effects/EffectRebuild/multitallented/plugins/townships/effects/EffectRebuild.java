@@ -10,6 +10,7 @@ import multitallented.redcastlemedia.bukkit.townships.Util;
 import multitallented.redcastlemedia.bukkit.townships.effect.Effect;
 import multitallented.redcastlemedia.bukkit.townships.events.ToCommandEffectEvent;
 import multitallented.redcastlemedia.bukkit.townships.events.ToRegionCreatedEvent;
+import multitallented.redcastlemedia.bukkit.townships.events.ToRegionDestroyedEvent;
 import multitallented.redcastlemedia.bukkit.townships.region.Region;
 import multitallented.redcastlemedia.bukkit.townships.region.RegionManager;
 import multitallented.redcastlemedia.bukkit.townships.region.RegionType;
@@ -138,7 +139,7 @@ public class EffectRebuild extends Effect {
             }
             
             //Check if over max number of regions of that type
-            if (regionManager.isAtMaxRegions(player, currentRegionType)) {
+            if (regionManager.isAtMaxRegions(player, currentRegionType, -1)) {
                 player.sendMessage(ChatColor.GRAY + "[Townships] You dont have permission to build more " + currentRegionType.getName());
                 return;
             }
@@ -275,6 +276,8 @@ public class EffectRebuild extends Effect {
             } catch (IOException | InvalidConfigurationException e) {
                 getPlugin().warning("[Townships] unable to save rebuild in " + childRegion.getID() + ".yml");
             }
+            ToRegionDestroyedEvent destroyedEvent = new ToRegionDestroyedEvent(childRegion, false);
+            Bukkit.getPluginManager().callEvent(destroyedEvent);
             ToRegionCreatedEvent createdEvent = new ToRegionCreatedEvent(childRegion);
             Bukkit.getPluginManager().callEvent(createdEvent);
         }
