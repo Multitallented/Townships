@@ -26,6 +26,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.Potion;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 /**
  *
@@ -238,6 +241,7 @@ public class EffectPort extends Effect {
                 delay = warmup / 50;
             }
             player.sendMessage(ChatColor.GOLD + "[Townships] You will be teleported in " + (warmup / 1000) + "s");
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 100, 2));
             plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
             @Override
                 public void run() {

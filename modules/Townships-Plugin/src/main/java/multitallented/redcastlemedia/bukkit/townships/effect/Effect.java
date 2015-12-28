@@ -377,7 +377,7 @@ public class Effect {
             }
             boolean hasPower = false;
             for (SuperRegion sr : srs) {
-                if (sr.getPower() > rt.getPowerDrain() && rm.getSuperRegionType(sr.getType()).getMaxPower() > sr.getPower() - rt.getPowerDrain()) {
+                if (sr.getPower() > rt.getPowerDrain() && sr.getMaxPower() > sr.getPower() - rt.getPowerDrain()) {
                     hasPower = true;
                     rm.setPower(sr, sr.getPower() - rt.getPowerDrain());
                     break;
@@ -472,7 +472,7 @@ public class Effect {
             }
             boolean hasPower = false;
             for (SuperRegion sr : srs) {
-                if (sr.getPower() > rt.getPowerDrain() && rm.getSuperRegionType(sr.getType()).getMaxPower() > sr.getPower() - rt.getPowerDrain()) {
+                if (sr.getPower() > rt.getPowerDrain() && sr.getMaxPower() > sr.getPower() - rt.getPowerDrain()) {
                     hasPower = true;
                     rm.setPower(sr, sr.getPower() - rt.getPowerDrain());
                     break;
@@ -569,7 +569,7 @@ public class Effect {
             }
             boolean hasPower = false;
             for (SuperRegion sr : srs) {
-                if (sr.getPower() > rt.getPowerDrain() && rm.getSuperRegionType(sr.getType()).getMaxPower() > sr.getPower() - rt.getPowerDrain()) {
+                if (sr.getPower() > rt.getPowerDrain() && sr.getMaxPower() > sr.getPower() - rt.getPowerDrain()) {
                     hasPower = true;
                     rm.setPower(sr, sr.getPower() - rt.getPowerDrain());
                     break;
@@ -668,7 +668,7 @@ public class Effect {
             }
             boolean hasPower = false;
             for (SuperRegion sr : srs) {
-                if (sr.getPower() > rt.getPowerDrain() && rm.getSuperRegionType(sr.getType()).getMaxPower() > sr.getPower() - rt.getPowerDrain()) {
+                if (sr.getPower() > rt.getPowerDrain() && sr.getMaxPower() > sr.getPower() - rt.getPowerDrain()) {
                     hasPower = true;
                     rm.setPower(sr, sr.getPower() - rt.getPowerDrain());
                     break;

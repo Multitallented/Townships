@@ -213,6 +213,9 @@ public class EffectRepair extends Effect
             player.sendMessage(ChatColor.GRAY + "[Townships] You must hold the item you wish to repair.");
             return;
         }
+        if (is.getDurability() >= is.getType().getMaxDurability()) {
+            return;
+        }
       Material reagent = getRequiredReagent(is.getType());
       int repairCost = getRepairCost(is);
       if (repairCost == 0) {

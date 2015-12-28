@@ -108,6 +108,12 @@ public class EffectRebuild extends Effect {
                 }
                 return;
             }
+
+            //Owner Check
+            if (childRegion.getOwners().isEmpty() || !childRegion.getOwners().get(0).equals(player.getName())) {
+                player.sendMessage(ChatColor.GRAY + "[Townships] You are not an owner of this " + childRegionType.getName() + ".");
+                return;
+            }
             
             //Permission Check
             boolean nullPerms = perms == null;
