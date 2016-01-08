@@ -45,24 +45,6 @@ public class RegionBlockListener implements Listener {
         for (SuperRegion sr : regionManager.getContainingSuperRegions(loc)) {
             SuperRegionType currentRegionType = regionManager.getSuperRegionType(sr.getType());
             Player player = event.getPlayer();
-            if ((player == null || (!sr.hasOwner(player.getName()) && !sr.hasMember(player.getName())))
-                    && currentRegionType.hasEffect("deny_block_break") && regionManager.hasAllRequiredRegions(sr) &&
-                    sr.getPower() > 0 && sr.getBalance() > 0) {
-                event.setCancelled(true);
-                if (player != null) {
-                    player.sendMessage(ChatColor.GRAY + "[Townships] This region is protected");
-                }
-                return;
-            }
-            if ((player == null || (!sr.hasOwner(player.getName()) && !sr.hasMember(player.getName())))
-                    && currentRegionType.hasEffect("deny_block_break_no_reagent")) {
-                event.setCancelled(true);
-                if (player != null) {
-                    player.sendMessage(ChatColor.GRAY + "[Townships] This region is protected");
-                }
-                return;
-            }
-            
             boolean nullPlayer = player == null;
             boolean member = false;
             if (!nullPlayer) {
@@ -71,7 +53,26 @@ public class RegionBlockListener implements Listener {
             boolean reqs = regionManager.hasAllRequiredRegions(sr);
             boolean hasPower = sr.getPower() > 0;
             boolean hasMoney = sr.getBalance() > 0;
-            activeSRDetected = activeSRDetected || (reqs && hasPower && hasMoney);
+            boolean hasGrace = regionManager.refreshGracePeriod(sr, hasMoney && reqs);
+            if ((nullPlayer || !member)
+                    && currentRegionType.hasEffect("deny_block_break") &&
+                    hasPower && ((hasMoney && reqs) || hasGrace)) {
+                event.setCancelled(true);
+                if (player != null) {
+                    player.sendMessage(ChatColor.GRAY + "[Townships] This region is protected");
+                }
+                return;
+            }
+            if ((nullPlayer || !member)
+                    && currentRegionType.hasEffect("deny_block_break_no_reagent")) {
+                event.setCancelled(true);
+                if (player != null) {
+                    player.sendMessage(ChatColor.GRAY + "[Townships] This region is protected");
+                }
+                return;
+            }
+
+            activeSRDetected = activeSRDetected || (hasPower && ((reqs && hasMoney) || hasGrace));
         }
         for (Region r : regionManager.getContainingBuildRegions(loc)) {
             try {

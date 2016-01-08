@@ -248,6 +248,8 @@ public class GUIManager implements Listener {
               item.setMat(Material.WATER_BUCKET);
             } else if (mat == Material.STATIONARY_LAVA) {
               item.setMat(Material.LAVA_BUCKET);
+            } else if (mat == Material.CAULDRON) {
+              item.setMat(Material.CAULDRON_ITEM);
             } else if (mat == Material.REDSTONE_COMPARATOR_OFF ||
                     mat == Material.REDSTONE_COMPARATOR_ON) {
                 item.setMat(Material.REDSTONE_COMPARATOR);

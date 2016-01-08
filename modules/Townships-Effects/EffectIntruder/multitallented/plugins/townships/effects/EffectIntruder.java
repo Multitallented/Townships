@@ -11,6 +11,7 @@ import multitallented.redcastlemedia.bukkit.townships.region.SuperRegion;
 import multitallented.redcastlemedia.bukkit.townships.region.SuperRegionType;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -141,6 +142,7 @@ public class EffectIntruder extends Effect {
             for (Player p : Bukkit.getOnlinePlayers()) {
                 if (sr.hasMember(p.getName()) || sr.hasOwner(p.getName())) {
                     p.sendMessage(message);
+                    p.playSound(p.getLocation(), Sound.WOLF_HOWL, 1, 1);
                 }
             }
         }

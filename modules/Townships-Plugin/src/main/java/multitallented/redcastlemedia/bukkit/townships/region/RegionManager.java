@@ -1934,7 +1934,7 @@ public class RegionManager {
     
     public boolean refreshGracePeriod(SuperRegion sr, boolean notDisabled) {
         long grace = getRemainingGracePeriod(sr);
-        
+
         if (grace < 0 && !notDisabled) {
             long lastDisable = Townships.getConfigManager().getGracePeriod() + System.currentTimeMillis();
             sr.setLastDisable(lastDisable);
