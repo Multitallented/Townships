@@ -8,12 +8,11 @@ package multitallented.redcastlemedia.bukkit.townships.listeners.guis;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+
 import multitallented.redcastlemedia.bukkit.townships.Townships;
 import multitallented.redcastlemedia.bukkit.townships.Util;
-import multitallented.redcastlemedia.bukkit.townships.region.RegionManager;
-import multitallented.redcastlemedia.bukkit.townships.region.RegionType;
-import multitallented.redcastlemedia.bukkit.townships.region.SuperRegionType;
-import multitallented.redcastlemedia.bukkit.townships.region.TOItem;
+import multitallented.redcastlemedia.bukkit.townships.region.*;
 import net.milkbowl.vault.item.Items;
 //import net.minecraft.util.org.apache.commons.lang3.text.WordUtils;
 import org.apache.commons.lang.WordUtils;
@@ -101,10 +100,30 @@ public class ShopGUIListener implements Listener {
     private static ArrayList<String> determineVisibleRegions(Player player, String category, ArrayList<String> baseRegions) {
         ArrayList<String> returnList = new ArrayList<String>(baseRegions);
 
+        HashMap<String, Boolean> superRegions = new HashMap<String, Boolean>();
+        HashSet<String> permRegions = new HashSet<String>();
+        for (SuperRegion sr : rm.getSortedSuperRegions()) {
+            if (sr.hasOwner(player.getName()) && (!superRegions.containsKey(sr.getType()) || !superRegions.get(sr.getType()))) {
+                superRegions.put(sr.getType(), true);
+            }
+            if (sr.hasMember(player.getName())) {
+                permRegions.addAll(sr.getMember(player.getName()));
+            }
+        }
+
+
         ArrayList<String> removeMe = new ArrayList<String>();
-        for (String regionName : returnList) {
+        regionLoop: for (String regionName : returnList) {
             RegionType rt = rm.getRegionType(regionName);
             //TODO filter out regions here
+
+            //super region filter
+            for (String sr : rt.getSuperRegions()) {
+                if (!superRegions.containsKey(sr) || !(superRegions.get(sr) || permRegions.contains(regionName))) {
+                    removeMe.add(regionName);
+                    continue regionLoop;
+                }
+            }
         }
 
         for (String removePlease : removeMe) {
