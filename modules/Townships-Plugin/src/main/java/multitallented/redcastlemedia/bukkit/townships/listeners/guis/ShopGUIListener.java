@@ -36,8 +36,13 @@ public class ShopGUIListener implements Listener {
         ShopGUIListener.rm = to.getRegionManager();
     }
     
-    public static void openCategoryShop(Player player) {
-        HashMap<String, ArrayList<String>> categories = rm.getRegionCategories();
+    public static void openCategoryShop(Player player, boolean showAll) {
+        HashMap<String, ArrayList<String>> categories;
+        if (showAll) {
+            categories = rm.getRegionCategories();
+        } else {
+            categories = determineVisibleCategories(player);
+        }
         int size = 9;
         int actualSize = categories.keySet().size();
         boolean hasSuperRegions = !rm.getSuperRegionTypes().isEmpty();
@@ -74,6 +79,39 @@ public class ShopGUIListener implements Listener {
         }
         
         player.openInventory(inv);
+    }
+
+    private static HashMap<String, ArrayList<String>> determineVisibleCategories(Player player) {
+        HashMap<String, ArrayList<String>> returnCategories = new HashMap<String, ArrayList<String>>(rm.getRegionCategories());
+
+        ArrayList<String> removeMe = new ArrayList<String>();
+        for (String categoryName : returnCategories.keySet()) {
+            ArrayList<String> categoryRegions = determineVisibleRegions(player, categoryName, returnCategories.get(categoryName));
+            if (categoryRegions.isEmpty()) {
+                removeMe.add(categoryName);
+            }
+        }
+        for (String removePlease : removeMe) {
+            returnCategories.remove(removePlease);
+        }
+
+        return returnCategories;
+    }
+
+    private static ArrayList<String> determineVisibleRegions(Player player, String category, ArrayList<String> baseRegions) {
+        ArrayList<String> returnList = new ArrayList<String>(baseRegions);
+
+        ArrayList<String> removeMe = new ArrayList<String>();
+        for (String regionName : returnList) {
+            RegionType rt = rm.getRegionType(regionName);
+            //TODO filter out regions here
+        }
+
+        for (String removePlease : removeMe) {
+            returnList.remove(removePlease);
+        }
+
+        return returnList;
     }
 
     public static void openListShop(ArrayList<RegionType> regions, ArrayList<SuperRegionType> superRegions, Player player, String category) {

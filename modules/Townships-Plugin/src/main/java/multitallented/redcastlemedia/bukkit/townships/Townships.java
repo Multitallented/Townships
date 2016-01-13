@@ -177,7 +177,7 @@ public class Townships extends JavaPlugin {
             String category = "";
 
             if (args.length == 1 && regionManager.getRegionCategories().size() > 1) {
-                ShopGUIListener.openCategoryShop(player);
+                ShopGUIListener.openCategoryShop(player, false);
                 return true;
             }
             if (args.length != 1) {
@@ -185,6 +185,9 @@ public class Townships extends JavaPlugin {
                 if (category.equals("other")) {
                     category = "";
                 }
+            }
+            if (category.equals("all") {
+                ShopGUIListener.openCategoryShop(player, true);
             }
             if (!regionManager.getRegionCategories().containsKey(category) && (category.equals("") && 
                     !regionManager.getRegionCategories().containsKey("other"))
