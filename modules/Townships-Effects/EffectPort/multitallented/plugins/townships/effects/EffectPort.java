@@ -201,7 +201,7 @@ public class EffectPort extends Effect {
                 outer: for (Region region : plugin.getRegionManager().getContainedRegions(sr)) {
                     RegionType rt = plugin.getRegionManager().getRegionType(region.getType());
                     for (String effectName : rt.getEffects()) {
-                        if (effectName.contains("port.")) {
+                        if (effectName.equals("port.1")) {
                             if (!(effect.isMemberOfRegion(player, region.getLocation()) || effect.isOwnerOfRegion(player, region.getLocation()))) {
                                 continue;
                             }
@@ -258,11 +258,11 @@ public class EffectPort extends Effect {
 //                        return;
 //                    }
                     if (money > 0 && Townships.econ != null) {
-                        if (money > Townships.econ.getBalance(p.getName())) {
+                        if (money > Townships.econ.getBalance(p)) {
                             p.sendMessage(ChatColor.RED + "[Townships] You dont have enough money to port");
                             return;
                         }
-                        Townships.econ.withdrawPlayer(p.getName(), money);
+                        Townships.econ.withdrawPlayer(p, money);
                     }
 //                    h.setMana(h.getMana() - mana);
                     if (damage > 0) {

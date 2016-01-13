@@ -2505,7 +2505,7 @@ public class Townships extends JavaPlugin {
                         " (+" + srt.getDailyPower() + ") / " + sr.getMaxPower());
                 player.sendMessage(ChatColor.GRAY + "Taxes: " + ChatColor.GOLD + formatter.format(sr.getTaxes())
                         + ChatColor.GRAY + " Total Revenue: " + (revenue < 0 ? ChatColor.RED : ChatColor.GOLD) + formatter.format(revenue) +
-                        ChatColor.GRAY + " Disabled: " + (notDisabled && !hasGrace ? (ChatColor.GOLD + "false") : (ChatColor.RED + "true")));
+                        ChatColor.GRAY + " Disabled: " + (notDisabled || hasGrace ? (ChatColor.GOLD + "false") : (ChatColor.RED + "true")));
                 
                 if (!notDisabled && hasGrace) {
                     long hours = (gracePeriod / (1000 * 60 * 60)) % 24;

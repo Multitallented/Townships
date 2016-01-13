@@ -39,10 +39,11 @@ public class EffectAntiCamp extends Effect {
     
     public class IntruderListener implements Listener {
         private final EffectAntiCamp effect;
-        private final HashMap<String, Integer> deathCounts = new HashMap<String, Integer>();
+//        private final HashMap<String, Integer> deathCounts = new HashMap<String, Integer>();
         private final HashMap<String, String> lastDamager = new HashMap<String, String>();
         private final HashMap<String, String> lastDeathTown = new HashMap<String, String>();
         private final HashMap<String, Long> lastPoison = new HashMap<String, Long>();
+        private final HashMap<String, ArrayList<Long>> lastDeath = new HashMap<String, ArrayList<Long>>();
 
         public IntruderListener(EffectAntiCamp effect) {
             this.effect = effect;
@@ -81,8 +82,11 @@ public class EffectAntiCamp extends Effect {
                 lastDeathTown.remove(playerName);
             }
 
-            if (deathCounts.containsKey(playerName)) {
-                deathCounts.remove(playerName);
+//            if (deathCounts.containsKey(playerName)) {
+//                deathCounts.remove(playerName);
+//            }
+            if (lastDeath.containsKey(playerName)) {
+                lastDeath.remove(playerName);
             }
         }
 
@@ -91,20 +95,20 @@ public class EffectAntiCamp extends Effect {
             Player player = event.getEntity();
             RegionManager rm = getPlugin().getRegionManager();
 
-            //If you die, then remove them you from lastDamager
+            //Remove killer from lastDamager
             if (lastDamager.containsKey(player.getName())) {
 
                 //remove the killer from deathCounts
-                if (deathCounts.containsKey(lastDamager.get(player.getName()))) {
-                    deathCounts.remove(lastDamager.get(player.getName()));
+                if (lastDeath.containsKey(lastDamager.get(player.getName()))) {
+                    lastDeath.remove(lastDamager.get(player.getName()));
                 }
                 lastDamager.remove(player.getName());
             }
 
             //if the person who's dying has died more than twice, then I don't care
-            if (deathCounts.containsKey(player.getName()) && deathCounts.get(player.getName()) > 2) {
-                return;
-            }
+//            if (lastDeath.containsKey(player.getName()) && lastDeath.get(player.getName()).size() > 2) {
+//                return;
+//            }
 
             //If they died outside of a super region then I don't care
             ArrayList<SuperRegion> superRegions = rm.getContainingSuperRegions(player.getLocation());
@@ -131,11 +135,28 @@ public class EffectAntiCamp extends Effect {
 
                 //If the person dying was a member, then increment their deathCount
                 if (sr.hasOwner(player.getName()) || sr.hasMember(player.getName())) {
-                    if (deathCounts.containsKey(player.getName())) {
-                        deathCounts.put(player.getName(), deathCounts.get(player.getName()) + 1);
-                    } else {
-                        deathCounts.put(player.getName(), 1);
+
+                    //Don't count deaths in a previous town
+                    if (!lastDeathTown.get(player.getName()).equals(sr.getName())) {
+                        lastDeath.remove(player.getName());
                     }
+
+                    //if the person hasn't died yet then add to lastDeath
+                    if (!lastDeath.containsKey(player.getName())) {
+                        lastDeath.put(player.getName(), new ArrayList<Long>());
+                        lastDeath.get(player.getName()).add(System.currentTimeMillis());
+                    } else {
+                        lastDeath.get(player.getName()).add(System.currentTimeMillis());
+                    }
+                    if (lastDeath.get(player.getName()).size() > 3) {
+                        lastDeath.get(player.getName()).remove(0);
+                    }
+
+//                    if (deathCounts.containsKey(player.getName())) {
+//                        deathCounts.put(player.getName(), deathCounts.get(player.getName()) + 1);
+//                    } else {
+//                        deathCounts.put(player.getName(), 1);
+//                    }
                     lastDeathTown.put(player.getName(), sr.getName());
                     return;
                 }
@@ -150,10 +171,25 @@ public class EffectAntiCamp extends Effect {
             ArrayList<String> removeMeDeathCounts = new ArrayList<String>();
 
             //Go through everyone who has died in their own town
-            for (String name : deathCounts.keySet()) {
+            for (String name : lastDeath.keySet()) {
+
+                //Cleanup
+                {
+                    ArrayList<Integer> removeIndexes = new ArrayList<Integer>();
+                    int i = 0;
+                    for (Long deathTime : lastDeath.get(name)) {
+                        if (deathTime + 600000 < System.currentTimeMillis()) {
+                            removeIndexes.add(i);
+                        }
+                        i++;
+                    }
+                    for (Integer j : removeIndexes) {
+                        lastDeath.get(name).remove((int) j);
+                    }
+                }
 
                 //Skip people who haven't died enough
-                if (deathCounts.get(name) < 3 || !lastDeathTown.containsKey(name)) {
+                if (lastDeath.get(name).size() < 3 || !lastDeathTown.containsKey(name)) {
                     continue;
                 }
 
@@ -188,7 +224,7 @@ public class EffectAntiCamp extends Effect {
                 lastPoison.put(sr.getName(), System.currentTimeMillis() + (period * 1000));
             }
             for (String s : removeMeDeathCounts) {
-                deathCounts.remove(s);
+                lastDeath.remove(s);
             }
 
             //Deal Poison Damage
@@ -199,7 +235,6 @@ public class EffectAntiCamp extends Effect {
 
                 if (lastPoisonTime == null || System.currentTimeMillis() > lastPoisonTime) {
                     removeMePoison.add(srName);
-//                    lastPoison.remove(srName);
                     continue;
                 }
 
