@@ -87,9 +87,17 @@ public class EffectDrainPower extends Effect {
             String srName = sign.getLine(0);
             SuperRegion sr = plugin.getRegionManager().getSuperRegion(srName);
             if (sr == null) {
-                sign.setLine(2, "invalid name");
-                sign.update();
-                return;
+                for (SuperRegion currentSR : plugin.getRegionManager().getSortedSuperRegions()) {
+                    if (currentSR.getName().startsWith(srName)) {
+                        sr = currentSR;
+                        break;
+                    }
+                }
+                if (sr == null) {
+                    sign.setLine(2, "invalid name");
+                    sign.update();
+                    return;
+                }
             }
 
             //Check if too far away

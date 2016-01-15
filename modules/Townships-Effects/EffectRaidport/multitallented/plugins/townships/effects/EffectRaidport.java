@@ -103,9 +103,17 @@ public class EffectRaidport extends Effect {
                 return;
             }
             if (sr == null) {
-                block.breakNaturally();
-                event.getPlayer().sendMessage(ChatColor.RED + "[Townships] Raid location lost. New target required.");
-                return;
+                for (SuperRegion currentSR : rm.getSortedSuperRegions()) {
+                    if (currentSR.getName().startsWith(sign.getLine(0))) {
+                        sr = currentSR;
+                        break;
+                    }
+                }
+                if (sr == null) {
+                    block.breakNaturally();
+                    event.getPlayer().sendMessage(ChatColor.RED + "[Townships] Raid location lost. New target required.");
+                    return;
+                }
             }
             SuperRegionType srt = rm.getSuperRegionType(sr.getType());
             if (srt == null) {
