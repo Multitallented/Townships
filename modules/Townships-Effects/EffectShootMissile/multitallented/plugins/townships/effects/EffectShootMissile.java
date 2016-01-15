@@ -45,195 +45,150 @@ public class EffectShootMissile extends Effect {
 
     public class IntruderListener implements Listener {
         private final EffectShootMissile effect;
-        private HashMap<TNTPrimed, Integer> tntThreads = new HashMap<TNTPrimed, Integer>();
-        private HashMap<TNTPrimed, Integer> tntStages = new HashMap<TNTPrimed, Intger>();
+        private final HashMap<TNTPrimed, FiredTNT> firedTNT = new HashMap<TNTPrimed, FiredTNT>();
+        private final HashMap<Integer, Long> cooldowns = new HashMap<Integer, Long>();
 
         public IntruderListener(EffectShootArrow effect) {
             this.effect = effect;
         }
 
         @EventHandler
-        public void onCustomEvent(ToPlayerInRegionEvent event) {
+        public void onPlayerInteract(PlayerInteractEvent event) {
+        	if ((event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK) ||
+        			event.getPlayer().getHeldItem() == null || event.getPlayer().getHeldItem().getItemMeta() == null ||
+        			event.getPlayer().getHeldItem().getItemMeta().getDisplayName() == null ||
+        			!event.getPlayer().getHeldItem().getItemMeta().getDisplayName().equals("Missile Controller")) {
+        		return;
+        	}
+        	Player player = (Player) event.getPlayer();
+        	int id = -1;
+        	try {
+        		String name = player.getHeldItem().getItemMeta().getDisplayName();
+        		id = Integer.parseInt(name.replace("Missile Controller ", ""));
+        	} catch (Exception e) {
+        		return;
+        	}
+        	if (id < 0) {
+        		return;
+        	}
+        	RegionManager rm = plugin.getRegionManager();
+        	Region region = rm.getRegionById(id);
+        	if (region == null || !effect.isOwnerOfRegion(player, l)) {
+        		return;
+        	}
+        	RegionType rt = rm.getRegionType(region.getType());
+        	boolean hasEffect = false;
+        	int periods = 4;
+        	long cooldown = 8;
+        	for (String effectName : rt.getEffects()) {
+        		if (effectName.startsWith("shoot_missile")) {
+        			hasEffect = true;
+        			String[] effectParts = effectName.split("\\.");
+        			if (effectParts.length > 2) {
+        				try {
+        					periods = Integer.parseInt(effectParts[1]);
+        					cooldown = Long.parseLong(effectParts[2]);
+        				} catch (Exception e) {
+        					//Do nothing and just use defaults
+        				}
+        			}
 
-            Location l = event.getLocation();
-            Region r = rm.getRegion(l);
-            RegionType rt = rm.getRegionType(r.getType());
-            //Check if the region has the shoot arrow effect and return arrow velocity
-            boolean hasEffect = false;
-            int damage = 1;
-            double speed = 0.5;
-            int spread = 12;
-            for (String s : rt.getEffects()) {
-                if (s.startsWith("shoot_arrow")) {
-                    hasEffect = true;
-                    String[] parts = s.split("\\.");
-                    if (parts.length > 1) {
-                        try {
-                            damage = Integer.parseInt(parts[1]);
-                        } catch (Exception e) {
-                            break;
-                        }
-                    }
-                    if (parts.length > 2) {
-                        try {
-                            speed = Double.parseDouble(parts[2]) / 10;
-                        } catch (Exception e) {
-                            break;
-                        }
-                    }
-                    if (parts.length > 3) {
-                        try {
-                            spread = Integer.parseInt(parts[3]);
-                        } catch (Exception e) {
-                            break;
-                        }
-                    }
-                    break;
-                }
-            }
-            if (!hasEffect) {
-                return;
-            }
+        			break;
+				}
+        	}
+        	if (!hasEffect) {
+        		return;
+        	}
+        	if (!effect.hasReagents(region.getLocation())) {
+				return;
+			}
 
-            if (l.getBlock().getRelative(BlockFace.UP).getType() != Material.AIR) {
-                return;
-            }
+        	if (cooldowns.get(id) > System.currentTimeMillis()) {
+        		//TODO show how long till reload is done
+        		player.sendMessage(ChatColor.RED + "[Townships] That " + region.getType() + " is reloading.");
+        		return;
+        	}
+        	HashSet<Byte> bytes = new HashSet<Byte>();
+        	bytes.add((Byte) 0);
+        	Location targetLocation = player.getTargetBlock(bytes, 100).getLocation();
+			Location fireLocation = region.getLocation();
+			if (!targetLocation.getWorld().equals(fireLocation.getWorld())) {
+				return;
+			}
+			fireLocation.setY(fireLocation.getY() + 2);
+			TNTPrimed tnt = (TNTPrimed) fireLocation.getWorld().spawn(fireLocation, TNTPrimed.class);
 
-            Player player = event.getPlayer();
+			Vector vector = ((targetLocation.getX() - fireLocation.getX()) / periods,
+							 (targetLocation.getY() - fireLocation.getY()) / periods + (100 / periods * 2),
+							 (targetLocation.getZ() - fireLocation.getZ()) / periods);
+			tnt.setVelocity(vector);
 
+			FiredTNT ftnt = new FiredTNT(tnt, periods, fireLocation, targetLocation);
+			firedTNT.put(tnt, ftnt);
+			cooldowns.put(id, System.currentTimeMillis() + cooldown * 1000);
 
-            //Check if the player is invincible
-            if (player.getGameMode() != GameMode.SURVIVAL && player.getGameMode() != GameMode.ADVENTURE) {
-                return;
-            }
-
-//            EntityDamageEvent damageEvent = new EntityDamageEvent(null, DamageCause.CUSTOM, 0);
-//            Bukkit.getPluginManager().callEvent(damageEvent);
-//            if (damageEvent.isCancelled()) {
-//                System.out.println("damage cancelled");
-//                return;
-//            }
-
-            //Check if the player owns or is a member of the region
-            if (effect.isOwnerOfRegion(player, l) || effect.isMemberOfRegion(player, l)) {
-                return;
-            }
-
-
-            //Check to see if the Townships has enough reagents
-            if (!effect.hasReagents(l)) {
-                return;
-            }
-
-            //Damage check before firing
-//            EntityDamageEvent testEvent = new EntityDamageEvent(player, DamageCause.CUSTOM, 0);
-//            Bukkit.getPluginManager().callEvent(testEvent);
-//            if (testEvent.isCancelled()) {
-//                System.out.println("damage test failed");
-//                return;
-//            }
-
-            HashSet<Arrow> arrows = new HashSet<Arrow>();
-            for (Arrow arrow : arrowDamages.keySet()) {
-                if (arrow.isDead() || arrow.isOnGround() || !arrow.isValid()) {
-                    arrows.add(arrow);
-                }
-            }
-            for (Arrow arrow : arrows) {
-                arrowDamages.remove(arrow);
-            }
-
-
-            //Calculate trajectory of the arrow
-            Location loc = l.getBlock().getRelative(BlockFace.UP, 2).getLocation();
-            Location playerLoc = player.getEyeLocation();
-
-            Vector vel = new Vector(playerLoc.getX() - loc.getX(), playerLoc.getY() - loc.getY(), playerLoc.getZ() - loc.getZ());
-
-            //Make sure the target is not hiding behind something
-//            if (!hasCleanShot(loc, playerLoc)) {
-//                System.out.println("line of sight failed");
-//                return;
-//            }
-
-            //Run upkeep but don't need to know if upkeep occured
-            effect.forceUpkeep(event);
-
-
-            //Location playerLoc = player.getLocation().getBlock().getRelative(BlockFace.UP).getLocation();
-            //playerLoc.setX(Math.floor(playerLoc.getX()) + 0.5);
-            //playerLoc.setY(Math.floor(playerLoc.getY()) + 0.5);
-            //playerLoc.setZ(Math.floor(playerLoc.getZ()) + 0.5);
-
-
-            //Spawn and set velocity of the arrow
-            Arrow arrow = l.getWorld().spawnArrow(loc, vel, (float) (speed), spread);
-            arrowDamages.put(arrow, damage);
-            //arrowOwners.put(arrow, r.getOwners().get(0));
+			player.sendMessage(ChatColor.GREEN + "[Townships] Your " + region.getType() + " has fired a missile at your new target.";
         }
 
         @EventHandler
-        public void onEntityDamageByEntityEvent(EntityDamageEvent event) {
-            if (event.isCancelled() || event.getDamage() < 1 || !(event instanceof EntityDamageByEntityEvent)) {
-                return;
-            }
-            EntityDamageByEntityEvent edby = (EntityDamageByEntityEvent) event;
-            Entity projectile = edby.getDamager();
-            if (!(projectile instanceof Arrow) || !(edby.getEntity() instanceof Player)) {
-                return;
-            }
-            Arrow arrow = (Arrow) projectile;
-            Player damagee = (Player) edby.getEntity();
-            double maxHP = damagee.getMaxHealth();
-            if (arrowDamages.get(arrow) == null) {
-                return;
-            }
-
-            //String ownerName = arrowOwners.get(arrow);
-            //Player player = null;
-            //if (ownerName != null) {
-            //    player = Bukkit.getPlayer(ownerName);
-            //}
-
-            int damage = (int) ((double) arrowDamages.get(arrow) / 100.0 * (double) maxHP);
-            arrowDamages.remove(arrow);
-            //arrowOwners.remove(arrow);
-
-            //if (player != null) {
-            //    damagee.damage(damage, player);
-            //} else {
-//                damagee.damage(damage);
-                //damagee.damage(damage);
-            //}
-//            event.setCancelled(true);
-            event.setDamage(damage);
-
+        public void onTwoSecondEvent(TwoSecondEvent event) {
+        	HashSet<TNTPrimed> removeTNT = new HashSet<TNTPrimed>();
+        	for (FiredTNT tnt : firedTNT.values()) {
+				if (tnt.getStage() < 2) {
+					removeTNT.add(tnt.getTNT());
+				}
+				TNTPrimed tntPrimed = tnt.getTNT();
+				Location tntLocation = tntPrimed.getLocation();
+				tntPrimed.remove();
+				tntPrimed = tntLocation.getWorld().spawn(tntLocation, TNTPrimed.class);
+				//TODO set velocity and decrement the stage
+        	}
+        	for (TNTPrimed tnt : removeTNT) {
+        		firedTNT.remove(tnt);
+        	}
+        	HashSet<Integer> removeMe = new HashSet<Integer>();
+        	for (Integer id : cooldowns.keySet()) {
+        		if (cooldowns.get(id) < System.currentTimeMillis()) {
+        			removeMe.add(id);
+        		}
+        	}
+        	for (Integer id : removeMe) {
+				cooldowns.remove(id);
+        	}
         }
 
-        private boolean hasCleanShot(Location shootHere, Location targetHere) {
-            double x = shootHere.getX();
-            double y = shootHere.getY();
-            double z = shootHere.getZ();
+        private class FiredTNT {
+        	public FiredTNT(TNTPrimed tnt, int stage, Location startLocation, Location targetLocation) {
+        		this.tnt = tnt;
+        		this.stage = stage;
+        		this.startLocation = startLocation;
+        		this.targetLocation = targetLocation;
+        	}
 
-            double x1 = targetHere.getX();
-            double y1 = targetHere.getY();
-            double z1 = targetHere.getZ();
-
-            Vector start = new Vector(x, y, z);
-            Vector end = new Vector (x1, y1, z1);
-
-            BlockIterator bi = new BlockIterator(shootHere.getWorld(), start, end, 0, (int) shootHere.distance(targetHere));
-            while (bi.hasNext()) {
-                Block block = bi.next();
-                System.out.println("[Townships] " + ((int) block.getLocation().getX()) +
-                        ":" + ((int) block.getLocation().getY()) + ":" +
-                        ((int) block.getLocation().getZ()) + " " + !Util.isSolidBlock(block.getType()));
-                if (!Util.isSolidBlock(block.getType())) {
-                    return false;
-                }
-            }
-
-            return true;
+        	public void setTNT(TNTPrimed tnt) {
+        		this.tnt = tnt;
+        	}
+        	public void setStage(int stage) {
+        		this.stage = stage;
+        	}
+        	public void setStartLocation(Location startLocation) {
+        		this.startLocation = startLocation;
+        	}
+        	public void setTargetLocation(Location targetLocation) {
+        		this.targetLocation = targetLocation;
+        	}
+        	public TNTPrimed getTNT() {
+        		return tnt;
+        	}
+        	public int getStage() {
+        		return stage;
+        	}
+        	public Location getStartLocation() {
+        		return startLocation;
+        	}
+        	public Location getTargetLocation() {
+        		return targetLocation;
+        	}
         }
     }
 
