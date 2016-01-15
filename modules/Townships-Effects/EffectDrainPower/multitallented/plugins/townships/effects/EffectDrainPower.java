@@ -62,6 +62,10 @@ public class EffectDrainPower extends Effect {
                 if (period < 1) {
                 return;
             }
+            int damage = 1;
+            if (event.getEffect().size() > 2) {
+            	damage = Integer.parseInt(event.getEffect()[2]);
+            }
 
             if (lastUpkeep.get(l) != null && period + lastUpkeep.get(l) > new Date().getTime()) {
                 return;
@@ -161,7 +165,11 @@ public class EffectDrainPower extends Effect {
             //double randZ = srLoc.getZ() + Math.random()*rawRadius*(-1 * (int) (Math.random() + 0.5));
             //final Location endLoc = new Location(srLoc.getWorld(), randX, 240, randZ);
 
-            plugin.getRegionManager().reduceRegion(sr);
+			if (damage == 1) {
+            	plugin.getRegionManager().reduceRegion(sr);
+			} else {
+				plugin.getRegionManager().reduceRegion(sr, damage);
+			}
             if (sr.getPower() < 1 && Townships.getConfigManager().getDestroyNoPower()) {
                 plugin.getRegionManager().destroySuperRegion(sr.getName(), true);
             }
