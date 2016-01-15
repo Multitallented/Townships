@@ -115,6 +115,10 @@ public class EffectShootMissile extends Effect {
 			if (!targetLocation.getWorld().equals(fireLocation.getWorld())) {
 				return;
 			}
+			if (targetLocation.distanceSquared(fireLocation) < 1600) {
+				player.sendMessage(ChatColor.RED + "[Townships] That target is too close to shoot at.";
+				return;
+			}
 			fireLocation.setY(fireLocation.getY() + 2);
 			TNTPrimed tnt = (TNTPrimed) fireLocation.getWorld().spawn(fireLocation, TNTPrimed.class);
 
@@ -141,6 +145,7 @@ public class EffectShootMissile extends Effect {
 				Location tntLocation = tntPrimed.getLocation();
 				tntPrimed.remove();
 				tntPrimed = tntLocation.getWorld().spawn(tntLocation, TNTPrimed.class);
+				Vector vector = new Vector
 				//TODO set velocity and decrement the stage
         	}
         	for (TNTPrimed tnt : removeTNT) {
