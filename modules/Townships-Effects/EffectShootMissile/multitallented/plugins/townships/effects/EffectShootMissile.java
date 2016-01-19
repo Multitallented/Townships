@@ -95,20 +95,24 @@ public class EffectShootMissile extends Effect {
                 return;
             }
 
-            if (cooldowns.get(id) > System.currentTimeMillis()) {
-                //TODO show how long till reload is done
-                player.sendMessage(ChatColor.RED + "[Townships] That " + region.getType() + " is reloading.");
-                return;
-            }
-            HashSet<Byte> bytes = new HashSet<Byte>();
-            bytes.add((byte) 0);
-            Location targetLocation = player.getTargetBlock(bytes, 100).getLocation();
-            Location fireLocation = region.getLocation();
-            if (!targetLocation.getWorld().equals(fireLocation.getWorld())) {
-                return;
-            }
-            fireLocation.setY(fireLocation.getY() + 2);
-            TNTPrimed tnt = (TNTPrimed) fireLocation.getWorld().spawn(fireLocation, TNTPrimed.class);
+        	if (cooldowns.get(id) > System.currentTimeMillis()) {
+        		//TODO show how long till reload is done
+        		player.sendMessage(ChatColor.RED + "[Townships] That " + region.getType() + " is reloading.");
+        		return;
+        	}
+        	HashSet<Byte> bytes = new HashSet<Byte>();
+        	bytes.add((Byte) 0);
+        	Location targetLocation = player.getTargetBlock(bytes, 100).getLocation();
+			Location fireLocation = region.getLocation();
+			if (!targetLocation.getWorld().equals(fireLocation.getWorld())) {
+				return;
+			}
+			if (targetLocation.distanceSquared(fireLocation) < 1600) {
+				player.sendMessage(ChatColor.RED + "[Townships] That target is too close to shoot at.";
+				return;
+			}
+			fireLocation.setY(fireLocation.getY() + 2);
+			TNTPrimed tnt = (TNTPrimed) fireLocation.getWorld().spawn(fireLocation, TNTPrimed.class);
 
             Vector vector = new Vector((targetLocation.getX() - fireLocation.getX()) / periods,
                              (targetLocation.getY() - fireLocation.getY()) / periods + (100 / periods * 2),
@@ -123,30 +127,31 @@ public class EffectShootMissile extends Effect {
         }
 
         @EventHandler
-        public void onTwoSecondEvent(ToTwoSecondEvent event) {
-            HashSet<TNTPrimed> removeTNT = new HashSet<TNTPrimed>();
-            for (FiredTNT tnt : firedTNT.values()) {
-                if (tnt.getStage() < 2) {
-                    removeTNT.add(tnt.getTNT());
-                }
-                TNTPrimed tntPrimed = tnt.getTNT();
-                Location tntLocation = tntPrimed.getLocation();
-                tntPrimed.remove();
-                tntPrimed = tntLocation.getWorld().spawn(tntLocation, TNTPrimed.class);
-                //TODO set velocity and decrement the stage
-            }
-            for (TNTPrimed tnt : removeTNT) {
-                firedTNT.remove(tnt);
-            }
-            HashSet<Integer> removeMe = new HashSet<Integer>();
-            for (Integer id : cooldowns.keySet()) {
-                if (cooldowns.get(id) < System.currentTimeMillis()) {
-                    removeMe.add(id);
-                }
-            }
-            for (Integer id : removeMe) {
-                cooldowns.remove(id);
-            }
+        public void onTwoSecondEvent(TwoSecondEvent event) {
+        	HashSet<TNTPrimed> removeTNT = new HashSet<TNTPrimed>();
+        	for (FiredTNT tnt : firedTNT.values()) {
+				if (tnt.getStage() < 2) {
+					removeTNT.add(tnt.getTNT());
+				}
+				TNTPrimed tntPrimed = tnt.getTNT();
+				Location tntLocation = tntPrimed.getLocation();
+				tntPrimed.remove();
+				tntPrimed = tntLocation.getWorld().spawn(tntLocation, TNTPrimed.class);
+				Vector vector = new Vector
+				//TODO set velocity and decrement the stage
+        	}
+        	for (TNTPrimed tnt : removeTNT) {
+        		firedTNT.remove(tnt);
+        	}
+        	HashSet<Integer> removeMe = new HashSet<Integer>();
+        	for (Integer id : cooldowns.keySet()) {
+        		if (cooldowns.get(id) < System.currentTimeMillis()) {
+        			removeMe.add(id);
+        		}
+        	}
+        	for (Integer id : removeMe) {
+				cooldowns.remove(id);
+        	}
         }
 
         private class FiredTNT {
