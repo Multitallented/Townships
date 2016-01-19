@@ -63,7 +63,7 @@ public class EffectDrainPower extends Effect {
                 return;
             }
             int damage = 1;
-            if (event.getEffect().size() > 2) {
+            if (event.getEffect().length > 2) {
             	damage = Integer.parseInt(event.getEffect()[2]);
             }
 

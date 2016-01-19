@@ -186,8 +186,13 @@ public class Townships extends JavaPlugin {
                     category = "";
                 }
             }
-            if (category.equals("all") {
+            if (category.equals("all")) {
                 ShopGUIListener.openCategoryShop(player, true);
+                return true;
+            }
+            boolean showAll = false;
+            if (args.length > 2 && args[2].equals("all")) {
+                showAll = true;
             }
             if (!regionManager.getRegionCategories().containsKey(category) && (category.equals("") && 
                     !regionManager.getRegionCategories().containsKey("other"))
@@ -208,7 +213,11 @@ public class Townships extends JavaPlugin {
                 return true;
             }
             if (!category.equals("towns")) {
-                for (String s : regionManager.getRegionCategories().get(category)) {
+                ArrayList<String> baseRegions = regionManager.getRegionCategories().get(category);
+                if (!showAll) {
+                    baseRegions = ShopGUIListener.determineVisibleRegions(player, baseRegions);
+                }
+                for (String s : baseRegions) {
                     RegionType rt = regionManager.getRegionType(s);
                     if (rt.getUnlockCost() > 0 && !perms.has(player, "townships.create." + s)) {
                         
@@ -217,7 +226,11 @@ public class Townships extends JavaPlugin {
                 }
             }
             if (category.equals("") && regionManager.getRegionCategories().containsKey("other")) {
-                for (String s : regionManager.getRegionCategories().get("other")) {
+                ArrayList<String> baseRegions = regionManager.getRegionCategories().get("other");
+                if (!showAll) {
+                    baseRegions = ShopGUIListener.determineVisibleRegions(player, baseRegions);
+                }
+                for (String s : baseRegions) {
                     RegionType rt = regionManager.getRegionType(s);
                     if (rt.getUnlockCost() > 0 && !perms.has(player, "townships.create." + s)) {
                         
@@ -251,7 +264,7 @@ public class Townships extends JavaPlugin {
                     }
                 });
             }
-            ShopGUIListener.openListShop(regions, superRegions, player, category);
+            ShopGUIListener.openListShop(regions, superRegions, player, category, showAll);
             
             return true;
         } else if (args.length > 1 && args[0].equalsIgnoreCase("confirm")) {

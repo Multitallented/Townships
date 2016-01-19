@@ -53,8 +53,14 @@ public class ShopGUIListener implements Listener {
             }
         }
         //Inventory inv = Bukkit.createInventory(null, size, ChatColor.RED + "Townships Categories");
+        String title;
+        if (showAll) {
+            title = ChatColor.RED + "All Shop Categories";
+        } else {
+            title = ChatColor.RED + "Shop Categories";
+        }
         Inventory inv = Bukkit.createInventory(new MenuHolder(Bukkit.createInventory(null, size)), 
-                size, ChatColor.RED + "Shop Categories");
+                size, title);
         
         
         int i = 0;
@@ -85,7 +91,7 @@ public class ShopGUIListener implements Listener {
 
         ArrayList<String> removeMe = new ArrayList<String>();
         for (String categoryName : returnCategories.keySet()) {
-            ArrayList<String> categoryRegions = determineVisibleRegions(player, categoryName, returnCategories.get(categoryName));
+            ArrayList<String> categoryRegions = determineVisibleRegions(player, returnCategories.get(categoryName));
             if (categoryRegions.isEmpty()) {
                 removeMe.add(categoryName);
             }
@@ -97,7 +103,7 @@ public class ShopGUIListener implements Listener {
         return returnCategories;
     }
 
-    private static ArrayList<String> determineVisibleRegions(Player player, String category, ArrayList<String> baseRegions) {
+    public static ArrayList<String> determineVisibleRegions(Player player, ArrayList<String> baseRegions) {
         ArrayList<String> returnList = new ArrayList<String>(baseRegions);
 
         HashMap<String, Boolean> superRegions = new HashMap<String, Boolean>();
@@ -118,11 +124,21 @@ public class ShopGUIListener implements Listener {
             //TODO filter out regions here
 
             //super region filter
+            boolean srPerm = rt.getSuperRegions().isEmpty();
             for (String sr : rt.getSuperRegions()) {
-                if (!superRegions.containsKey(sr) || !(superRegions.get(sr) || permRegions.contains(regionName))) {
-                    removeMe.add(regionName);
-                    continue regionLoop;
+                if (superRegions.containsKey(sr) && (superRegions.get(sr) || permRegions.contains(regionName))) {
+                    srPerm = true;
                 }
+            }
+            if (!srPerm) {
+                removeMe.add(regionName);
+                continue;
+            }
+
+            //filter for regions without unlock costs
+            if (rt.getUnlockCost() < 1) {
+                removeMe.add(regionName);
+                continue;
             }
         }
 
@@ -133,7 +149,7 @@ public class ShopGUIListener implements Listener {
         return returnList;
     }
 
-    public static void openListShop(ArrayList<RegionType> regions, ArrayList<SuperRegionType> superRegions, Player player, String category) {
+    public static void openListShop(ArrayList<RegionType> regions, ArrayList<SuperRegionType> superRegions, Player player, String category, boolean showAll) {
         int size = 9;
         int actualSize = regions.size() + superRegions.size() + 1;
         if (actualSize > size) {
@@ -257,7 +273,11 @@ public class ShopGUIListener implements Listener {
         }
         ItemStack is = new ItemStack(Material.REDSTONE_BLOCK);
         ItemMeta isMeta = is.getItemMeta();
-        isMeta.setDisplayName(ChatColor.RESET + "Back to Categories");
+        if (showAll) {
+            isMeta.setDisplayName(ChatColor.RESET + "Back to All Categories");
+        } else {
+            isMeta.setDisplayName(ChatColor.RESET + "Back to Categories");
+        }
         ArrayList<String> lore = new ArrayList<String>();
         lore.add("list " + category);
         isMeta.setLore(lore);
@@ -340,7 +360,8 @@ public class ShopGUIListener implements Listener {
         }
         
         String category = "";
-        boolean isCategory = name.equalsIgnoreCase("Shop Categories");
+        boolean showAll = name.equalsIgnoreCase("All Shop Categories");
+        boolean isCategory = showAll || name.equalsIgnoreCase("Shop Categories");
         String[] names = name.split(" ");
         if (!isCategory) {
             if (names.length != 2 || !names[1].equalsIgnoreCase("Shop")) {
@@ -361,7 +382,11 @@ public class ShopGUIListener implements Listener {
         if (isCategory) {
             String categoryOpen = ChatColor.stripColor(event.getCurrentItem().getItemMeta().getDisplayName()).toLowerCase();
             player.closeInventory();
-            player.performCommand("to shop " + categoryOpen);
+            if (showAll) {
+                player.performCommand("to shop " + categoryOpen + " all");
+            } else {
+                player.performCommand("to shop " + categoryOpen);
+            }
             return;
         }
 
@@ -369,6 +394,12 @@ public class ShopGUIListener implements Listener {
                 ChatColor.stripColor(event.getCurrentItem().getItemMeta().getDisplayName()).equals("Back to Categories")) {
             player.closeInventory();
             player.performCommand("to shop");
+            return;
+        }
+        if (event.getCurrentItem().hasItemMeta() &&
+                ChatColor.stripColor(event.getCurrentItem().getItemMeta().getDisplayName()).equals("Back to All Categories")) {
+            player.closeInventory();
+            player.performCommand("to shop all");
             return;
         }
 

@@ -3,27 +3,19 @@ package multitallented.plugins.townships.effects;
 import java.util.HashMap;
 import java.util.HashSet;
 import multitallented.redcastlemedia.bukkit.townships.Townships;
-import multitallented.redcastlemedia.bukkit.townships.Util;
 import multitallented.redcastlemedia.bukkit.townships.effect.Effect;
-import multitallented.redcastlemedia.bukkit.townships.events.ToPlayerInRegionEvent;
+import multitallented.redcastlemedia.bukkit.townships.events.ToTwoSecondEvent;
 import multitallented.redcastlemedia.bukkit.townships.region.Region;
 import multitallented.redcastlemedia.bukkit.townships.region.RegionManager;
 import multitallented.redcastlemedia.bukkit.townships.region.RegionType;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.entity.Arrow;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.bukkit.util.BlockIterator;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.util.Vector;
 
 /**
@@ -48,60 +40,60 @@ public class EffectShootMissile extends Effect {
         private final HashMap<TNTPrimed, FiredTNT> firedTNT = new HashMap<TNTPrimed, FiredTNT>();
         private final HashMap<Integer, Long> cooldowns = new HashMap<Integer, Long>();
 
-        public IntruderListener(EffectShootArrow effect) {
+        public IntruderListener(EffectShootMissile effect) {
             this.effect = effect;
         }
 
         @EventHandler
         public void onPlayerInteract(PlayerInteractEvent event) {
-        	if ((event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK) ||
-        			event.getPlayer().getHeldItem() == null || event.getPlayer().getHeldItem().getItemMeta() == null ||
-        			event.getPlayer().getHeldItem().getItemMeta().getDisplayName() == null ||
-        			!event.getPlayer().getHeldItem().getItemMeta().getDisplayName().equals("Missile Controller")) {
-        		return;
-        	}
-        	Player player = (Player) event.getPlayer();
-        	int id = -1;
-        	try {
-        		String name = player.getHeldItem().getItemMeta().getDisplayName();
-        		id = Integer.parseInt(name.replace("Missile Controller ", ""));
-        	} catch (Exception e) {
-        		return;
-        	}
-        	if (id < 0) {
-        		return;
-        	}
-        	RegionManager rm = plugin.getRegionManager();
-        	Region region = rm.getRegionById(id);
-        	if (region == null || !effect.isOwnerOfRegion(player, l)) {
-        		return;
-        	}
-        	RegionType rt = rm.getRegionType(region.getType());
-        	boolean hasEffect = false;
-        	int periods = 4;
-        	long cooldown = 8;
-        	for (String effectName : rt.getEffects()) {
-        		if (effectName.startsWith("shoot_missile")) {
-        			hasEffect = true;
-        			String[] effectParts = effectName.split("\\.");
-        			if (effectParts.length > 2) {
-        				try {
-        					periods = Integer.parseInt(effectParts[1]);
-        					cooldown = Long.parseLong(effectParts[2]);
-        				} catch (Exception e) {
-        					//Do nothing and just use defaults
-        				}
-        			}
+            if ((event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK) ||
+                    event.getPlayer().getItemInHand() == null || event.getPlayer().getItemInHand().getItemMeta() == null ||
+                    event.getPlayer().getItemInHand().getItemMeta().getDisplayName() == null ||
+                    !event.getPlayer().getItemInHand().getItemMeta().getDisplayName().equals("Missile Controller")) {
+                return;
+            }
+            Player player = (Player) event.getPlayer();
+            int id = -1;
+            try {
+                String name = player.getItemInHand().getItemMeta().getDisplayName();
+                id = Integer.parseInt(name.replace("Missile Controller ", ""));
+            } catch (Exception e) {
+                return;
+            }
+            if (id < 0) {
+                return;
+            }
+            RegionManager rm = getPlugin().getRegionManager();
+            Region region = rm.getRegionByID(id);
+            if (region == null || !effect.isOwnerOfRegion(player, region.getLocation())) {
+                return;
+            }
+            RegionType rt = rm.getRegionType(region.getType());
+            boolean hasEffect = false;
+            int periods = 4;
+            long cooldown = 8;
+            for (String effectName : rt.getEffects()) {
+                if (effectName.startsWith("shoot_missile")) {
+                    hasEffect = true;
+                    String[] effectParts = effectName.split("\\.");
+                    if (effectParts.length > 2) {
+                        try {
+                            periods = Integer.parseInt(effectParts[1]);
+                            cooldown = Long.parseLong(effectParts[2]);
+                        } catch (Exception e) {
+                            //Do nothing and just use defaults
+                        }
+                    }
 
-        			break;
-				}
-        	}
-        	if (!hasEffect) {
-        		return;
-        	}
-        	if (!effect.hasReagents(region.getLocation())) {
-				return;
-			}
+                    break;
+                }
+            }
+            if (!hasEffect) {
+                return;
+            }
+            if (!effect.hasReagents(region.getLocation())) {
+                return;
+            }
 
         	if (cooldowns.get(id) > System.currentTimeMillis()) {
         		//TODO show how long till reload is done
@@ -122,16 +114,16 @@ public class EffectShootMissile extends Effect {
 			fireLocation.setY(fireLocation.getY() + 2);
 			TNTPrimed tnt = (TNTPrimed) fireLocation.getWorld().spawn(fireLocation, TNTPrimed.class);
 
-			Vector vector = ((targetLocation.getX() - fireLocation.getX()) / periods,
-							 (targetLocation.getY() - fireLocation.getY()) / periods + (100 / periods * 2),
-							 (targetLocation.getZ() - fireLocation.getZ()) / periods);
-			tnt.setVelocity(vector);
+            Vector vector = new Vector((targetLocation.getX() - fireLocation.getX()) / periods,
+                             (targetLocation.getY() - fireLocation.getY()) / periods + (100 / periods * 2),
+                             (targetLocation.getZ() - fireLocation.getZ()) / periods);
+            tnt.setVelocity(vector);
 
-			FiredTNT ftnt = new FiredTNT(tnt, periods, fireLocation, targetLocation);
-			firedTNT.put(tnt, ftnt);
-			cooldowns.put(id, System.currentTimeMillis() + cooldown * 1000);
+            FiredTNT ftnt = new FiredTNT(tnt, periods, fireLocation, targetLocation);
+            firedTNT.put(tnt, ftnt);
+            cooldowns.put(id, System.currentTimeMillis() + cooldown * 1000);
 
-			player.sendMessage(ChatColor.GREEN + "[Townships] Your " + region.getType() + " has fired a missile at your new target.";
+            player.sendMessage(ChatColor.GREEN + "[Townships] Your " + region.getType() + " has fired a missile at your new target.");
         }
 
         @EventHandler
@@ -163,37 +155,42 @@ public class EffectShootMissile extends Effect {
         }
 
         private class FiredTNT {
-        	public FiredTNT(TNTPrimed tnt, int stage, Location startLocation, Location targetLocation) {
-        		this.tnt = tnt;
-        		this.stage = stage;
-        		this.startLocation = startLocation;
-        		this.targetLocation = targetLocation;
-        	}
+            private int stage;
+            private Location startLocation;
+            private Location targetLocation;
+            private TNTPrimed tnt;
 
-        	public void setTNT(TNTPrimed tnt) {
-        		this.tnt = tnt;
-        	}
-        	public void setStage(int stage) {
-        		this.stage = stage;
-        	}
-        	public void setStartLocation(Location startLocation) {
-        		this.startLocation = startLocation;
-        	}
-        	public void setTargetLocation(Location targetLocation) {
-        		this.targetLocation = targetLocation;
-        	}
-        	public TNTPrimed getTNT() {
-        		return tnt;
-        	}
-        	public int getStage() {
-        		return stage;
-        	}
-        	public Location getStartLocation() {
-        		return startLocation;
-        	}
-        	public Location getTargetLocation() {
-        		return targetLocation;
-        	}
+            public FiredTNT(TNTPrimed tnt, int stage, Location startLocation, Location targetLocation) {
+                this.tnt = tnt;
+                this.stage = stage;
+                this.startLocation = startLocation;
+                this.targetLocation = targetLocation;
+            }
+
+            public void setTNT(TNTPrimed tnt) {
+                this.tnt = tnt;
+            }
+            public void setStage(int stage) {
+                this.stage = stage;
+            }
+            public void setStartLocation(Location startLocation) {
+                this.startLocation = startLocation;
+            }
+            public void setTargetLocation(Location targetLocation) {
+                this.targetLocation = targetLocation;
+            }
+            public TNTPrimed getTNT() {
+                return tnt;
+            }
+            public int getStage() {
+                return stage;
+            }
+            public Location getStartLocation() {
+                return startLocation;
+            }
+            public Location getTargetLocation() {
+                return targetLocation;
+            }
         }
     }
 
