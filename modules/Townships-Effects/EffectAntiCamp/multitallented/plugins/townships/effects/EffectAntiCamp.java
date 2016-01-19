@@ -137,7 +137,7 @@ public class EffectAntiCamp extends Effect {
                 if (sr.hasOwner(player.getName()) || sr.hasMember(player.getName())) {
 
                     //Don't count deaths in a previous town
-                    if (!lastDeathTown.get(player.getName()).equals(sr.getName())) {
+                    if (lastDeathTown.containsKey(player.getName()) && !lastDeathTown.get(player.getName()).equals(sr.getName())) {
                         lastDeath.remove(player.getName());
                     }
 
