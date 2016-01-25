@@ -221,8 +221,7 @@ public class RegionEntityListener implements Listener {
         } else {
             return;
         }
-        boolean isInCombat = false;
-        //TODO add combat check here
+        boolean isInCombat = Townships.hsb != null && Townships.hsb.isPlayerInCombat(player);
 
         Location loc = player.getLocation();
         for (SuperRegion sr : rm.getContainingSuperRegions(loc)) {
