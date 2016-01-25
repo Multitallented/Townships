@@ -137,6 +137,12 @@ public class EffectPort extends Effect {
                 return;
             }
             Player player = event.getPlayer();
+
+            if (Townships.hsb != null && Townships.hsb.isPlayerInCombat(player)) {
+                player.sendMessage(ChatColor.GRAY + "[Townships] You can't port while in combat");
+                return;
+            }
+
             Economy econ = Townships.econ;
 
             //Check if on cooldown
@@ -248,7 +254,10 @@ public class EffectPort extends Effect {
                     if (!p.isOnline() || p.isDead()) {
                         return;
                     }
-                    //TODO combat check
+                    if (Townships.hsb != null && Townships.hsb.isPlayerInCombat(p)) {
+                        p.sendMessage(ChatColor.GRAY + "[Townships] You can't port while in combat");
+                        return;
+                    }
 //                    if (h != null && h.isInCombat()) {
 //                        p.sendMessage(ChatColor.RED + "[Townships] You cant use that while in combat");
 //                        return;

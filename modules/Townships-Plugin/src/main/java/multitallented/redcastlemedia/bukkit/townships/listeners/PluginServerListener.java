@@ -24,12 +24,17 @@ public class PluginServerListener implements Listener {
         Plugin currentPlugin = event.getPlugin();
         String name = currentPlugin.getDescription().getName();
 
+        if (name.equals("HeroScoreboard")) {
+            Townships.hsb = null;
+        }
     }
 
     @EventHandler
     public void onPluginEnable(PluginEnableEvent event) {
         Plugin currentPlugin = event.getPlugin();
         String name = currentPlugin.getDescription().getName();
-
+        if (name.equals("HeroScoreboard")) {
+            Townships.hsb = (HeroScoreboard) currentPlugin;
+        }
     }
 }

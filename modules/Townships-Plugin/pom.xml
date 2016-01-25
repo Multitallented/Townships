@@ -38,6 +38,14 @@
             <systemPath>D:/champions test server/plugins/NoCheatPlus.jar</systemPath>
         </dependency>
         <dependency>
+            <groupId>multitallented.plugins.heroscoreboard</groupId>
+            <artifactId>HeroScoreboard</artifactId>
+            <version>0.1</version>
+            <scope>system</scope>
+            <optional>true</optional>
+            <systemPath>D:/champions test server/plugins/HeroScoreboard.jar</systemPath>
+        </dependency>
+        <dependency>
             <groupId>com.griefcraft</groupId>
             <artifactId>lwc</artifactId>
             <version>4.4.0-SNAPSHOT</version>

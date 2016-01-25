@@ -56,6 +56,7 @@ public class Townships extends JavaPlugin {
     private GUIManager guiManager;
     private static EffectManager effectManager;
     private CheckRegionTask theSender;
+    public static HeroScoreboard hsb = null;
     
     @Override
     public void onDisable() {
@@ -79,7 +80,11 @@ public class Townships extends JavaPlugin {
         setupPermissions();
         setupEconomy();
         setupChat();
-        
+
+        if (Bukkit.getPluginManager().isPluginEnabled("HeroScoreboard")) {
+            Townships.hsb = (HeroScoreboard) Bukkit.getPluginManager().getPlugin("HeroScoreboard");
+        }
+
         //Register Listeners Here
         serverListener = new PluginServerListener(this);
         blockListener = new RegionBlockListener(this);
