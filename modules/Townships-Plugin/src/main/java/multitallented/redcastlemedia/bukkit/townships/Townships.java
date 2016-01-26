@@ -284,6 +284,10 @@ public class Townships extends JavaPlugin {
             RegionType rt = regionManager.getRegionType(args[1]);
             NumberFormat formatter = NumberFormat.getCurrencyInstance();
             if (rt != null) {
+                if (rt.getUnlockCost() < 1) {
+                    player.sendMessage(ChatColor.RED + "[Townships] " + rt.getName() + " can't be unlocked.");
+                    return true;
+                }
                 if (!econ.has(player, rt.getUnlockCost())) {
                    player.sendMessage(ChatColor.RED + "[Townships] You don't have " + formatter.format(rt.getUnlockCost()) + " to buy a " + rt.getName()); 
                    return true;
