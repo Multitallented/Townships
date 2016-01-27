@@ -23,8 +23,7 @@ import org.bukkit.potion.PotionEffectType;
  * @author Multitallented
  */
 public class EffectFood extends Effect {
-    protected HashSet<SuperRegion> unfedRegions;
-    protected HashMap<SuperRegion, ArrayList<Region>> fedRegions;
+    protected HashSet<SuperRegion> unfedRegions = new HashSet<SuperRegion>();
     protected final RegionManager rm;
     private final String EFFECT_NAME = "food";
     private final int EFFECT_DURATION = 600; //ticks
@@ -74,69 +73,56 @@ public class EffectFood extends Effect {
         
         @EventHandler
         public void onSuperRegionCreated(ToSuperRegionCreatedEvent event) {
-            loadSuperRegions();
-            /*SuperRegion sr = rm.getSuperRegion(event.getName());
+            SuperRegion sr = rm.getSuperRegion(event.getName());
             SuperRegionType srt = rm.getSuperRegionType(sr.getType());
             if (!srt.hasEffect(EFFECT_NAME)) {
                 return;
             }
             for (Region r : rm.getContainedRegions(sr)) {
-                if (regionHasEffect(r, EFFECT_NAME) != 0) {
-                    if (fedRegions.containsKey(sr)) {
-                        fedRegions.get(sr).add(r);
-                    } else {
-                        ArrayList<Region> re = new ArrayList<Region>();
-                        re.add(r);
-                        fedRegions.put(sr, re);
+                RegionType rt = rm.getRegionType(r.getType());
+                boolean hasEffect = false;
+                for (String effectName : rt.getEffects()) {
+                    if (effectName.equals(EFFECT_NAME) {
+                        hasEffect = true;
+                        break;
                     }
-                    return;
                 }
+                if (!hasEffect) {
+                    continue;
+                }
+                return;
             }
-            unfedRegions.add(sr);*/
+            unfedRegions.add(sr);
         }
         
         @EventHandler
         public void onSuperRegionDestroyed(ToSuperRegionDestroyedEvent event) {
-            loadSuperRegions();
-            /*
-            SuperRegion sr = event.getSuperRegion();
-            if (unfedRegions.contains(sr)) {
-                unfedRegions.remove(sr);
-            }
-            if (fedRegions.containsKey(sr)) {
-                fedRegions.remove(sr);
-            }*/
+            unfedRegions.remove(event.getSuperRegion);
         }
         
         @EventHandler
         public void onRegionCreated(ToRegionCreatedEvent event) {
-            loadSuperRegions();
-            /*RegionManager rm = getPlugin().getRegionManager();
+            RegionManager rm = getPlugin().getRegionManager();
             Region r = event.getRegion();
             if (r == null || rm.getRegionType(r.getType()) == null) {
                 return;
             }
-            if (effect.regionHasEffect(r, EFFECT_NAME) == 0) {
-                return;
+            RegionType rt = rm.getRegionType(r.getType());
+            boolean hasEffect = false;
+            for (String effectName : rt.getEffects()) {
+                if (effectName.equals(EFFECT_NAME) {
+                    hasEffect = true;
+                    break;
+                }
+            }
+            if (!hasEffect) {
+                continue;
             }
             outer: for (SuperRegion sr : rm.getContainingSuperRegions(r.getLocation())) {
-                SuperRegionType srt = rm.getSuperRegionType(sr.getType());
-                if (!srt.hasEffect(EFFECT_NAME)) {
-                    continue;
-                }
-                if (fedRegions.containsKey(sr)) {
-                    fedRegions.get(sr).add(r);
-                } else {
-                    ArrayList<Region> re = new ArrayList<Region>();
-                    re.add(r);
-                    fedRegions.put(sr, re);
-                }
-                
                 if (unfedRegions.contains(sr)) {
                     unfedRegions.remove(sr);
                 }
-            }*/
-            
+            }
         }
         
         @EventHandler
@@ -167,17 +153,19 @@ public class EffectFood extends Effect {
         }
         
         private void loadSuperRegions() {
-            unfedRegions = new HashSet<SuperRegion>();
             outer: for (SuperRegion sr : rm.getSortedSuperRegions()) {
                 SuperRegionType srt = rm.getSuperRegionType(sr.getType());
                 if (!srt.hasEffect(EFFECT_NAME)) {
                     continue;
                 }
                 boolean fed = false;
-                for (Region r : rm.getContainedRegions(sr)) {
-                    if (regionHasEffect(r, EFFECT_NAME) != 0) {
-                        fed = true;
-                        break;
+                regionLoop: for (Region r : rm.getContainedRegions(sr)) {
+                    RegionType rt = rm.getRegionType(r.getType());
+                    for (String effectName : rt.getEffects()) {
+                        if (effectName.equals(EFFECT_NAME) {
+                            fed = true;
+                            break regionLoop;
+                        }
                     }
                 }
                 if (!fed) {
