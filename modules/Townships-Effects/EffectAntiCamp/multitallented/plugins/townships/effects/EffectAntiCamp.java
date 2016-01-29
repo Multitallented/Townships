@@ -9,6 +9,7 @@ import multitallented.redcastlemedia.bukkit.townships.region.RegionManager;
 import multitallented.redcastlemedia.bukkit.townships.region.SuperRegion;
 import multitallented.redcastlemedia.bukkit.townships.region.SuperRegionType;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -81,6 +82,9 @@ public class EffectAntiCamp extends Effect {
             if (lastDeathTown.containsKey(playerName)) {
                 lastDeathTown.remove(playerName);
             }
+            if (lastDamager.containsKey(playerName)) {
+                lastDamager.remove(playerName);
+            }
 
 //            if (deathCounts.containsKey(playerName)) {
 //                deathCounts.remove(playerName);
@@ -137,7 +141,9 @@ public class EffectAntiCamp extends Effect {
                 if (sr.hasOwner(player.getName()) || sr.hasMember(player.getName())) {
 
                     //Don't count deaths in a previous town
-                    if (lastDeathTown.containsKey(player.getName()) && !lastDeathTown.get(player.getName()).equals(sr.getName())) {
+                    if (lastDeathTown.containsKey(player.getName()) &&
+                            lastDeathTown.get(player.getName()) != null &&
+                            !lastDeathTown.get(player.getName()).equals(sr.getName())) {
                         lastDeath.remove(player.getName());
                     }
 
@@ -221,6 +227,9 @@ public class EffectAntiCamp extends Effect {
                     continue;
                 }
 
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    player.sendMessage(ChatColor.WHITE + "[Townships] " + ChatColor.RED + sr.getName() + ChatColor.WHITE + "'s anti-camp has been " + ChatColor.ITALIC + "triggered.");
+                }
                 lastPoison.put(sr.getName(), System.currentTimeMillis() + (period * 1000));
             }
             for (String s : removeMeDeathCounts) {
@@ -267,9 +276,8 @@ public class EffectAntiCamp extends Effect {
                 }
 
                 for (Player p : Bukkit.getOnlinePlayers()) {
-                    ArrayList<SuperRegion> containingSR = rm.getContainingSuperRegions(p.getLocation());
                     for (SuperRegion r : rm.getContainingSuperRegions(p.getLocation())) {
-                        if (!containingSR.contains(r)) {
+                        if (!lastPoison.containsKey(r.getName())) {
                             break;
                         }
 
@@ -282,6 +290,9 @@ public class EffectAntiCamp extends Effect {
                 }
             }
             for (String s : removeMePoison) {
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    player.sendMessage(ChatColor.WHITE + "[Townships] " + ChatColor.RED + s + ChatColor.WHITE + "'s anti-camp has expired.");
+                }
                 lastPoison.remove(s);
             }
         }

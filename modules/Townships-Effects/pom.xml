@@ -20,6 +20,14 @@
             <artifactId>Townships-Plugin</artifactId>
             <version>${townships.version}</version>
         </dependency>
+        <dependency>
+            <groupId>multitallented.plugins.heroscoreboard</groupId>
+            <artifactId>HeroScoreboard</artifactId>
+            <version>0.1</version>
+            <scope>system</scope>
+            <optional>true</optional>
+            <systemPath>D:/champions test server/plugins/HeroScoreboard.jar</systemPath>
+        </dependency>
     </dependencies>
 
     <build>

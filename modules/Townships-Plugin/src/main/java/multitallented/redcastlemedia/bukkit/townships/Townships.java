@@ -6,6 +6,8 @@ package multitallented.redcastlemedia.bukkit.townships;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.logging.Logger;
+
+import multitallented.plugins.heroscoreboard.HeroScoreboard;
 import multitallented.redcastlemedia.bukkit.townships.checkregiontask.CheckRegionTask;
 import multitallented.redcastlemedia.bukkit.townships.effect.EffectManager;
 import multitallented.redcastlemedia.bukkit.townships.events.ToCommandEffectEvent;
@@ -115,7 +117,7 @@ public class Townships extends JavaPlugin {
         //Setup repeating sync task for checking regions
         log.info("[Townships] starting synchronous effect task");
         theSender = new CheckRegionTask(getServer(), this);
-        getServer().getScheduler().scheduleSyncRepeatingTask(this, theSender, 10L, 10L);
+        getServer().getScheduler().scheduleSyncRepeatingTask(this, theSender, 5L, 5L);
         //theSender.run();
         
         System.currentTimeMillis();
@@ -320,6 +322,10 @@ public class Townships extends JavaPlugin {
             SuperRegion enemyTown = regionManager.getSuperRegion(args[1]);
             if (myTown == null || enemyTown == null) {
                 player.sendMessage(ChatColor.GRAY + "[Townships] That isn't a valid super-region.");
+                return true;
+            }
+            if (myTown.equals(enemyTown)) {
+                player.sendMessage(ChatColor.GRAY + "[Townships] You cant declare war on yourself.");
                 return true;
             }
 
@@ -2338,12 +2344,54 @@ public class Townships extends JavaPlugin {
             if (locationsToDestroy.isEmpty()) {
                 player.sendMessage(ChatColor.GRAY + "[Townships] You're not standing in a region.");
             }
-            
+            for (SuperRegion sr : regionManager.getContainingSuperRegions(loc)) {
+                if (!sr.hasOwner(player.getName()) && sr.hasMember(player.getName())) {
+                    player.sendMessage(ChatColor.RED + "[Townships] You can't destroy regions in towns you don't own.");
+                    return true;
+                }
+            }
+
             for (Location l : locationsToDestroy) {
                 regionManager.removeRegion(l);
                 player.sendMessage(ChatColor.GRAY + "[Townships] Region destroyed.");
             }
             return true;
+        } else if (args.length > 2 && args[0].equalsIgnoreCase("player")) {
+            String oldName = args[1];
+            String newName = args[2];
+
+            if (Townships.perms == null || !Townships.perms.has(player, "townships.admin")) {
+                player.sendMessage(ChatColor.GRAY + "[Townships] you don't have permission for that command.");
+                return true;
+            }
+            for (Region region : regionManager.getSortedRegions()) {
+                if (region.isMember(oldName)) {
+                    regionManager.setMember(region, oldName);
+                    regionManager.setMember(region, newName);
+                }
+                if (region.isPrimaryOwner(oldName)) {
+                    regionManager.setOwner(region, oldName);
+                    regionManager.setPrimaryOwner(region, newName);
+                } else if (region.isOwner(oldName)) {
+                    regionManager.setOwner(region, oldName);
+                    regionManager.setOwner(region, newName);
+                }
+            }
+            for (SuperRegion sr : regionManager.getSortedSuperRegions()) {
+                if (sr.hasMember(oldName)) {
+                    regionManager.removeMember(sr, oldName);
+                    ArrayList<String> perm = new ArrayList<String>();
+                    perm.add("member");
+                    regionManager.setMember(sr, newName, perm);
+                }
+                if (sr.hasOwner(oldName)) {
+                    regionManager.setOwner(sr, oldName);
+                    regionManager.setOwner(sr, newName);
+                }
+            }
+            player.sendMessage(ChatColor.GREEN + "[Townships] Replaced " + oldName + " with " + newName);
+            return true;
+
         } else if (args.length > 0 && args[0].equalsIgnoreCase("list")) {
             String category = "";
 
@@ -2479,6 +2527,14 @@ public class Townships extends JavaPlugin {
             }
             ToRenameEvent toRenameEvent = new ToRenameEvent(sr, args[1], args[2]);
             Bukkit.getPluginManager().callEvent(toRenameEvent);
+
+            for (Region region : regionManager.getSortedRegions()) {
+                if (region.isMember("sr:" + args[1])) {
+                    regionManager.setMember(region, "sr:" + args[1]);
+                    regionManager.setMember(region, "sr:" + args[2]);
+                }
+            }
+
             ArrayList<Location> childLocations = sr.getChildLocations();
             regionManager.destroySuperRegion(args[1], false, true);
             regionManager.addSuperRegion(args[2], sr.getLocation(), sr.getType(), sr.getOwners(), sr.getMembers(), sr.getPower(), sr.getBalance(), childLocations);

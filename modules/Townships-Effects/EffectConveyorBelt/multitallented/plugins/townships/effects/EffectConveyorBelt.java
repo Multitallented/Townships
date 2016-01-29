@@ -1,4 +1,4 @@
-package main.java.multitallented.plugins.townships.effects;
+package multitallented.plugins.townships.effects;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,6 +18,7 @@ import org.bukkit.block.Chest;
 import org.bukkit.entity.StorageMinecart;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -178,16 +179,13 @@ public class EffectConveyorBelt extends Effect {
                     return;
                 }
                 if (!sm.getLocation().getChunk().isLoaded()) {
-                    boolean cartRemoved = false;
                     try {
                         Chest returnChest = (Chest) r.getLocation().getBlock().getState();
-                        cartRemoved = returnChest.getInventory().addItem(new ItemStack(Material.STORAGE_MINECART, 1));
+                        returnChest.getInventory().addItem(new ItemStack(Material.STORAGE_MINECART, 1));
                     } catch (Exception e) {
                         //don't care
                     }
-                    if (cartRemoved) {
-                        sm.remove();
-                    }
+                    sm.remove();
                     carts.remove(r);
                     return;
                 }

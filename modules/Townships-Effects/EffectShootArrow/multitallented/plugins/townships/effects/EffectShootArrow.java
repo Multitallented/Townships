@@ -23,6 +23,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BlockIterator;
 import org.bukkit.util.Vector;
 
@@ -95,11 +96,23 @@ public class EffectShootArrow extends Effect {
                 return;
             }
 
-            if (l.getBlock().getRelative(BlockFace.UP).getType() != Material.AIR) {
+            if (l.getBlock().getRelative(BlockFace.UP).getType() != Material.AIR ||
+                    l.getBlock().getRelative(BlockFace.UP, 2).getType() != Material.AIR) {
                 return;
             }
 
             Player player = event.getPlayer();
+
+            HashSet<Arrow> removeMe = new HashSet<Arrow>();
+            //clean up arrows
+            for (Arrow arrow : arrowDamages.keySet()) {
+                if (arrow.isDead() || !arrow.isValid()) {
+                    removeMe.add(arrow);
+                }
+            }
+            for (Arrow arrow : removeMe) {
+                arrowDamages.remove(arrow);
+            }
 
 
             //Check if the player is invincible
@@ -173,17 +186,16 @@ public class EffectShootArrow extends Effect {
         }
 
         @EventHandler
-        public void onEntityDamageByEntityEvent(EntityDamageEvent event) {
-            if (event.isCancelled() || event.getDamage() < 1 || !(event instanceof EntityDamageByEntityEvent)) {
+        public void onEntityDamageByEntityEvent(EntityDamageByEntityEvent event) {
+            if (event.isCancelled()) {
                 return;
             }
-            EntityDamageByEntityEvent edby = (EntityDamageByEntityEvent) event;
-            Entity projectile = edby.getDamager();
-            if (!(projectile instanceof Arrow) || !(edby.getEntity() instanceof Player)) {
+            Entity projectile = event.getDamager();
+            if (!(projectile instanceof Arrow) || !(event.getEntity() instanceof Player)) {
                 return;
             }
             Arrow arrow = (Arrow) projectile;
-            Player damagee = (Player) edby.getEntity();
+            Player damagee = (Player) event.getEntity();
             double maxHP = damagee.getMaxHealth();
             if (arrowDamages.get(arrow) == null) {
                 return;
@@ -206,8 +218,53 @@ public class EffectShootArrow extends Effect {
                 //damagee.damage(damage);
             //}
 //            event.setCancelled(true);
+            damage = adjustForArmor(damage, damagee);
             event.setDamage(damage);
 
+        }
+        private int adjustForArmor(int damage, Player player) {
+            org.bukkit.inventory.PlayerInventory inv = player.getInventory();
+            ItemStack boots = inv.getBoots();
+            ItemStack helmet = inv.getHelmet();
+            ItemStack chest = inv.getChestplate();
+            ItemStack pants = inv.getLeggings();
+            double red = 0.0;
+            if (helmet != null) {
+                if (helmet.getType() == Material.LEATHER_HELMET) red = red + 0.04;
+                else if (helmet.getType() == Material.GOLD_HELMET) red = red + 0.08;
+                else if (helmet.getType() == Material.CHAINMAIL_HELMET) red = red + 0.08;
+                else if (helmet.getType() == Material.IRON_HELMET) red = red + 0.08;
+                else if (helmet.getType() == Material.DIAMOND_HELMET) red = red + 0.12;
+            }
+
+            if (boots != null) {
+                if (boots.getType() == Material.LEATHER_BOOTS) red = red + 0.04;
+                else if (boots.getType() == Material.GOLD_BOOTS) red = red + 0.04;
+                else if (boots.getType() == Material.CHAINMAIL_BOOTS) red = red + 0.04;
+                else if (boots.getType() == Material.IRON_BOOTS) red = red + 0.08;
+                else if (boots.getType() == Material.DIAMOND_BOOTS) red = red + 0.12;
+            }
+
+            if (pants != null) {
+                if (pants.getType() == Material.LEATHER_LEGGINGS) red = red + 0.08;
+                else if (pants.getType() == Material.GOLD_LEGGINGS) red = red + 0.12;
+                else if (pants.getType() == Material.CHAINMAIL_LEGGINGS) red = red + 0.16;
+                else if (pants.getType() == Material.IRON_LEGGINGS) red = red + 0.20;
+                else if (pants.getType() == Material.DIAMOND_LEGGINGS) red = red + 0.24;
+            }
+
+            if (chest != null) {
+                if (chest.getType() == Material.LEATHER_CHESTPLATE) red = red + 0.12;
+                else if (chest.getType() == Material.GOLD_CHESTPLATE) red = red + 0.20;
+                else if (chest.getType() == Material.CHAINMAIL_CHESTPLATE) red = red + 0.20;
+                else if (chest.getType() == Material.IRON_CHESTPLATE) red = red + 0.24;
+                else if (chest.getType() == Material.DIAMOND_CHESTPLATE) red = red + 0.32;
+            }
+            if (red == 0) {
+                return damage;
+            } else {
+                return (int) Math.round(damage / (1 - red));
+            }
         }
 
         private boolean hasCleanShot(Location shootHere, Location targetHere) {
