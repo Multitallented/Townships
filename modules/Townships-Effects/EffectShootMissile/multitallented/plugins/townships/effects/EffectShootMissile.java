@@ -169,17 +169,17 @@ public class EffectShootMissile extends Effect {
             double vt = 1.96;
 
             double deltaX = Math.sqrt(Math.pow(targetLocation.getX() - fireLocation.getX(), 2) + Math.pow(targetLocation.getZ() + fireLocation.getZ(), 2));
-            double deltaY = targetLocation.getY() - fireLocation.getY();
+            deltaX = targetLocation.distance(fireLocation);
+//            double deltaY = targetLocation.getY() - fireLocation.getY();
 
             double theta = 64.2556-0.0651852*deltaX;
+            theta = Math.PI * theta / 180;
 
-            double current = 0;
-            double prevPrev = 0.041*deltaX;
-            double prev = prevPrev + 0.01;
-            accuracy = accuracy / 10000;
+            double current = 0.977778*g*(11.4205+deltaX)/(vt*Math.cos(theta));
+//            double prevPrev = 0.041*deltaX;
+//            double prev = prevPrev + 0.01;
+//            accuracy = accuracy / 10000;
 
-
-            current = 0.977778*g*(11.4205+deltaX)/(vt*Math.cos(theta));
             /*int i = 0;
             while (Math.abs(functionDx(deltaX, deltaY, prev)) > accuracy && i <= 9001) {
                 current = (prevPrev*functionDx(deltaX, deltaY, prev)-prev*functionDx(deltaX,deltaY,prevPrev))/(functionDx(deltaX,deltaY,prev)-functionDx(deltaX, deltaY, prevPrev));
@@ -189,9 +189,9 @@ public class EffectShootMissile extends Effect {
             }*/
 //            player.sendMessage(ChatColor.GREEN + "[Townships] Val: " + Math.abs(functionDx(deltaX, deltaY, prev)));
 //            player.sendMessage(ChatColor.GREEN + "[Townships] Iterations: " + i);
-            double newX = current*0.5*Math.cos(Math.atan2(targetLocation.getZ() - fireLocation.getZ(), targetLocation.getX() - fireLocation.getX()));
-            double newZ = current*0.5*Math.sin(Math.atan2(targetLocation.getZ() - fireLocation.getZ(), targetLocation.getX() - fireLocation.getX()));
-            double newY = current*0.8660254;
+            double newX = current*Math.cos(theta)*Math.cos(Math.atan2(targetLocation.getZ() - fireLocation.getZ(), targetLocation.getX() - fireLocation.getX()));
+            double newZ = current*Math.cos(theta)*Math.sin(Math.atan2(targetLocation.getZ() - fireLocation.getZ(), targetLocation.getX() - fireLocation.getX()));
+            double newY = current*Math.sin(theta);
 
 //            player.sendMessage(ChatColor.GREEN + "[Townships] Current Velocity: " + current);
 
@@ -204,7 +204,10 @@ public class EffectShootMissile extends Effect {
             cooldowns.put(id, System.currentTimeMillis() + cooldown * 1000);
 
             effect.forceUpkeep(region.getLocation());
+            /*player.sendMessage(ChatColor.GREEN + "[Townships] Dx: " + deltaX);
             player.sendMessage(ChatColor.GREEN + "[Townships] Velocity: " + newX + ", " + newY + ", " + newZ);
+            player.sendMessage(ChatColor.GREEN + "[Townships] Theta: " + theta);
+            player.sendMessage(ChatColor.GREEN + "[Townships] Current: " + current);*/
             player.getWorld().playEffect(fireLocation.getBlock().getRelative(BlockFace.NORTH, 1).getLocation(), org.bukkit.Effect.EXPLOSION_LARGE, 1);
             player.getWorld().playEffect(fireLocation.getBlock().getRelative(BlockFace.EAST, 1).getLocation(), org.bukkit.Effect.EXPLOSION_LARGE, 1);
             player.getWorld().playEffect(fireLocation.getBlock().getRelative(BlockFace.WEST, 1).getLocation(), org.bukkit.Effect.EXPLOSION_LARGE, 1);

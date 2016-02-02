@@ -2453,6 +2453,19 @@ public class Townships extends JavaPlugin {
                             message += s + ", ";
                         }*/
                         regions.add(regionManager.getRegionType(s));
+                    } else if (createAll || permNull || perms.has(player, "townships.rebuild." + s)) {
+                        if (createAll || permNull) {
+                            regions.add(regionManager.getRegionType(s));
+                        } else {
+                            rebuild: for (Region reg : regionManager.getSortedRegions()) {
+                                for (String effect : regionManager.getRegionType(reg.getType()).getEffects()) {
+                                    if (effect.equals("rebuild." + s) && perms.has(player, "townships.create." + reg.getType())) {
+                                        regions.add(regionManager.getRegionType(s));
+                                        break rebuild;
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }

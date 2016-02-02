@@ -16,7 +16,9 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.projectiles.ProjectileSource;
@@ -98,6 +100,23 @@ public class EffectAntiCamp extends Effect {
         public void onDeath(PlayerDeathEvent event) {
             Player player = event.getEntity();
             RegionManager rm = getPlugin().getRegionManager();
+
+            EntityDamageEvent damageEvent = event.getEntity().getLastDamageCause();
+            if (!(damageEvent instanceof EntityDamageByEntityEvent)) {
+                return;
+            }
+            EntityDamageByEntityEvent dEvent = (EntityDamageByEntityEvent) damageEvent;
+            Entity damager = dEvent.getDamager();
+            if (dEvent.getCause() == DamageCause.PROJECTILE) {
+                ProjectileSource shooter = ((Projectile)damager).getShooter();
+                if (!(shooter instanceof Entity)) {
+                    return;
+                }
+                damager = (Entity) shooter;
+            }
+            if (!(damager instanceof Player)) {
+                return;
+            }
 
             //Remove killer from lastDamager
             if (lastDamager.containsKey(player.getName())) {
