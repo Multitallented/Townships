@@ -71,13 +71,13 @@ public class InfoGUIListener implements Listener {
             lore.add(ChatColor.RESET + "" + ChatColor.RED + "Build Cost: " + formatter.format(region.getMoneyRequirement()));
         }
 
-	    double defaultSalvage = Townships.getConfigManager().getSalvage();
-	    double salvageValue = region.getSalvage() != 0 ? region.getSalvage() : defaultSalvage > 0 ? defaultSalvage * region.getMoneyRequirement() / 100 : 0;
-	    if (region.getSalvage() > 0) {
-		    lore.add(ChatColor.RESET + "" + ChatColor.GREEN + "Salvage Value: " + formatter.format(salvageValue));
-	    } else if (region.getSalvage() < 0) {
-		    lore.add(ChatColor.RESET + "" + ChatColor.RED + "Salvage Value: " + formatter.format(salvageValue));
-	    }
+        double defaultSalvage = Townships.getConfigManager().getSalvage();
+        double salvageValue = region.getSalvage() != 0 ? region.getSalvage() : defaultSalvage > 0 ? defaultSalvage * region.getMoneyRequirement() / 100 : 0;
+        if (region.getSalvage() > 0) {
+            lore.add(ChatColor.RESET + "" + ChatColor.GREEN + "Salvage Value: " + formatter.format(salvageValue));
+        } else if (region.getSalvage() < 0) {
+            lore.add(ChatColor.RESET + "" + ChatColor.RED + "Salvage Value: " + formatter.format(salvageValue));
+        }
 
         if (region.getMoneyOutput() > 0) {
             lore.add(ChatColor.RESET + "" + ChatColor.GREEN + "Payout: +" + formatter.format(region.getMoneyOutput()));
@@ -335,6 +335,8 @@ public class InfoGUIListener implements Listener {
                 }
             } else if (parts.length > 1 && parts[0].equals("who")) {
                 player.performCommand("to who " + parts[1]);
+            } else {
+                MainMenuGUIListener.openMainMenu(player);
             }
             return;
         }

@@ -272,6 +272,9 @@ public class Townships extends JavaPlugin {
             ShopGUIListener.openListShop(regions, superRegions, player, category, showAll);
             
             return true;
+        } else if (args.length > 0 && args[0].equalsIgnoreCase("menu")) {
+            MainMenuListener.openMainMenu(player);
+            return true;
         } else if (args.length > 1 && args[0].equalsIgnoreCase("confirm")) {
 
             ShopGUIListener.openConfirmation(player, args[1]);
