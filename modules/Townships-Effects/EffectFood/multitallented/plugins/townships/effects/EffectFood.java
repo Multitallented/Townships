@@ -39,7 +39,7 @@ public class EffectFood extends Effect {
         private final EffectFood effect;
         public UpkeepListener(EffectFood effect) {
             this.effect = effect;
-            loadSuperRegions();
+//            loadSuperRegions();
         }
         
         
@@ -71,108 +71,108 @@ public class EffectFood extends Effect {
             p.sendMessage(ChatColor.GRAY + "[Townships] Build a food supply.");
         }
         
-        @EventHandler
-        public void onSuperRegionCreated(ToSuperRegionCreatedEvent event) {
-            SuperRegion sr = rm.getSuperRegion(event.getName());
-            SuperRegionType srt = rm.getSuperRegionType(sr.getType());
-            if (!srt.hasEffect(EFFECT_NAME)) {
-                return;
-            }
-            for (Region r : rm.getContainedRegions(sr)) {
-                RegionType rt = rm.getRegionType(r.getType());
-                boolean hasEffect = false;
-                for (String effectName : rt.getEffects()) {
-                    if (effectName.equals(EFFECT_NAME) {
-                        hasEffect = true;
-                        break;
-                    }
-                }
-                if (!hasEffect) {
-                    continue;
-                }
-                return;
-            }
-            unfedRegions.add(sr);
-        }
-        
-        @EventHandler
-        public void onSuperRegionDestroyed(ToSuperRegionDestroyedEvent event) {
-            unfedRegions.remove(event.getSuperRegion);
-        }
-        
-        @EventHandler
-        public void onRegionCreated(ToRegionCreatedEvent event) {
-            RegionManager rm = getPlugin().getRegionManager();
-            Region r = event.getRegion();
-            if (r == null || rm.getRegionType(r.getType()) == null) {
-                return;
-            }
-            RegionType rt = rm.getRegionType(r.getType());
-            boolean hasEffect = false;
-            for (String effectName : rt.getEffects()) {
-                if (effectName.equals(EFFECT_NAME) {
-                    hasEffect = true;
-                    break;
-                }
-            }
-            if (!hasEffect) {
-                continue;
-            }
-            outer: for (SuperRegion sr : rm.getContainingSuperRegions(r.getLocation())) {
-                if (unfedRegions.contains(sr)) {
-                    unfedRegions.remove(sr);
-                }
-            }
-        }
-        
-        @EventHandler
-        public void onRegionDestroyed(ToRegionDestroyedEvent event) {
-            loadSuperRegions();
-            /*Region r = event.getRegion();
-            if (effect.regionHasEffect(r, EFFECT_NAME) == 0) {
-                return;
-            }
-            outer: for (SuperRegion sr : rm.getContainingSuperRegions(r.getLocation())) {
-                SuperRegionType srt = rm.getSuperRegionType(sr.getType());
-                if (!srt.hasEffect(EFFECT_NAME)) {
-                    continue;
-                }
-                if (fedRegions.containsKey(sr)) {
-                    ArrayList<Region> re = fedRegions.get(sr);
-                    if (re.contains(r)) {
-                        re.remove(r);
-                        if (re.isEmpty()) {
-                            fedRegions.remove(sr);
-                            unfedRegions.add(sr);
-                        }
-                    }
-                } else if (!unfedRegions.contains(sr)) {
-                    unfedRegions.add(sr);
-                }
-            }*/
-        }
-        
-        private void loadSuperRegions() {
-            outer: for (SuperRegion sr : rm.getSortedSuperRegions()) {
-                SuperRegionType srt = rm.getSuperRegionType(sr.getType());
-                if (!srt.hasEffect(EFFECT_NAME)) {
-                    continue;
-                }
-                boolean fed = false;
-                regionLoop: for (Region r : rm.getContainedRegions(sr)) {
-                    RegionType rt = rm.getRegionType(r.getType());
-                    for (String effectName : rt.getEffects()) {
-                        if (effectName.equals(EFFECT_NAME) {
-                            fed = true;
-                            break regionLoop;
-                        }
-                    }
-                }
-                if (!fed) {
-                    unfedRegions.add(sr);
-                }
-            }
-        }
+//        @EventHandler
+//        public void onSuperRegionCreated(ToSuperRegionCreatedEvent event) {
+//            SuperRegion sr = rm.getSuperRegion(event.getName());
+//            SuperRegionType srt = rm.getSuperRegionType(sr.getType());
+//            if (!srt.hasEffect(EFFECT_NAME)) {
+//                return;
+//            }
+//            for (Region r : rm.getContainedRegions(sr)) {
+//                RegionType rt = rm.getRegionType(r.getType());
+//                boolean hasEffect = false;
+//                for (String effectName : rt.getEffects()) {
+//                    if (effectName.equals(EFFECT_NAME) {
+//                        hasEffect = true;
+//                        break;
+//                    }
+//                }
+//                if (!hasEffect) {
+//                    continue;
+//                }
+//                return;
+//            }
+//            unfedRegions.add(sr);
+//        }
+//
+//        @EventHandler
+//        public void onSuperRegionDestroyed(ToSuperRegionDestroyedEvent event) {
+//            unfedRegions.remove(event.getSuperRegion);
+//        }
+//
+//        @EventHandler
+//        public void onRegionCreated(ToRegionCreatedEvent event) {
+//            RegionManager rm = getPlugin().getRegionManager();
+//            Region r = event.getRegion();
+//            if (r == null || rm.getRegionType(r.getType()) == null) {
+//                return;
+//            }
+//            RegionType rt = rm.getRegionType(r.getType());
+//            boolean hasEffect = false;
+//            for (String effectName : rt.getEffects()) {
+//                if (effectName.equals(EFFECT_NAME) {
+//                    hasEffect = true;
+//                    break;
+//                }
+//            }
+//            if (!hasEffect) {
+//                continue;
+//            }
+//            outer: for (SuperRegion sr : rm.getContainingSuperRegions(r.getLocation())) {
+//                if (unfedRegions.contains(sr)) {
+//                    unfedRegions.remove(sr);
+//                }
+//            }
+//        }
+//
+//        @EventHandler
+//        public void onRegionDestroyed(ToRegionDestroyedEvent event) {
+//            loadSuperRegions();
+//            /*Region r = event.getRegion();
+//            if (effect.regionHasEffect(r, EFFECT_NAME) == 0) {
+//                return;
+//            }
+//            outer: for (SuperRegion sr : rm.getContainingSuperRegions(r.getLocation())) {
+//                SuperRegionType srt = rm.getSuperRegionType(sr.getType());
+//                if (!srt.hasEffect(EFFECT_NAME)) {
+//                    continue;
+//                }
+//                if (fedRegions.containsKey(sr)) {
+//                    ArrayList<Region> re = fedRegions.get(sr);
+//                    if (re.contains(r)) {
+//                        re.remove(r);
+//                        if (re.isEmpty()) {
+//                            fedRegions.remove(sr);
+//                            unfedRegions.add(sr);
+//                        }
+//                    }
+//                } else if (!unfedRegions.contains(sr)) {
+//                    unfedRegions.add(sr);
+//                }
+//            }*/
+//        }
+//
+//        private void loadSuperRegions() {
+//            outer: for (SuperRegion sr : rm.getSortedSuperRegions()) {
+//                SuperRegionType srt = rm.getSuperRegionType(sr.getType());
+//                if (!srt.hasEffect(EFFECT_NAME)) {
+//                    continue;
+//                }
+//                boolean fed = false;
+//                regionLoop: for (Region r : rm.getContainedRegions(sr)) {
+//                    RegionType rt = rm.getRegionType(r.getType());
+//                    for (String effectName : rt.getEffects()) {
+//                        if (effectName.equals(EFFECT_NAME) {
+//                            fed = true;
+//                            break regionLoop;
+//                        }
+//                    }
+//                }
+//                if (!fed) {
+//                    unfedRegions.add(sr);
+//                }
+//            }
+//        }
     }
     
 }

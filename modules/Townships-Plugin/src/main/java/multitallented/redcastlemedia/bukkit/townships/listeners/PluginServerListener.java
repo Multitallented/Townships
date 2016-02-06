@@ -1,5 +1,6 @@
 package multitallented.redcastlemedia.bukkit.townships.listeners;
 
+import multitallented.plugins.heroscoreboard.HeroScoreboard;
 import multitallented.redcastlemedia.bukkit.townships.Townships;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

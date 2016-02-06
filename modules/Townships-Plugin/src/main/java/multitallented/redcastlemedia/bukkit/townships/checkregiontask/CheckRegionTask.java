@@ -57,8 +57,8 @@ public class CheckRegionTask implements Runnable {
         PluginManager pm = server.getPluginManager();
         if (Townships.getConfigManager().getPlayerInRegionChecks()) {
             Collection<? extends Player> players = server.getOnlinePlayers();
-            int chunk = players.size() / 4;
-            for (int j=chunk * i; j<(i==3 ? players.size() : chunk * (i+1)); j++) {
+            int chunk = players.size() / 8;
+            for (int j=chunk * i; j<(i==7 ? players.size() : chunk * (i+1)); j++) {
                 try {
                     CheckPlayerInRegionThread thread = new CheckPlayerInRegionThread(this, pm, hs.getRegionManager(), (Player) players.toArray()[j]);
                     thread.go();
@@ -70,7 +70,7 @@ public class CheckRegionTask implements Runnable {
                 Thread.yield();
             }
         }
-        if (i == 3) {
+        if (i == 7) {
             i=-1;
             pm.callEvent(new ToTwoSecondEvent());
             TriggerEffectTask triggerEffectTask = new TriggerEffectTask(hs.getRegionManager(), server.getPluginManager(), this);

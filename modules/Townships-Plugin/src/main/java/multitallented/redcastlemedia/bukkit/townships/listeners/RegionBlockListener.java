@@ -107,6 +107,15 @@ public class RegionBlockListener implements Listener {
                         }
                         return;
                     }
+
+                    for (SuperRegion sr : regionManager.getContainingSuperRegions(currentLoc)) {
+                        if (!sr.hasOwner(player.getName()) && sr.hasMember(player.getName())) {
+                            player.sendMessage(ChatColor.RED + "[Townships] You can't destroy regions in towns you don't own.");
+                            event.setCancelled(true);
+                            return;
+                        }
+                    }
+
                     if (currentRegionType != null && player != null && (Townships.getConfigManager().getSalvage() > 0 || currentRegionType.getSalvage() != 0) && r.isPrimaryOwner(player.getName())) {
                         NumberFormat formatter = NumberFormat.getCurrencyInstance();
                         double salvageValue = Townships.getConfigManager().getSalvage() * currentRegionType.getMoneyRequirement();

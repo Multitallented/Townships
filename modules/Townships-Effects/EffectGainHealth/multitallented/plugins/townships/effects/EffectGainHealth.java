@@ -10,6 +10,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 
@@ -70,8 +71,9 @@ public class EffectGainHealth extends Effect {
             effect.forceUpkeep(event);
             
             //grant the player hp
-            EntityRegainHealthEvent e = new EntityRegainHealthEvent(player, addHealth, RegainReason.CUSTOM);
-            effect.aPlugin.getServer().getPluginManager().callEvent(e);
+            player.setHealth(Math.min(player.getHealth() + addHealth, player.getMaxHealth()));
+            //EntityRegainHealthEvent e = new EntityRegainHealthEvent(player, addHealth, RegainReason.CUSTOM);
+            //effect.aPlugin.getServer().getPluginManager().callEvent(e);
         }
     }
     

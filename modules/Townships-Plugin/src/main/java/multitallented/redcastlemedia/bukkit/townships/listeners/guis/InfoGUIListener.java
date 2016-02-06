@@ -29,9 +29,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
         
 public class InfoGUIListener implements Listener {
-    private final RegionManager rm;
+    private static RegionManager rm;
     public InfoGUIListener(RegionManager rm) {
-        this.rm = rm;
+        InfoGUIListener.rm = rm;
     }
     
     public static void openInfoInventory(RegionType region, Player player, String back) {
@@ -63,6 +63,46 @@ public class InfoGUIListener implements Listener {
         iconMeta.setLore(lore);
         iconStack.setItemMeta(iconMeta);
         inv.setItem(0, iconStack);
+
+
+        String rebuild = "";
+        for (String s : region.getEffects()) {
+            String[] sParts = s.split("\\.");
+            if (sParts[0].equals("rebuild") && sParts.length > 1) {
+                rebuild = sParts[1];
+            }
+        }
+        String evolve = "";
+        for (String s : region.getEffects()) {
+            String[] sParts = s.split("\\.");
+            if (sParts[0].equals("evolve") && sParts.length > 1) {
+                evolve = sParts[1];
+            }
+        }
+
+        if (!rebuild.equals("")) {
+            RegionType rebuildType = rm.getRegionType(rebuild);
+            ItemStack rebuildStack = new ItemStack(rebuildType.getIcon());
+            ItemMeta rebuildMeta = rebuildStack.getItemMeta();
+            rebuildMeta.setDisplayName(WordUtils.capitalize(rebuild));
+            ArrayList<String> rebuildLore = new ArrayList<String>();
+            rebuildLore.add(ChatColor.GREEN + region.getName() + " is required to build a " + rebuild);
+            rebuildMeta.setLore(rebuildLore);
+            rebuildStack.setItemMeta(rebuildMeta);
+            inv.setItem(1, rebuildStack);
+        }
+        if (!evolve.equals("")) {
+            RegionType rebuildType = rm.getRegionType(evolve);
+            ItemStack rebuildStack = new ItemStack(rebuildType.getIcon());
+            ItemMeta rebuildMeta = rebuildStack.getItemMeta();
+            rebuildMeta.setDisplayName(WordUtils.capitalize(evolve));
+            ArrayList<String> rebuildLore = new ArrayList<String>();
+            rebuildLore.add(ChatColor.GREEN + region.getName() + " evolves into: " + evolve);
+            rebuildMeta.setLore(rebuildLore);
+            rebuildStack.setItemMeta(rebuildMeta);
+            inv.setItem(2, rebuildStack);
+        }
+
         
         ItemStack costStack = new ItemStack(Material.EMERALD);
         ItemMeta costMeta = costStack.getItemMeta();
@@ -90,10 +130,11 @@ public class InfoGUIListener implements Listener {
         
         ItemStack requireStack = new ItemStack(Material.IRON_PICKAXE);
         ItemMeta requireMeta = requireStack.getItemMeta();
-        requireMeta.setDisplayName(ChatColor.RESET + "" + ChatColor.GOLD + "Requirements:");
+        requireMeta.setDisplayName(ChatColor.RESET + "" + ChatColor.GOLD + "Building Materials:");
         lore = new ArrayList<String>();
-        lore.add(ChatColor.GOLD + "Build a structure with these blocks.");
-        if (region.getRequirements().size() > 0) {
+        lore.add(ChatColor.GOLD + "Place these blocks before");
+        lore.add(ChatColor.GOLD + "the region can be created.");
+        /*if (region.getRequirements().size() > 0) {
             lore.add("Requirements");
             for (ArrayList<TOItem> items : region.getRequirements()) {
                 String reagents = "";
@@ -112,7 +153,7 @@ public class InfoGUIListener implements Listener {
                 }
                 lore.addAll(Util.textWrap("", reagents));
             }
-        }
+        }*/
         //Trim lore
         trimLore: {
             boolean addEllipses = lore.size() > 20;
@@ -130,7 +171,7 @@ public class InfoGUIListener implements Listener {
         
         ItemStack reagentStack = new ItemStack(Material.CHEST);
         ItemMeta reagentMeta = reagentStack.getItemMeta();
-        reagentMeta.setDisplayName(ChatColor.RESET + "" + ChatColor.GOLD + "Reagents:");
+        reagentMeta.setDisplayName(ChatColor.RESET + "" + ChatColor.GOLD + "Needs:");
         lore = new ArrayList<String>();
         lore.add(ChatColor.GOLD + "Items required to run the region.");
         reagentMeta.setLore(lore);
@@ -335,6 +376,8 @@ public class InfoGUIListener implements Listener {
                 }
             } else if (parts.length > 1 && parts[0].equals("who")) {
                 player.performCommand("to who " + parts[1]);
+            } else if (parts.length > 1 && parts[0].equals("info")) {
+                player.performCommand("to info " + parts[1]);
             } else {
                 MainMenuGUIListener.openMainMenu(player);
             }
@@ -344,7 +387,24 @@ public class InfoGUIListener implements Listener {
         regionTypeName = ChatColor.stripColor(event.getInventory().getItem(0).getItemMeta().getDisplayName()).toLowerCase();
         
         RegionType rt = rm.getRegionType(regionTypeName);
-        
+
+        if (event.getClickedInventory() != null && event.getClickedInventory().getItem(1) != null &&
+                event.getClickedInventory().getItem(1).equals(event.getCurrentItem())) {
+            player.closeInventory();
+            RegionType type = rm.getRegionType(event.getCurrentItem().getItemMeta().getDisplayName());
+            InfoGUIListener.openInfoInventory(type, player, "info " + regionTypeName);
+//            player.performCommand("to info " + event.getCurrentItem().getItemMeta().getDisplayName());
+            return;
+        }
+        if (event.getClickedInventory() != null && event.getClickedInventory().getItem(2) != null &&
+                event.getClickedInventory().getItem(2).equals(event.getCurrentItem())) {
+            player.closeInventory();
+            RegionType type = rm.getRegionType(event.getCurrentItem().getItemMeta().getDisplayName());
+            InfoGUIListener.openInfoInventory(type, player, "info " + regionTypeName);
+//            player.performCommand("to info " + event.getCurrentItem().getItemMeta().getDisplayName());
+            return;
+        }
+
         if (rt != null && event.getCurrentItem().getType() == Material.IRON_PICKAXE) {
             player.closeInventory();
             RequirementsGUIListener.openRequirementsInventory(new ArrayList<ArrayList<TOItem>>(rt.getRequirements()), player, rt.getName()+ " requirements", backState + " " + regionTypeName);

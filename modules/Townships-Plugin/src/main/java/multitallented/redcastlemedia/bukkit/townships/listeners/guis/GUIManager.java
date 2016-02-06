@@ -244,6 +244,8 @@ public class GUIManager implements Listener {
               item.setMat(Material.FURNACE);
             } else if (mat == Material.REDSTONE_LAMP_ON) {
               item.setMat(Material.REDSTONE_LAMP_OFF);
+            } else if (mat == Material.REDSTONE_TORCH_OFF) {
+              item.setMat(Material.REDSTONE_TORCH_ON);
             } else if (mat == Material.STATIONARY_WATER) {
               item.setMat(Material.WATER_BUCKET);
             } else if (mat == Material.STATIONARY_LAVA) {

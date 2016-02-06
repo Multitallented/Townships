@@ -126,7 +126,7 @@ public class GUIListener implements Listener {
             if (r.getMoneyRequirement() > 0) {
                 lore.add(ChatColor.RESET + "" + ChatColor.BLUE + "Cost: " + formatter.format(r.getMoneyRequirement()));
             }
-            if (r.getRequirements().size() > 0) {
+            /*if (r.getRequirements().size() > 0) {
                 lore.add("Requirements");
                 for (ArrayList<TOItem> items : r.getRequirements()) {
                     String reagents = "";
@@ -145,7 +145,7 @@ public class GUIListener implements Listener {
                     }
                     lore.addAll(Util.textWrap("", reagents));
                 }
-            }
+            }*/
             isMeta.setDisplayName(displayName);
             
             //Trim lore
