@@ -20,6 +20,7 @@ import org.apache.commons.lang.WordUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.SkullType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -27,17 +28,18 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-        
+import org.bukkit.inventory.meta.SkullMeta;
+
 public class MainMenuGUIListener implements Listener {
     private final RegionManager rm;
-    public InfoGUIListener(RegionManager rm) {
+    public MainMenuGUIListener(RegionManager rm) {
         this.rm = rm;
     }
     
     public static void openMainMenu(Player player) {
         int size = 18;
         //Inventory inv = Bukkit.createInventory(null, size, ChatColor.RED + "Townships Menu");
-        Inventory inv = Bukkit.createInventory(new MenuHolder(Bukkit.createInventory(null, size)), size, ChatColor.RED + "Townships Menu");
+        Inventory inv = Bukkit.createInventory(new MenuHolder(Bukkit.createInventory(null, size)), size, ChatColor.RED + "To Menu");
         
         NumberFormat formatter = NumberFormat.getCurrencyInstance(Locale.US);
 
@@ -83,14 +85,14 @@ public class MainMenuGUIListener implements Listener {
 
         //Profile
         {
-            ItemStack itemStack = new ItemStack(Material.SKULL, 1, 3);
-            ItemMeta im = itemStack.getItemMeta();
+            ItemStack itemStack = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
+            SkullMeta im = (SkullMeta) itemStack.getItemMeta();
             im.setDisplayName(ChatColor.LIGHT_PURPLE + "Profile");
             ArrayList<String> lore = new ArrayList<String>();
             lore.add(ChatColor.WHITE + "See your current status.");
 
             if (Townships.econ != null) {
-                double balance = Townships.econ.bankBalance(player).balance;
+                double balance = Townships.econ.bankBalance(player.getName()).balance;
                 if (balance >= 0) {
                     lore.add(ChatColor.RESET + "" + ChatColor.GREEN + "Money: " + formatter.format(balance));
                 } else if (balance < 0) {
@@ -100,14 +102,14 @@ public class MainMenuGUIListener implements Listener {
             lore.add(ChatColor.LIGHT_PURPLE + "Location: " + Math.round(player.getLocation().getX()) + "x " + Math.round(player.getLocation().getY()) + "y " + Math.round(player.getLocation().getZ()) + "z");
 
             im.setLore(lore);
-            im.setOwner(player.getName());
+            im.setOwner(player.getName().toLowerCase());
             itemStack.setItemMeta(im);
             inv.setItem(0, itemStack);
         }
 
         //Lookup Player
         {
-            ItemStack itemStack = new ItemStack(Material.SKULL, 1, 3);
+            ItemStack itemStack = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
             ItemMeta im = itemStack.getItemMeta();
             im.setDisplayName(ChatColor.RED + "Players");
             ArrayList<String> lore = new ArrayList<String>();
@@ -136,7 +138,7 @@ public class MainMenuGUIListener implements Listener {
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         if (!ChatColor.stripColor(event.getInventory().getName())
-                .equalsIgnoreCase("Townships Menu")) {
+                .equalsIgnoreCase("To Menu")) {
             return;
         }
         Player player = (Player) event.getWhoClicked();
@@ -179,12 +181,12 @@ public class MainMenuGUIListener implements Listener {
         }
         if (event.getCurrentItem().getType() == Material.CHEST) {
             player.closeInventory();
-            //TODO open region list by category
+            RegionGUIListener.openCategoryInventory(player);
             //RequirementsGUIListener.openRequirementsInventory(new ArrayList<ArrayList<TOItem>>(rt.getReagents()), player, rt.getName() + " reagents", backState + " " + regionTypeName);
             return;
         }
         if (event.getCurrentItem().getType() == Material.SKULL) {
-            if (event.getCurrentItem().getItemMeta().getDisplayName.equals("Players")) {
+            if (event.getCurrentItem().getItemMeta().getDisplayName().equals("Players")) {
                 player.closeInventory();
                 //TODO show all players and do a who lookup on them
                 return;

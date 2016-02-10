@@ -5,6 +5,7 @@ package multitallented.redcastlemedia.bukkit.townships.listeners.guis;
  * @author Multitallented
  * @author Phoenix_Frenzy
  */
+import java.io.File;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -70,7 +71,11 @@ public class GUIListener implements Listener {
             if (category.equals("")) {
                 category = "Other";
             }
-            ItemStack is = new ItemStack(Material.CHEST);
+            Material mat = Townships.getConfigManager().getCategory(category.toLowerCase());
+            if (mat == null) {
+                mat = Material.CHEST;
+            }
+            ItemStack is = new ItemStack(mat);
             ItemMeta isMeta = is.getItemMeta();
             isMeta.setDisplayName(ChatColor.RESET + WordUtils.capitalize(category));
             is.setItemMeta(isMeta);
@@ -87,7 +92,11 @@ public class GUIListener implements Listener {
             }
 
             if (hasAtLeastOne) {
-                ItemStack is = new ItemStack(Material.CHEST);
+                Material mat = Townships.getConfigManager().getCategory("towns");
+                if (mat == null) {
+                    mat = Material.CHEST;
+                }
+                ItemStack is = new ItemStack(mat);
                 ItemMeta isMeta = is.getItemMeta();
                 isMeta.setDisplayName(ChatColor.RESET + "Towns");
                 is.setItemMeta(isMeta);

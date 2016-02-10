@@ -18,11 +18,7 @@ import multitallented.redcastlemedia.bukkit.townships.listeners.PluginServerList
 import multitallented.redcastlemedia.bukkit.townships.listeners.RegionBlockListener;
 import multitallented.redcastlemedia.bukkit.townships.listeners.RegionEntityListener;
 import multitallented.redcastlemedia.bukkit.townships.listeners.RegionPlayerInteractListener;
-import multitallented.redcastlemedia.bukkit.townships.listeners.guis.GUIListener;
-import multitallented.redcastlemedia.bukkit.townships.listeners.guis.GUIManager;
-import multitallented.redcastlemedia.bukkit.townships.listeners.guis.InfoGUIListener;
-import multitallented.redcastlemedia.bukkit.townships.listeners.guis.RequirementsGUIListener;
-import multitallented.redcastlemedia.bukkit.townships.listeners.guis.ShopGUIListener;
+import multitallented.redcastlemedia.bukkit.townships.listeners.guis.*;
 import multitallented.redcastlemedia.bukkit.townships.region.Region;
 import multitallented.redcastlemedia.bukkit.townships.region.RegionManager;
 import multitallented.redcastlemedia.bukkit.townships.region.RegionType;
@@ -107,6 +103,9 @@ public class Townships extends JavaPlugin {
         pm.registerEvents(guiManager, this);
         
         pm.registerEvents(new GUIListener(regionManager), this);
+        pm.registerEvents(new RegionGUIListener(regionManager), this);
+        pm.registerEvents(new RegionInfoGUIListener(regionManager), this);
+        pm.registerEvents(new MainMenuGUIListener(regionManager), this);
         pm.registerEvents(new InfoGUIListener(regionManager), this);
         pm.registerEvents(new RequirementsGUIListener(this), this);
         pm.registerEvents(new ShopGUIListener(this), this);
@@ -275,7 +274,33 @@ public class Townships extends JavaPlugin {
             
             return true;
         } else if (args.length > 0 && args[0].equalsIgnoreCase("menu")) {
-            MainMenuListener.openMainMenu(player);
+            MainMenuGUIListener.openMainMenu(player);
+            return true;
+        } else if (args.length > 1 && args[0].equalsIgnoreCase("built")) {
+            if (args[1].toLowerCase().equals("towns")) {
+                ArrayList<SuperRegion> townList = new ArrayList<SuperRegion>();
+                for (SuperRegion sr : regionManager.getSortedSuperRegions()) {
+                    if (sr.hasOwner(player.getName()) || sr.hasMember(player.getName())) {
+                        townList.add(sr);
+                    }
+                }
+                RegionGUIListener.openListInventory(new ArrayList<Region>(), townList, player, args[1].toLowerCase());
+                return true;
+            }
+            ArrayList<String> categories = regionManager.getRegionCategories().get(args[1].toLowerCase());
+            if (categories == null) {
+                player.sendMessage(ChatColor.RED + "[Townships] There is no category named " + args[1].toLowerCase());
+                return true;
+            }
+
+            ArrayList<Region> regionList = new ArrayList<Region>();
+            for (Region r : regionManager.getSortedRegions()) {
+                if (r.getOwners().contains(player.getName()) && categories.contains(r.getType())) {
+                    regionList.add(r);
+                }
+            }
+
+            RegionGUIListener.openListInventory(regionList, new ArrayList<SuperRegion>(), player, args[1].toLowerCase());
             return true;
         } else if (args.length > 1 && args[0].equalsIgnoreCase("confirm")) {
 
@@ -1747,10 +1772,10 @@ public class Townships extends JavaPlugin {
             return true;
         } else if (args.length > 1 && args[0].equalsIgnoreCase("info")) {
             //Check if valid regiontype or super-regiontype
-            RegionType rt = regionManager.getRegionType(args[1]);
-            SuperRegionType srt = regionManager.getSuperRegionType(args[1]);
+            RegionType rt = regionManager.getRegionType(args[1].toLowerCase());
+            SuperRegionType srt = regionManager.getSuperRegionType(args[1].toLowerCase());
             if (rt == null && srt == null) {
-                player.sendMessage(ChatColor.GRAY + "[Townships] There is no region type called " + args[1]);
+                player.sendMessage(ChatColor.GRAY + "[Townships] There is no region type called " + args[1].toLowerCase());
                 return true;
             }
             if (rt != null) {
@@ -2310,7 +2335,8 @@ public class Townships extends JavaPlugin {
                     return true;
                 }
                 RegionType rt = regionManager.getRegionType(r.getType());
-                if (rt != null && (getConfigManager().getSalvage() > 0 || rt.getSalvage() != 0) && r.isPrimaryOwner(player.getName())) {
+
+                if (rt != null && (Townships.getConfigManager().getSalvage() > 0 || rt.getSalvage() != 0) && r.isPrimaryOwner(player.getName())) {
                     NumberFormat formatter = NumberFormat.getCurrencyInstance();
                     double salvageValue = getConfigManager().getSalvage() * rt.getMoneyRequirement();
                     salvageValue = rt.getSalvage() != 0 ? rt.getSalvage() : salvageValue;
@@ -2335,6 +2361,16 @@ public class Townships extends JavaPlugin {
             ArrayList<Location> locationsToDestroy = new ArrayList<Location>();
             for (Region r : regionManager.getContainingBuildRegions(loc)) {
                 if (r.isOwner(player.getName()) || (perms != null && perms.has(player, "townships.admin"))) {
+
+                    RegionType rt = regionManager.getRegionType(r.getType());
+                    if (rt != null && (Townships.getConfigManager().getSalvage() > 0 || rt.getSalvage() != 0) && r.isPrimaryOwner(player.getName())) {
+                        NumberFormat formatter = NumberFormat.getCurrencyInstance();
+                        double salvageValue = getConfigManager().getSalvage() * rt.getMoneyRequirement();
+                        salvageValue = rt.getSalvage() != 0 ? rt.getSalvage() : salvageValue;
+                        player.sendMessage(ChatColor.GREEN + "[Townships] You salvaged region " + r.getID() + " for " + formatter.format(salvageValue));
+                        econ.depositPlayer(player, salvageValue);
+                    }
+
                     regionManager.destroyRegion(r.getLocation());
                     locationsToDestroy.add(r.getLocation());
                     break;

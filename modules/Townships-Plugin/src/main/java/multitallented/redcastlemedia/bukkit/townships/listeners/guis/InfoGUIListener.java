@@ -233,27 +233,39 @@ public class InfoGUIListener implements Listener {
             }
         }
 
-        ItemStack createStack = new ItemStack(Material.IRON_AXE);
-        ItemMeta createMeta = createStack.getItemMeta();
-        createMeta.setDisplayName(ChatColor.RESET + "" + ChatColor.GREEN + "Create this Structure");
-        lore = new ArrayList<String>();
-        lore.add(ChatColor.RESET + "" + ChatColor.RED + "/to create " + region.getName());
-        createMeta.setLore(lore);
-        createStack.setItemMeta(createMeta);
-        inv.setItem(17, Util.removeAttributes(createStack));
-        
-        ItemStack backStack = new ItemStack(Material.REDSTONE_BLOCK);
-        ItemMeta backMeta = backStack.getItemMeta();
-        backMeta.setDisplayName(ChatColor.RESET + "" + ChatColor.GOLD + "Press to go BACK");
-        lore = new ArrayList<String>();
-        if (back == null) {
-            lore.add(ChatColor.RESET + "" + ChatColor.RED + "Exit");
-        } else {
-            lore.add(ChatColor.RESET + "" + ChatColor.RED + back);
+        {
+            Material mat = Material.IRON_AXE;
+            boolean maxRegions = rm.isAtMaxRegions(player, region);
+            if (maxRegions) {
+                mat = Material.BARRIER;
+            }
+
+            ItemStack createStack = new ItemStack(mat);
+            ItemMeta createMeta = createStack.getItemMeta();
+            createMeta.setDisplayName(ChatColor.RESET + "" + ChatColor.GREEN + "Create this Structure");
+            lore = new ArrayList<String>();
+            lore.add(ChatColor.RESET + "" + ChatColor.RED + "/to create " + region.getName());
+            if (maxRegions) {
+                lore.add(ChatColor.RESET + "" + ChatColor.RED + "You're at your max limit.");
+                lore.add(ChatColor.RESET + "" + ChatColor.RED + "You can't build more " + region.getName());
+            }
+            createMeta.setLore(lore);
+            createStack.setItemMeta(createMeta);
+            inv.setItem(17, Util.removeAttributes(createStack));
+
+            ItemStack backStack = new ItemStack(Material.REDSTONE_BLOCK);
+            ItemMeta backMeta = backStack.getItemMeta();
+            backMeta.setDisplayName(ChatColor.RESET + "" + ChatColor.GOLD + "Press to go BACK");
+            lore = new ArrayList<String>();
+            if (back == null) {
+                lore.add(ChatColor.RESET + "" + ChatColor.RED + "Exit");
+            } else {
+                lore.add(ChatColor.RESET + "" + ChatColor.RED + back);
+            }
+            backMeta.setLore(lore);
+            backStack.setItemMeta(backMeta);
+            inv.setItem(8, backStack);
         }
-        backMeta.setLore(lore);
-        backStack.setItemMeta(backMeta);
-        inv.setItem(8, backStack);
         
         player.openInventory(inv);
     }
@@ -391,7 +403,7 @@ public class InfoGUIListener implements Listener {
         if (event.getClickedInventory() != null && event.getClickedInventory().getItem(1) != null &&
                 event.getClickedInventory().getItem(1).equals(event.getCurrentItem())) {
             player.closeInventory();
-            RegionType type = rm.getRegionType(event.getCurrentItem().getItemMeta().getDisplayName());
+            RegionType type = rm.getRegionType(event.getCurrentItem().getItemMeta().getDisplayName().toLowerCase());
             InfoGUIListener.openInfoInventory(type, player, "info " + regionTypeName);
 //            player.performCommand("to info " + event.getCurrentItem().getItemMeta().getDisplayName());
             return;
@@ -399,7 +411,7 @@ public class InfoGUIListener implements Listener {
         if (event.getClickedInventory() != null && event.getClickedInventory().getItem(2) != null &&
                 event.getClickedInventory().getItem(2).equals(event.getCurrentItem())) {
             player.closeInventory();
-            RegionType type = rm.getRegionType(event.getCurrentItem().getItemMeta().getDisplayName());
+            RegionType type = rm.getRegionType(event.getCurrentItem().getItemMeta().getDisplayName().toLowerCase());
             InfoGUIListener.openInfoInventory(type, player, "info " + regionTypeName);
 //            player.performCommand("to info " + event.getCurrentItem().getItemMeta().getDisplayName());
             return;

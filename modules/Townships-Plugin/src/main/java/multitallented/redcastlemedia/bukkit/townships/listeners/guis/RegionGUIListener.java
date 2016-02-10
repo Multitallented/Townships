@@ -3,18 +3,17 @@ package multitallented.redcastlemedia.bukkit.townships.listeners.guis;
 /**
  *
  * @author Multitallented
- * @author Phoenix_Frenzy
  */
+import java.io.File;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import multitallented.redcastlemedia.bukkit.townships.Townships;
 import multitallented.redcastlemedia.bukkit.townships.Util;
-import multitallented.redcastlemedia.bukkit.townships.region.RegionManager;
-import multitallented.redcastlemedia.bukkit.townships.region.RegionType;
-import multitallented.redcastlemedia.bukkit.townships.region.SuperRegionType;
-import multitallented.redcastlemedia.bukkit.townships.region.TOItem;
+import multitallented.redcastlemedia.bukkit.townships.effect.Effect;
+import multitallented.redcastlemedia.bukkit.townships.region.*;
 import net.milkbowl.vault.item.Items;
 //import net.minecraft.util.org.apache.commons.lang3.text.WordUtils;
 import org.apache.commons.lang.WordUtils;
@@ -28,13 +27,13 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-        
+
 public class RegionGUIListener implements Listener {
     private static RegionManager rm;
     public RegionGUIListener(RegionManager rm) {
         this.rm = rm;
     }
-    
+
     public static void openCategoryInventory(Player player) {
         HashMap<String, ArrayList<String>> categories = rm.getRegionCategories();
         int size = 9;
@@ -47,30 +46,41 @@ public class RegionGUIListener implements Listener {
                 size -= 9;
             }
         }
-        //Inventory inv = Bukkit.createInventory(null, size, ChatColor.RED + "Region Categories");
-        Inventory inv = Bukkit.createInventory(new MenuHolder(Bukkit.createInventory(null, size)), size, ChatColor.RED + "Region Categories");
-        
-        
-        int i = 0;
-        for (String category : categories.keySet()) {
+        //Inventory inv = Bukkit.createInventory(null, size, ChatColor.RED + "Townships Categories");
+        Inventory inv = Bukkit.createInventory(new MenuHolder(Bukkit.createInventory(null, size)), size, ChatColor.RED + "Built Categories");
 
-            //Determine if the player has permissions for any of these
-            boolean hasAtLeastOne = false;
-            for (String regionName : rm.getRegionCategories().get(category)) {
-                if (Townships.perms.has(player, "townships.create." + regionName)) {
-                    hasAtLeastOne = true;
+        HashSet<String> regionCategories = new HashSet<String>();
+        for (Region r : rm.getSortedRegions()) {
+            if (!r.getOwners().contains(player.getName())) {
+                continue;
+            }
+            for (String category : rm.getRegionCategories().keySet()) {
+                if (regionCategories.contains(category)) {
+                    if (rm.getRegionCategories().get(category).contains(r.getType())) {
+                        break;
+                    }
+                    continue;
+                }
+
+                if (rm.getRegionCategories().get(category).contains(r.getType())) {
+                    regionCategories.add(category);
                     break;
                 }
             }
+        }
 
-            if (!hasAtLeastOne) {
-                continue;
-            }
+
+        int i = 0;
+        for (String category : regionCategories) {
 
             if (category.equals("")) {
                 category = "Other";
             }
-            ItemStack is = new ItemStack(Material.CHEST);
+            Material mat = Townships.getConfigManager().getCategory(category.toLowerCase());
+            if (mat == null) {
+                mat = Material.CHEST;
+            }
+            ItemStack is = new ItemStack(mat);
             ItemMeta isMeta = is.getItemMeta();
             isMeta.setDisplayName(ChatColor.RESET + WordUtils.capitalize(category));
             is.setItemMeta(isMeta);
@@ -79,26 +89,31 @@ public class RegionGUIListener implements Listener {
         }
         if (hasSuperRegions) {
             boolean hasAtLeastOne = false;
-            for (String regionName : rm.getSuperRegionTypes()) {
-                if (Townships.perms.has(player, "townships.create." + regionName)) {
+
+            for (SuperRegion sr : rm.getSortedSuperRegions()) {
+                if (sr.hasOwner(player.getName())) {
                     hasAtLeastOne = true;
                     break;
                 }
             }
 
             if (hasAtLeastOne) {
-                ItemStack is = new ItemStack(Material.CHEST);
+                Material mat = Townships.getConfigManager().getCategory("towns");
+                if (mat == null) {
+                    mat = Material.CHEST;
+                }
+                ItemStack is = new ItemStack(mat);
                 ItemMeta isMeta = is.getItemMeta();
                 isMeta.setDisplayName(ChatColor.RESET + "Towns");
                 is.setItemMeta(isMeta);
                 inv.setItem(i, is);
             }
         }
-        
+
         player.openInventory(inv);
     }
-    
-    public static void openListInventory(ArrayList<RegionType> regions, ArrayList<SuperRegionType> superRegions, Player player, String category) {
+
+    public static void openListInventory(ArrayList<Region> regions, ArrayList<SuperRegion> superRegions, Player player, String category) {
         int size = 9;
         int actualSize = regions.size() + superRegions.size() + 1;
         if (actualSize > size) {
@@ -108,46 +123,40 @@ public class RegionGUIListener implements Listener {
             }
         }
         category = category.toLowerCase();
-        //Inventory inv = Bukkit.createInventory(null, size, ChatColor.RED + category + " Regions");
-        //Inventory inv = Bukkit.createInventory(new MenuHolder(Bukkit.createInventory(null, size)), size, ChatColor.RED + WordUtils.capitalize(category) +  " Regions");
-        Inventory inv = Bukkit.createInventory(null, size, ChatColor.RED + WordUtils.capitalize(category) +  " Regions");
-        
+        Inventory inv = Bukkit.createInventory(null, size, ChatColor.RED + WordUtils.capitalize(category) +  " Builds");
+
         NumberFormat formatter = NumberFormat.getCurrencyInstance();
         int i = 0;
-        for (RegionType r : regions) {
-            ItemStack is = new ItemStack(r.getIcon());
+        for (Region region : regions) {
+            RegionType regionType = rm.getRegionType(region.getType());
+            ItemStack is = new ItemStack(regionType.getIcon());
             ItemMeta isMeta = is.getItemMeta();
-            String displayName = ChatColor.RESET + r.getName();
+            String displayName = ChatColor.RESET + regionType.getName() + " " + region.getID();
             ArrayList<String> lore = new ArrayList<String>();
-            lore.add(ChatColor.RESET + "" + ChatColor.GRAY + "Region");
-            if (r.getDescription() != null && !r.getDescription().equals("")) {
-                lore.addAll(Util.textWrap(ChatColor.RESET + "" + ChatColor.GOLD, r.getDescription()));
+
+            ArrayList<SuperRegion> superContRegions = rm.getContainingSuperRegions(region.getLocation());
+            if (!superContRegions.isEmpty()) {
+                lore.add(ChatColor.GOLD + superContRegions.get(0).getName() + " " + Math.round(region.getLocation().getX()) + "x " + Math.round(region.getLocation().getY()) + "y " + Math.round(region.getLocation().getZ()) + "z");
+            } else {
+                lore.add(ChatColor.GOLD + "wild " + Math.round(region.getLocation().getX()) + "x " + Math.round(region.getLocation().getY()) + "y " + Math.round(region.getLocation().getZ()) + "z");
             }
-            if (r.getMoneyRequirement() > 0) {
-                lore.add(ChatColor.RESET + "" + ChatColor.BLUE + "Cost: " + formatter.format(r.getMoneyRequirement()));
+            if (Effect.hasReagents(rm, region)) {
+                lore.add(ChatColor.RESET + "" + ChatColor.GREEN + "Region is working");
+            } else {
+                lore.add(ChatColor.RESET + "" + ChatColor.RED + "Missing needed items/money to work");
             }
-            if (r.getRequirements().size() > 0) {
-                lore.add("Requirements");
-                for (ArrayList<TOItem> items : r.getRequirements()) {
-                    String reagents = "";
-                    for (TOItem item : items) {
-                        if (!reagents.equals("")) {
-                            reagents += " or ";
-                        }
-                        String itemName = "";
-                        if (item.isWildDamage()) {
-                            itemName = item.getMat().name().replace("_", " ").toLowerCase();
-                        } else {
-                            ItemStack ist = new ItemStack(item.getMat(), 1, (short) item.getDamage());
-                            itemName = Items.itemByStack(ist).getName();
-                        }
-                        reagents += item.getQty() + " " + itemName;
-                    }
-                    lore.addAll(Util.textWrap("", reagents));
-                }
+
+            if (region.getOwners().isEmpty() || !region.getOwners().get(0).equals(player.getName())) {
+                lore.add(ChatColor.RESET + "" + ChatColor.GRAY + "You co-own this region");
+            } else {
+                lore.add(ChatColor.RESET + "" + ChatColor.GRAY + "You own this region");
+            }
+
+            if (regionType.getDescription() != null && !regionType.getDescription().equals("")) {
+                lore.addAll(Util.textWrap(ChatColor.RESET + "" + ChatColor.GOLD, regionType.getDescription()));
             }
             isMeta.setDisplayName(displayName);
-            
+
             //Trim lore
             trimLore: {
                 boolean addEllipses = lore.size() > 20;
@@ -158,53 +167,32 @@ public class RegionGUIListener implements Listener {
                     lore.add("To be continued...");
                 }
             }
-            
-            
+
+
             isMeta.setLore(lore);
             is.setItemMeta(isMeta);
             inv.setItem(i, is);
             i++;
         }
-        for (SuperRegionType sr : superRegions) {
-            ItemStack is = new ItemStack(sr.getIcon());
+        for (SuperRegion superRegion : superRegions) {
+            SuperRegionType superRegionType = rm.getSuperRegionType(superRegion.getType());
+            ItemStack is = new ItemStack(superRegionType.getIcon());
             ItemMeta isMeta = is.getItemMeta();
-            String displayName = ChatColor.RESET + sr.getName();
+            String displayName = ChatColor.RESET + superRegionType.getName();
             ArrayList<String> lore = new ArrayList<String>();
             lore.add(ChatColor.RESET + "" + ChatColor.GRAY + "Super Region");
-            if (sr.getDescription() != null && !sr.getDescription().equals("")) {
-                lore.addAll(Util.textWrap(ChatColor.GOLD + "", sr.getDescription()));
+            if (superRegion.getBalance() > 0) {
+                lore.add(ChatColor.RESET + "" + ChatColor.GREEN + "Town Bank: " + superRegion.getBalance());
+            } else {
+                lore.add(ChatColor.RESET + "" + ChatColor.RED + "Town Bank: " + superRegion.getBalance());
+                lore.add(ChatColor.RESET + "" + ChatColor.RED + "Deposit money immediately or risk destruction!");
             }
-            if (sr.getChildren().size() > 0) {
-                lore.add(ChatColor.GREEN + "Upgrade from:");
-                int lineCount = 0;
-                String childString = "";
-                for (String srt : sr.getChildren()) {
-                    if (!childString.equals("")) {
-                        childString += ", ";
-                    } else {
-                        childString += ChatColor.GREEN + "";
-                    }
-                    lineCount += srt.length();
-                    if (lineCount > 50) {
-                        lore.add(childString);
-                        childString = new String();
-                        lineCount = srt.length();
-                    }
-                    childString += srt;
-                }
-                lore.add(childString);
-            }
-            if (sr.getMoneyRequirement() > 0) {
-                lore.add("Cost: " + formatter.format(sr.getMoneyRequirement()));
-            }
-            if (sr.getRequirements().size() > 0) {
-                lore.add(ChatColor.BLUE + "Requirements:");
-                for (String s : sr.getRequirements().keySet()) {
-                    lore.add(ChatColor.BLUE + " " + sr.getRequirement(s) + " " + s);
-                }
+
+            if (superRegionType.getDescription() != null && !superRegionType.getDescription().equals("")) {
+                lore.addAll(Util.textWrap(ChatColor.GOLD + "", superRegionType.getDescription()));
             }
             isMeta.setDisplayName(displayName);
-            
+
             //Trim lore
             trimLore: {
                 boolean addEllipses = lore.size() > 20;
@@ -215,7 +203,7 @@ public class RegionGUIListener implements Listener {
                     lore.add("To be continued...");
                 }
             }
-            
+
             isMeta.setLore(lore);
             is.setItemMeta(isMeta);
             inv.setItem(i, is);
@@ -231,7 +219,7 @@ public class RegionGUIListener implements Listener {
         inv.setItem(size - 1 , is);
         player.openInventory(inv);
     }
-    
+
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         if (event.isCancelled()) {
@@ -239,10 +227,10 @@ public class RegionGUIListener implements Listener {
         }
         String name = ChatColor.stripColor(event.getInventory().getName());
         String category = "";
-        boolean isCategory = name.equalsIgnoreCase("Townships Categories");
+        boolean isCategory = name.equalsIgnoreCase("Built Categories");
         String[] names = name.split(" ");
         if (!isCategory) {
-            if (names.length != 2 || !names[1].equals("Regions")) {
+            if (names.length != 2 || !names[1].equals("Builds")) {
                 return;
             } else {
                 category = names[0].toLowerCase();
@@ -250,8 +238,8 @@ public class RegionGUIListener implements Listener {
         }
         Player player = (Player) event.getWhoClicked();
         event.setCancelled(true);
-        
-        if(event.getCurrentItem()==null 
+
+        if(event.getCurrentItem()==null
                 || event.getCurrentItem().getType()==Material.AIR
                 ||!event.getCurrentItem().hasItemMeta()){
             //player.closeInventory();
@@ -260,34 +248,32 @@ public class RegionGUIListener implements Listener {
         if (isCategory) {
             String categoryOpen = ChatColor.stripColor(event.getCurrentItem().getItemMeta().getDisplayName()).toLowerCase();
             player.closeInventory();
-            player.performCommand("to list " + categoryOpen);
+            player.performCommand("to built " + categoryOpen);
             return;
         }
-        
+
         if (event.getCurrentItem().hasItemMeta() && ChatColor.stripColor(event.getCurrentItem().getItemMeta().getDisplayName()).equals("Back to Categories")) {
             player.closeInventory();
-            player.performCommand("to list");
+            RegionGUIListener.openCategoryInventory(player);
             return;
         }
-        
-        //player.performCommand("to info " + ChatColor.stripColor(event.getCurrentItem().getItemMeta().getDisplayName()));
-        String regionName = ChatColor.stripColor(event.getCurrentItem().getItemMeta().getDisplayName()).toLowerCase();
-        RegionType rt = rm.getRegionType(regionName);
-        SuperRegionType srt = null;
-        if (rt == null) {
-            srt = rm.getSuperRegionType(regionName);
-            if (srt == null) {
-                player.closeInventory();
-                return;
-            }
+        if (event.getCurrentItem() == null || event.getCurrentItem().getType() == Material.AIR) {
+            return;
         }
-        
-        String backButton = ChatColor.stripColor(event.getInventory().getItem(event.getInventory().getSize() - 1).getItemMeta().getLore().get(0));
-        player.closeInventory();
-        if (rt != null) {
-            InfoGUIListener.openInfoInventory(rt, player, backButton);
-        } else {
-            InfoGUIListener.openInfoInventory(srt, player, backButton);
+
+        int id = -1;
+        try {
+            id = Integer.parseInt(event.getCurrentItem().getItemMeta().getDisplayName().split(" ")[1]);
+        } catch (Exception e) {
+
         }
+        if (id < 0) {
+            return;
+        }
+        Region region = rm.getRegionByID(id);
+        if (region == null) {
+            return;
+        }
+        RegionInfoGUIListener.openInfoInventory(region, player, "built " + category);
     }
 }

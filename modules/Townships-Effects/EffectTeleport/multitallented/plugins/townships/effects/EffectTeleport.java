@@ -47,7 +47,13 @@ public class EffectTeleport extends Effect {
             RegionManager rm = getPlugin().getRegionManager();
             Region r = rm.getRegion(l);
             RegionType rt = rm.getRegionType(r.getType());
-            
+
+            //Membership Check
+            if (!effect.isMemberOfRegion(event.getPlayer(),  r.getLocation()) && !effect.isOwnerOfRegion(event.getPlayer(), r)) {
+                //Don't teleport them if they aren't a member or owner of the region
+                return;
+            }
+
             //Check if the region is a teleporter
             if (effect.regionHasEffect(rt.getEffects(), "teleport") == 0) {
                 return;

@@ -68,7 +68,11 @@ public class ShopGUIListener implements Listener {
             if (category.equals("")) {
                 category = "Other";
             }
-            ItemStack is = new ItemStack(Material.CHEST);
+            Material mat = Townships.getConfigManager().getCategory(category.toLowerCase());
+            if (mat == null) {
+                mat = Material.CHEST;
+            }
+            ItemStack is = new ItemStack(mat);
             ItemMeta isMeta = is.getItemMeta();
             isMeta.setDisplayName(ChatColor.RESET + WordUtils.capitalize(category));
             is.setItemMeta(isMeta);
@@ -76,7 +80,11 @@ public class ShopGUIListener implements Listener {
             i++;
         }
         if (hasSuperRegions) {
-            ItemStack is = new ItemStack(Material.CHEST);
+            Material mat = Townships.getConfigManager().getCategory("towns");
+            if (mat == null) {
+                mat = Material.CHEST;
+            }
+            ItemStack is = new ItemStack(mat);
             ItemMeta isMeta = is.getItemMeta();
             isMeta.setDisplayName(ChatColor.RESET + "Towns");
             is.setItemMeta(isMeta);

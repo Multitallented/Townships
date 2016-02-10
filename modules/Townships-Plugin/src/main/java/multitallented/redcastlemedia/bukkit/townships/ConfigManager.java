@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.ConfigurationSection;
@@ -45,6 +47,7 @@ public class ConfigManager {
     private final HashMap<String, String> itemGroups;
     private final boolean useTownPrefixes;
     private final List<String> blackListWorlds;
+    private final HashMap<String, Material> categoryMaterials;
     
     public ConfigManager(FileConfiguration config, Townships plugin) {
         this.config = config;
@@ -76,7 +79,27 @@ public class ConfigManager {
         gracePeriod = config.getLong("grace-period-minutes", 0) * 600000;
         itemGroups = processGroups(config.getConfigurationSection("item-groups"));
         blackListWorlds = processWorldList(config.getStringList("black-list-worlds"));
+        categoryMaterials = processMaterialList(config.getConfigurationSection("categories"));
         loadCharters();
+    }
+
+    public Material getCategory(String category) {
+        return categoryMaterials.get(category);
+    }
+
+    private HashMap<String, Material> processMaterialList(ConfigurationSection section) {
+        HashMap<String, Material> returnList = new HashMap<String, Material>();
+
+        for (String s : section.getKeys(false)) {
+            Material mat = Material.valueOf(section.getString(s));
+            if (mat == null) {
+                Bukkit.getLogger().severe("[Townships] cant parse category " + s + " material " + section.getString(s));
+                continue;
+            }
+            returnList.put(s, mat);
+        }
+
+        return returnList;
     }
 
     public List<String> getBlackListWorlds() {

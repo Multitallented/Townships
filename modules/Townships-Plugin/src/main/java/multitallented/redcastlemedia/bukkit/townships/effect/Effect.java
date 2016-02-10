@@ -248,13 +248,66 @@ public class Effect {
         }
         return false;
     }
-    
+
+
+    public static boolean hasReagents(RegionManager rm, Region r) {
+        if (r == null) {
+            return false;
+        }
+        RegionType rt = null;
+        rt = rm.getRegionType(r.getType());
+        if (rt == null) {
+            return false;
+        }
+
+        BlockState bs = r.getLocation().getBlock().getState();
+        if (!(bs instanceof Chest)) {
+            return false;
+        }
+
+        ToReagentCheckEvent rce = new ToReagentCheckEvent(r.getLocation());
+        Bukkit.getPluginManager().callEvent(rce);
+        if (rce.isCancelled()) {
+            return false;
+        }
+
+
+        if (rt.getPowerDrain() != 0) {
+            ArrayList<SuperRegion> srs = rm.getContainingSuperRegions(r.getLocation());
+            if (srs.isEmpty()) {
+                return false;
+            }
+            boolean hasPower = false;
+            for (SuperRegion sr : srs) {
+                if (sr.getPower() + rt.getPowerDrain() > 0) {
+                    hasPower = true;
+                    break;
+                }
+            }
+            if (!hasPower) {
+                return false;
+            }
+        }
+
+        //Check if the player has enough money
+        if (Townships.econ != null) {
+            double balance = Townships.econ.getBalance(r.getOwners().get(0));
+            if (balance + rt.getMoneyOutput() < 0) {
+                return false;
+            }
+        }
+
+        //Check if chest is full and region has output
+        Chest chest = ((Chest) bs);
+        return Util.containsItems(rt.getReagents(), chest.getInventory());
+    }
+
     /**
      * Checks if the region has output and the chest is not full first. Then it
      * checks if the chest has the necessary reagents.
-     * 
+     *
      * @param location the location of the center of the region region.getLocation()
-     * @return 
+     * @return whether or not the region has reagents
      */
     public boolean hasReagents(Location location) {
         if (location == null || location.getBlock() == null || location.getBlock().getState() == null) {
@@ -267,7 +320,9 @@ public class Effect {
         if (r == null) {
             return false;
         }
-        rt = rm.getRegionType(r.getType());
+
+        return Effect.hasReagents(rm, r);
+        /*rt = rm.getRegionType(r.getType());
         if (r == null || rt == null) {
             return false;
         }
@@ -311,7 +366,7 @@ public class Effect {
 
         //Check if chest is full and region has output
         Chest chest = ((Chest) bs);
-        return Util.containsItems(rt.getReagents(), chest.getInventory());
+        return Util.containsItems(rt.getReagents(), chest.getInventory());*/
     }
     
     /**
