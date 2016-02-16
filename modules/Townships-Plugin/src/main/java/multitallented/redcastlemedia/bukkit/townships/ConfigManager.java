@@ -107,6 +107,9 @@ public class ConfigManager {
     }
 
     private List<String> processWorldList(List<String> input) {
+        if (input == null) {
+            return new ArrayList<String>();
+        }
         ArrayList<String> removeMe = new ArrayList<String>();
         for (String worldName : input) {
             if (Bukkit.getWorld(worldName) == null) {

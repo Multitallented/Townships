@@ -103,6 +103,8 @@ public class Townships extends JavaPlugin {
         pm.registerEvents(guiManager, this);
         
         pm.registerEvents(new GUIListener(regionManager), this);
+        pm.registerEvents(new TownGUIListener(regionManager), this);
+        pm.registerEvents(new PlayerGUIListener(regionManager), this);
         pm.registerEvents(new RegionGUIListener(regionManager), this);
         pm.registerEvents(new RegionInfoGUIListener(regionManager), this);
         pm.registerEvents(new MainMenuGUIListener(regionManager), this);
@@ -156,7 +158,8 @@ public class Townships extends JavaPlugin {
         }
 
         //Are they in a blacklisted world
-        if ((Townships.perms == null || !Townships.perms.has(sender, "townships.admin")) && getConfigManager().getBlackListWorlds().contains(player.getWorld().getName())) {
+        if ((Townships.perms == null || !Townships.perms.has(sender, "townships.admin")) &&
+                (getConfigManager().getBlackListWorlds() != null && getConfigManager().getBlackListWorlds().contains(player.getWorld().getName()))) {
             sender.sendMessage(ChatColor.RED + "[Townships] is disabled on this world");
             return true;
         }
@@ -1186,7 +1189,8 @@ public class Townships extends JavaPlugin {
             regionManager.reduceRegion(sr);
             return true;
         } else if (args.length > 0 && args[0].equalsIgnoreCase("listall")) {
-            if (args.length > 1) {
+            TownGUIListener.openInventory(player);
+            /*if (args.length > 1) {
                 SuperRegionType srt = regionManager.getSuperRegionType(args[1]);
                 if (srt == null) {
                     player.sendMessage(ChatColor.GRAY + "[Townships] There is no super-region type named " + args[1]);
@@ -1227,7 +1231,7 @@ public class Townships extends JavaPlugin {
                 if (!message.equals(ChatColor.GOLD + "")) {
                     player.sendMessage(message);
                 }
-            }
+            }*/
             return true;
         } else if (args.length > 2 && args[0].equalsIgnoreCase("withdraw")) {
             if (econ == null) {
@@ -1784,310 +1788,6 @@ public class Townships extends JavaPlugin {
                 InfoGUIListener.openInfoInventory(srt, player, null);
             }
 
-                /*player.sendMessage(ChatColor.GRAY + "[Townships] Info for region type " + ChatColor.GOLD + args[1] + ":");
-
-                String message = "";
-                if (rt.getMoneyRequirement() != 0) {
-                    message += ChatColor.GRAY + "Cost: " + ChatColor.GOLD + rt.getMoneyRequirement();
-                }
-                if (rt.getMoneyOutput() != 0) {
-                    message += ChatColor.GRAY + ", Payout: " + ChatColor.GOLD + rt.getMoneyOutput();
-                }
-                message += ChatColor.GRAY + ", Radius: " + ChatColor.GOLD + (int) Math.sqrt(rt.getRadius());
-                player.sendMessage(message);
-
-                String description = rt.getDescription();
-                int j=0;
-                if (description != null) {
-                    message = ChatColor.GRAY + "Description: " + ChatColor.GOLD;
-                    if (description.length() + message.length() <= 55) {
-                        player.sendMessage(message + description);
-                        description = null;
-                    }
-                    while (description != null && j<12) {
-                        if (description.length() > 53) {
-                            message += description.substring(0, 53);
-                            player.sendMessage(message);
-                            description = description.substring(53);
-                            message = ChatColor.GOLD + "";
-                            j++;
-                        } else {
-                            player.sendMessage(message + description);
-                            description = null;
-                            j++;
-                        }
-                    }
-                }
-
-                message = ChatColor.GRAY + "Effects: " + ChatColor.GOLD;
-                if (rt.getEffects() != null) {
-                    for (String is : rt.getEffects()) {
-                        String addLine = is.split("\\.")[0] + ", ";
-                        if (message.length() + addLine.length() > 55) {
-                            player.sendMessage(message.substring(0, message.length() - 2));
-                            message = ChatColor.GOLD + "";
-                            j++;
-                        }
-                        if (j < 12) {
-                            message += addLine;
-                        } else {
-                            break;
-                        }
-                    }
-                }
-                if (rt.getEffects() == null || rt.getEffects().isEmpty()) {
-                    message += "None";
-                    player.sendMessage(message);
-                } else {
-                    player.sendMessage(message.substring(0, message.length()-2));
-                }
-                message = ChatColor.GRAY + "Required Blocks: " + ChatColor.GOLD;
-                if (rt.getRequirements() != null) {
-                    for (ArrayList<HSItem> is : rt.getRequirements()) {
-                        String addLine = "";
-                        for (HSItem iss : is) {
-                            String itemName = "";
-                            if (iss.isWildDamage()) {
-                                itemName = iss.getMat().name();
-                            } else {
-                                ItemStack ist = new ItemStack(iss.getMat(), 1, (short) iss.getDamage());
-                                itemName = Items.itemByStack(ist).getName();
-                            }
-
-                            if (addLine.equals("")) {
-                                addLine = iss.getQty() + ":" + itemName + ", ";
-                            } else {
-                                addLine = " or " + iss.getQty() + ":" + itemName + ", ";
-                            }
-                        }
-                        if (message.length() + addLine.length() > 55) {
-                            player.sendMessage(message.substring(0, message.length() - 2));
-                            message = ChatColor.GOLD + "";
-                            j++;
-                        }
-                        if (j < 12) {
-                            message += addLine;
-                        } else {
-                            break;
-                        }
-                    }
-                }
-                if (rt.getRequirements() == null || rt.getRequirements().isEmpty()) {
-                    message += "None";
-                    player.sendMessage(message);
-                } else {
-                    player.sendMessage(message.substring(0, message.length()-2));
-                }
-                message = ChatColor.GRAY + "Required Items: " + ChatColor.GOLD;
-                if (rt.getReagents() != null) {
-                    for (ArrayList<HSItem> is : rt.getReagents()) {
-                        String addLine = "";
-                        for (HSItem iss : is) {
-
-                            String itemName = "";
-                            if (iss.isWildDamage()) {
-                                itemName = iss.getMat().name();
-                            } else {
-                                ItemStack ist = new ItemStack(iss.getMat(), 1, (short) iss.getDamage());
-                                itemName = Items.itemByStack(ist).getName();
-                            }
-                            if (addLine.equals("")) {
-                                addLine = iss.getQty() + ":" + itemName + ", ";
-                            } else {
-                                addLine = " or " + iss.getQty() + ":" + itemName + ", ";
-                            }
-                        }
-                        if (message.length() + addLine.length() > 55) {
-                            player.sendMessage(message.substring(0, message.length() - 2));
-                            message = ChatColor.GOLD + "";
-                            j++;
-                        }
-                        if (j < 12) {
-                            message += addLine;
-                        } else {
-                            break;
-                        }
-                    }
-                }
-                if (rt.getReagents() == null || rt.getReagents().isEmpty()) {
-                    message += "None";
-                    player.sendMessage(message);
-                } else {
-                    player.sendMessage(message.substring(0, message.length()-2));
-                }
-                if (rt.getUpkeep() != null && !rt.getUpkeep().isEmpty()) {
-                    message = ChatColor.GRAY + "Upkeep Cost: " + ChatColor.GOLD;
-                    for (ArrayList<HSItem> is : rt.getUpkeep()) {
-                        String addLine = "";
-                        for (HSItem iss : is) {
-                            String itemName = "";
-                            if (iss.isWildDamage()) {
-                                itemName = iss.getMat().name();
-                            } else {
-                                ItemStack ist = new ItemStack(iss.getMat(), 1, (short) iss.getDamage());
-                                itemName = Items.itemByStack(ist).getName();
-                            }
-
-                            if (addLine.equals("")) {
-                                addLine = iss.getQty() + ":" + itemName + ", ";
-                            } else {
-                                addLine = " or " + iss.getQty() + ":" + itemName + ", ";
-                            }
-                        }
-                        if (message.length() + addLine.length() > 55) {
-                            player.sendMessage(message.substring(0, message.length() - 2));
-                            message = ChatColor.GOLD + "";
-                            j++;
-                        }
-                        if (j < 12) {
-                            message += addLine;
-                        } else {
-                            break;
-                        }
-                    }
-                    player.sendMessage(message.substring(0, message.length()-2));
-                }
-
-                if (rt.getOutput() != null && !rt.getOutput().isEmpty()) {
-                    message = ChatColor.GRAY + "Output: " + ChatColor.GOLD;
-                    for (ArrayList<HSItem> is : rt.getOutput()) {
-                        String addLine = "";
-                        for (HSItem iss : is) {
-                            String itemName = "";
-                            if (iss.isWildDamage()) {
-                                itemName = iss.getMat().name();
-                            } else {
-                                ItemStack ist = new ItemStack(iss.getMat(), 1, (short) iss.getDamage());
-                                itemName = Items.itemByStack(ist).getName();
-                            }
-
-                            if (addLine.equals("")) {
-                                addLine = iss.getQty() + ":" + itemName + ", ";
-                            } else {
-                                addLine = " or " + iss.getQty() + ":" + itemName + ", ";
-                            }
-                        }
-                        if (message.length() + addLine.length() > 55) {
-                            player.sendMessage(message.substring(0, message.length() - 2));
-                            message = ChatColor.GOLD + "";
-                            j++;
-                        }
-                        if (j < 12) {
-                            message += addLine;
-                        } else {
-                            break;
-                        }
-                    }
-                    player.sendMessage(message.substring(0, message.length()-2));
-                }
-            } else if (srt != null) {
-                player.sendMessage(ChatColor.GRAY + "[Townships] Info for super-region type " + ChatColor.GOLD + args[1] + ":");
-
-                String message = "";
-                if (srt.getMoneyRequirement() != 0) {
-                    message += ChatColor.GRAY + "Cost: " + ChatColor.GOLD + srt.getMoneyRequirement();
-                }
-                if (srt.getOutput() != 0) {
-                    message += ChatColor.GRAY + ", Payout: " + ChatColor.GOLD + srt.getOutput();
-                }
-
-                if (!message.equals("")) {
-                    player.sendMessage(message);
-                }
-
-                message = ChatColor.GRAY + "Power: " + ChatColor.GOLD + srt.getMaxPower() + " (+" + srt.getDailyPower() + "), ";
-                if (srt.getCharter() != 0) {
-                    message += ChatColor.GRAY + "Charter: " + ChatColor.GOLD + srt.getCharter() + ChatColor.GRAY + ", ";
-                }
-                message += "Radius: " + ChatColor.GOLD + (int) Math.sqrt(srt.getRadius());
-
-                player.sendMessage(message);
-
-                int j=0;
-                if (srt.getDescription() != null) {
-                    message = ChatColor.GRAY + "Description: " + ChatColor.GOLD;
-                    String tempMess = srt.getDescription();
-                    if (tempMess.length() + message.length() <= 55) {
-                        player.sendMessage(message + tempMess);
-                        tempMess = null;
-                    }
-                    while (tempMess != null && j<12) {
-                        if (tempMess.length() > 53) {
-                            message += tempMess.substring(0, 53);
-                            player.sendMessage(message);
-                            tempMess = tempMess.substring(53);
-                            message = ChatColor.GOLD + "";
-                            j++;
-                        } else {
-                            player.sendMessage(message + tempMess);
-                            tempMess = null;
-                            j++;
-                        }
-                    }
-                }
-                message = ChatColor.GRAY + "Effects: " + ChatColor.GOLD;
-                List<String> effects = srt.getEffects();
-                if (effects != null) {
-                    for (String is : effects) {
-                        String addLine = is + ", ";
-                        if (message.length() + addLine.length() > 55) {
-                            player.sendMessage(message.substring(0, message.length() - 2));
-                            message = ChatColor.GOLD + "";
-                            j++;
-                        }
-                        if (j < 11) {
-                            message += addLine;
-                        } else {
-                            break;
-                        }
-                    }
-                }
-                if (effects != null && !effects.isEmpty()) {
-                    player.sendMessage(message.substring(0, message.length()-2));
-                } else {
-                    message += "None";
-                    player.sendMessage(message);
-                }
-                message = ChatColor.GRAY + "Required Regions: " + ChatColor.GOLD;
-                if (srt.getRequirements() != null) {
-                    for (String is : srt.getRequirements().keySet()) {
-                        String addLine = is + ":" + srt.getRequirement(is) + ", ";
-                        if (message.length() + addLine.length() > 55) {
-                            player.sendMessage(message.substring(0, message.length() - 2));
-                            message = ChatColor.GOLD + "";
-                            j++;
-                        }
-                        if (j < 12) {
-                            message += addLine;
-                        } else {
-                            break;
-                        }
-                    }
-                }
-                if (srt.getRequirements() == null || srt.getRequirements().isEmpty()) {
-                    message += "None";
-                    player.sendMessage(message);
-                } else {
-                    player.sendMessage(message.substring(0, message.length()-2));
-                }
-                if (srt.getChildren() != null) {
-                    message = ChatColor.GRAY + "Evolves from: " + ChatColor.GOLD;
-                    for (String is : srt.getChildren()) {
-                        String addLine = is + ", ";
-                        if (message.length() + addLine.length() > 55) {
-                            player.sendMessage(message.substring(0, message.length() - 2));
-                            message = ChatColor.GOLD + "";
-                            j++;
-                        }
-                        if (j < 12) {
-                            message += addLine;
-                        } else {
-                            break;
-                        }
-                    }
-                    player.sendMessage(message.substring(0, message.length()-2));
-                }
-            }*/
             return true;
         } else if (args.length > 1 && args[0].equalsIgnoreCase("addowner")) {
             String playername = args[1];
@@ -2213,6 +1913,131 @@ public class Townships extends JavaPlugin {
                 }
                 regionManager.setMember(r, playername);
                 player.sendMessage(ChatColor.GRAY + "[Townships] " + ChatColor.WHITE + "Added " + playername + " to the region.");
+                return true;
+            } else {
+                player.sendMessage(ChatColor.GRAY + "[Townships] You don't own this region.");
+                return true;
+            }
+        } else if (args.length > 2 && args[0].equals("addownerid")) {
+            String playername = args[1];
+            Player aPlayer = getServer().getPlayer(playername);
+            if (aPlayer != null) {
+                playername = aPlayer.getName();
+            }
+            Region r = null;
+            try {
+                r = regionManager.getRegionByID(Integer.parseInt(args[2]));
+                if (r == null) {
+                    player.sendMessage(ChatColor.GRAY + "[Townships] " + args[1] + " is not a valid id");
+                    return true;
+                }
+            } catch (Exception e) {
+                player.sendMessage(ChatColor.GRAY + "[Townships] " + args[1] + " is not a valid id");
+                return true;
+            }
+            if (r.isOwner(player.getName()) || (perms != null && perms.has(player, "townships.admin"))) {
+                if (r.isOwner(playername)) {
+                    player.sendMessage(ChatColor.GRAY + "[Townships] " + playername + " is already an owner of this region.");
+                    return true;
+                }
+                if (r.isMember(playername)) {
+                    regionManager.setMember(r, playername);
+                }
+                regionManager.setOwner(r, playername);
+                player.sendMessage(ChatColor.GRAY + "[Townships] " + ChatColor.WHITE + "Added " + playername + " as an owner.");
+                if (aPlayer != null) {
+                    aPlayer.sendMessage(ChatColor.GRAY + "[Townships] " + ChatColor.WHITE + "You're now a co-owner of " + player.getDisplayName() + "'s " + r.getType());
+                }
+                return true;
+            } else {
+                player.sendMessage(ChatColor.GRAY + "[Townships] You don't own this region.");
+                return true;
+            }
+        } else if (args.length > 2 && args[0].equals("setownerid")) {
+            String playername = args[1];
+            Player aPlayer = getServer().getPlayer(playername);
+            if (aPlayer != null) {
+                playername = aPlayer.getName();
+            } else {
+                player.sendMessage(ChatColor.RED + "[Townships] " + playername + " must be online and standing in the region");
+                return true;
+            }
+            Region r = null;
+            try {
+                r = regionManager.getRegionByID(Integer.parseInt(args[2]));
+                if (r == null) {
+                    player.sendMessage(ChatColor.GRAY + "[Townships] " + args[1] + " is not a valid id");
+                    return true;
+                }
+            } catch (Exception e) {
+                player.sendMessage(ChatColor.GRAY + "[Townships] " + args[1] + " is not a valid id");
+                return true;
+            }
+            if (regionManager.isAtMaxRegions(aPlayer, regionManager.getRegionType(r.getType()))) {
+                player.sendMessage(ChatColor.GRAY + "[Townships] " + ChatColor.RED + playername + " cannot own more " + r.getType());
+                return true;
+            }
+            if (r.isOwner(player.getName()) || (perms != null && perms.has(player, "townships.admin"))) {
+                //Check if too far away
+                ArrayList<Region> containedRegions = regionManager.getContainingBuildRegions(aPlayer.getLocation());
+                if (!containedRegions.contains(r)) {
+                    player.sendMessage(ChatColor.RED + "[Townships] " + playername + " must be standing inside the region");
+                    return true;
+                }
+
+                if (r.isMember(playername)) {
+                    regionManager.setMember(r, playername);
+                }
+                regionManager.setMember(r, player.getName());
+                regionManager.setOwner(r, player.getName());
+                regionManager.setPrimaryOwner(r, playername);
+                player.sendMessage(ChatColor.GRAY + "[Townships] " + ChatColor.WHITE + "Set " + playername + " as the owner.");
+
+                aPlayer.sendMessage(ChatColor.GRAY + "[Townships] " + ChatColor.WHITE + "You're now the owner of " + player.getDisplayName() + "'s " + r.getType());
+                return true;
+            } else {
+                player.sendMessage(ChatColor.GRAY + "[Townships] You don't own this region.");
+                return true;
+            }
+        } else if (args.length > 2 && args[0].equals("removeid")) {
+            String playername = args[1];
+            Player aPlayer = getServer().getPlayer(playername);
+            if (aPlayer != null) {
+                playername = aPlayer.getName();
+            } else {
+                player.sendMessage(ChatColor.RED + "[Townships] " + playername + " must be online and standing in the region");
+                return true;
+            }
+            Region r = null;
+            try {
+                r = regionManager.getRegionByID(Integer.parseInt(args[2]));
+                if (r == null) {
+                    player.sendMessage(ChatColor.GRAY + "[Townships] " + args[1] + " is not a valid id");
+                    return true;
+                }
+            } catch (Exception e) {
+                player.sendMessage(ChatColor.GRAY + "[Townships] " + args[1] + " is not a valid id");
+                return true;
+            }
+            if (regionManager.isAtMaxRegions(aPlayer, regionManager.getRegionType(r.getType()))) {
+                player.sendMessage(ChatColor.GRAY + "[Townships] " + ChatColor.RED + playername + " cannot own more " + r.getType());
+                return true;
+            }
+            if (r.isOwner(player.getName()) || (perms != null && perms.has(player, "townships.admin"))) {
+                if (r.isPrimaryOwner(playername)) {
+                    player.sendMessage(ChatColor.GRAY + "[Townships] You must use /to setowner to change the original owner.");
+                    return true;
+                }
+                if (!r.isMember(playername) && !r.isOwner(playername)) {
+                    player.sendMessage(ChatColor.GRAY + "[Townships] " + playername + " doesn't belong to this region");
+                    return true;
+                }
+                if (r.isMember(playername)) {
+                    regionManager.setMember(r, playername);
+                } else if (r.isOwner(playername)) {
+                    regionManager.setOwner(r, playername);
+                }
+                player.sendMessage(ChatColor.GRAY + "[Townships] " + ChatColor.WHITE + "Removed " + playername + " from the region.");
                 return true;
             } else {
                 player.sendMessage(ChatColor.GRAY + "[Townships] You don't own this region.");
@@ -2612,6 +2437,9 @@ public class Townships extends JavaPlugin {
 
             if (sr != null) {
 
+                RegionInfoGUIListener.openInfoInventory(sr, player, "");
+                return true;
+                /*
                 NumberFormat formatter = NumberFormat.getCurrencyInstance(Locale.US);
 
                 SuperRegionType srt = regionManager.getSuperRegionType(sr.getType());
@@ -2722,18 +2550,20 @@ public class Townships extends JavaPlugin {
                 } else {
                     player.sendMessage(message);
                 }
-                return true;
+                return true;*/
             }
 
             Player p = getServer().getPlayer(args[1]);
             if (p != null) {
-                String playername = p.getName();
-                player.sendMessage(ChatColor.GRAY + "[Townships] " + p.getDisplayName() + " is a member of:");
-                String message = ChatColor.GOLD + "";
+                ArrayList<SuperRegion> superRegions = new ArrayList<SuperRegion>();
+                String playerName = p.getName();
+                //player.sendMessage(ChatColor.GRAY + "[Townships] " + p.getDisplayName() + " is a member of:");
+                //String message = ChatColor.GOLD + "";
                 int j = 0;
                 for (SuperRegion sr1 : regionManager.getSortedSuperRegions()) {
-                    if (sr1.hasOwner(playername) || sr1.hasMember(playername)) {
-                        if (message.length() + sr1.getName().length() + 2 > 55) {
+                    if (sr1.hasOwner(playerName) || sr1.hasMember(playerName)) {
+                        superRegions.add(sr1);
+                        /*if (message.length() + sr1.getName().length() + 2 > 55) {
                             player.sendMessage(message);
                             message = ChatColor.GOLD + "";
                             j++;
@@ -2742,11 +2572,16 @@ public class Townships extends JavaPlugin {
                             break;
                         } else {
                             message += sr1.getName() + ", ";
-                        }
+                        }*/
                     }
                 }
-                if (!regionManager.getSortedRegions().isEmpty()) {
+                /*if (!regionManager.getSortedRegions().isEmpty()) {
                     player.sendMessage(message.substring(0, message.length() - 2));
+                }*/
+                if (!superRegions.isEmpty()) {
+                    TownGUIListener.openInventory(player, superRegions);
+                } else {
+                    player.sendMessage(ChatColor.GRAY + "[Townships] " + playerName + " does not belong to any towns.");
                 }
                 return true;
             }

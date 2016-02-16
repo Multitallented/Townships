@@ -178,7 +178,7 @@ public class RegionGUIListener implements Listener {
             SuperRegionType superRegionType = rm.getSuperRegionType(superRegion.getType());
             ItemStack is = new ItemStack(superRegionType.getIcon());
             ItemMeta isMeta = is.getItemMeta();
-            String displayName = ChatColor.RESET + superRegionType.getName();
+            String displayName = ChatColor.RESET + superRegion.getName();
             ArrayList<String> lore = new ArrayList<String>();
             lore.add(ChatColor.RESET + "" + ChatColor.GRAY + "Super Region");
             if (superRegion.getBalance() > 0) {
@@ -258,6 +258,13 @@ public class RegionGUIListener implements Listener {
             return;
         }
         if (event.getCurrentItem() == null || event.getCurrentItem().getType() == Material.AIR) {
+            return;
+        }
+
+        String townName = ChatColor.stripColor(event.getCurrentItem().getItemMeta().getDisplayName());
+        SuperRegion superRegion = rm.getSuperRegion(townName);
+        if (superRegion != null) {
+            RegionInfoGUIListener.openInfoInventory(superRegion, player, "built " + category);
             return;
         }
 

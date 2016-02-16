@@ -185,20 +185,25 @@ public class MainMenuGUIListener implements Listener {
             //RequirementsGUIListener.openRequirementsInventory(new ArrayList<ArrayList<TOItem>>(rt.getReagents()), player, rt.getName() + " reagents", backState + " " + regionTypeName);
             return;
         }
-        if (event.getCurrentItem().getType() == Material.SKULL) {
-            if (event.getCurrentItem().getItemMeta().getDisplayName().equals("Players")) {
+        if (event.getCurrentItem().getType() == Material.SKULL_ITEM) {
+            if (ChatColor.stripColor(event.getCurrentItem().getItemMeta().getDisplayName()).equals("Players")) {
                 player.closeInventory();
-                //TODO show all players and do a who lookup on them
+                ArrayList<String> playerList = new ArrayList<String>();
+                for (Player currentPlayer : Bukkit.getOnlinePlayers()) {
+                    playerList.add(currentPlayer.getName());
+                }
+                PlayerGUIListener.openPlayerList(player, playerList, "to who {name}");
                 return;
             } else {
                 player.closeInventory();
-                //TODO open profile menu
+                player.performCommand("to who " + player.getName());
+                //TODO open profile menu instead
                 return;
             }
         }
         if (event.getCurrentItem().getType() == Material.GLOWSTONE) {
             player.closeInventory();
-            //TODO show list of towns for lookup
+            TownGUIListener.openInventory(player);
             return;
         }
         player.closeInventory();

@@ -111,18 +111,14 @@ public class EffectShootMissile extends Effect {
             }
             RegionType rt = rm.getRegionType(region.getType());
             boolean hasEffect = false;
-            int periods = 4;
             long cooldown = 8;
-            double accuracy = 1;
             for (String effectName : rt.getEffects()) {
                 if (effectName.startsWith("shoot_missile")) {
                     hasEffect = true;
                     String[] effectParts = effectName.split("\\.");
-                    if (effectParts.length > 3) {
+                    if (effectParts.length > 1) {
                         try {
-                            periods = Integer.parseInt(effectParts[1]);
-                            cooldown = Long.parseLong(effectParts[2]);
-                            accuracy = Double.parseDouble(effectParts[3]);
+                            cooldown = Long.parseLong(effectParts[1]);
                         } catch (Exception e) {
                             //Do nothing and just use defaults
                         }
