@@ -52,12 +52,12 @@ public class ShopGUIListener implements Listener {
                 size -= 9;
             }
         }
-        //Inventory inv = Bukkit.createInventory(null, size, ChatColor.RED + "Townships Categories");
+        //Inventory inv = Bukkit.createInventory(null, size, ChatColor.RED + "Townships Groups");
         String title;
         if (showAll) {
-            title = ChatColor.RED + "All Shop Categories";
+            title = ChatColor.RED + "All Shop Groups";
         } else {
-            title = ChatColor.RED + "Shop Categories";
+            title = ChatColor.RED + "Shop Groups";
         }
         Inventory inv = Bukkit.createInventory(new MenuHolder(Bukkit.createInventory(null, size)), 
                 size, title);
@@ -282,9 +282,9 @@ public class ShopGUIListener implements Listener {
         ItemStack is = new ItemStack(Material.REDSTONE_BLOCK);
         ItemMeta isMeta = is.getItemMeta();
         if (showAll) {
-            isMeta.setDisplayName(ChatColor.RESET + "Back to All Categories");
+            isMeta.setDisplayName(ChatColor.RESET + "Back to All Groups");
         } else {
-            isMeta.setDisplayName(ChatColor.RESET + "Back to Categories");
+            isMeta.setDisplayName(ChatColor.RESET + "Back to Groups");
         }
         ArrayList<String> lore = new ArrayList<String>();
         lore.add("list " + category);
@@ -298,7 +298,7 @@ public class ShopGUIListener implements Listener {
         int size = 9;
         
         
-        //Inventory inv = Bukkit.createInventory(null, size, ChatColor.RED + "Townships Categories");
+        //Inventory inv = Bukkit.createInventory(null, size, ChatColor.RED + "Townships Groups");
         Inventory inv = Bukkit.createInventory(new MenuHolder(Bukkit.createInventory(null, size)), 
                 size, ChatColor.RED + "Unlock Confirmation");
         
@@ -368,8 +368,8 @@ public class ShopGUIListener implements Listener {
         }
         
         String category = "";
-        boolean showAll = name.equalsIgnoreCase("All Shop Categories");
-        boolean isCategory = showAll || name.equalsIgnoreCase("Shop Categories");
+        boolean showAll = name.equalsIgnoreCase("All Shop Groups");
+        boolean isCategory = showAll || name.equalsIgnoreCase("Shop Groups");
         String[] names = name.split(" ");
         if (!isCategory) {
             if (names.length != 2 || !names[1].equalsIgnoreCase("Shop")) {
@@ -399,13 +399,13 @@ public class ShopGUIListener implements Listener {
         }
 
         if (event.getCurrentItem().hasItemMeta() && 
-                ChatColor.stripColor(event.getCurrentItem().getItemMeta().getDisplayName()).equals("Back to Categories")) {
+                ChatColor.stripColor(event.getCurrentItem().getItemMeta().getDisplayName()).equals("Back to Groups")) {
             player.closeInventory();
             player.performCommand("to shop");
             return;
         }
         if (event.getCurrentItem().hasItemMeta() &&
-                ChatColor.stripColor(event.getCurrentItem().getItemMeta().getDisplayName()).equals("Back to All Categories")) {
+                ChatColor.stripColor(event.getCurrentItem().getItemMeta().getDisplayName()).equals("Back to All Groups")) {
             player.closeInventory();
             player.performCommand("to shop all");
             return;
