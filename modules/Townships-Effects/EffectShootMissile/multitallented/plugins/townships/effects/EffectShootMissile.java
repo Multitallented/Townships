@@ -216,7 +216,7 @@ public class EffectShootMissile extends Effect {
                 if (currPlayer.getLocation().distanceSquared(fireLocation) > 2500) {
                     continue;
                 }
-                currPlayer.playSound(fireLocation, Sound.EXPLODE, 2, 1);
+                currPlayer.playSound(fireLocation, Sound.ENTITY_GENERIC_EXPLODE, 2, 1);
             }
 
             player.sendMessage(ChatColor.GREEN + "[Townships] Your " + region.getType() + " has fired ordinance at your new target.");

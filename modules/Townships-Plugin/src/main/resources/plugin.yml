@@ -6,7 +6,7 @@ description: Allows you to create structures and towns.
 main: multitallented.redcastlemedia.bukkit.townships.Townships
 name: Townships
 startup: postworld
-version: 3.0.1-b060
+version: 3.1.1-b061
 depend: [Vault]
 commands:
    hs:

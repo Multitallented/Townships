@@ -28,9 +28,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
-import org.bukkit.event.painting.PaintingBreakByEntityEvent;
-import org.bukkit.event.painting.PaintingBreakEvent;
-import org.bukkit.event.painting.PaintingPlaceEvent;
+import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.projectiles.ProjectileSource;
 
 /**
@@ -272,11 +270,11 @@ public class RegionEntityListener implements Listener {
             }
         }
     }
-    
+
     @EventHandler
-    public void onPaintingPlace(PaintingPlaceEvent event) {
-        if ((event.isCancelled() || !rm.shouldTakeAction(event.getPainting().getLocation(), event.getPlayer(), 0, "deny_block_build", true))  &&
-                (event.isCancelled() || !rm.shouldTakeAction(event.getPainting().getLocation(), event.getPlayer(), 0, "deny_block_build_no_reagent", false))) {
+    public void onPaintingPlace(HangingPlaceEvent event) {
+        if ((event.isCancelled() || !rm.shouldTakeAction(event.getEntity().getLocation(), event.getPlayer(), 0, "deny_block_build", true))  &&
+                (event.isCancelled() || !rm.shouldTakeAction(event.getEntity().getLocation(), event.getPlayer(), 0, "deny_block_build_no_reagent", false))) {
             return;
         }
 
@@ -285,19 +283,18 @@ public class RegionEntityListener implements Listener {
     }
 
     @EventHandler
-    public void onPaintingBreak(PaintingBreakEvent event) {
-        if (event.isCancelled() || !(event instanceof PaintingBreakByEntityEvent))
+    public void onPaintingBreak(HangingBreakByEntityEvent pEvent) {
+        if (pEvent.isCancelled())
             return;
-        PaintingBreakByEntityEvent pEvent = (PaintingBreakByEntityEvent) event;
         if (!(pEvent.getRemover() instanceof Player))
             return;
         Player player = (Player) pEvent.getRemover();
-        if ((!rm.shouldTakeAction(event.getPainting().getLocation(), player, 0, "deny_block_break", true)) && 
-                (!rm.shouldTakeAction(event.getPainting().getLocation(), player, 0, "deny_block_break_no_reagent", false))) {
+        if ((!rm.shouldTakeAction(pEvent.getEntity().getLocation(), player, 0, "deny_block_break", true)) &&
+                (!rm.shouldTakeAction(pEvent.getEntity().getLocation(), player, 0, "deny_block_break_no_reagent", false))) {
             return;
         }
 
-        event.setCancelled(true);
+        pEvent.setCancelled(true);
         player.sendMessage(ChatColor.GRAY + "[Townships] This region is protected");
     }
 

@@ -53,7 +53,7 @@ public class EffectPowerShield extends Effect {
                         if (effectParts.length > 1) {
                             try {
                                 powerDamage = Integer.parseInt(effectParts[1]);
-                            } catch (Exception e) {
+                            } catch (Exception error) {
 
                             }
                         }

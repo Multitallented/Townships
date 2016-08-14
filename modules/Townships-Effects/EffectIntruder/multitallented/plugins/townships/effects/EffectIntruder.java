@@ -8,7 +8,6 @@ import multitallented.redcastlemedia.bukkit.townships.region.Region;
 import multitallented.redcastlemedia.bukkit.townships.region.RegionManager;
 import multitallented.redcastlemedia.bukkit.townships.region.RegionType;
 import multitallented.redcastlemedia.bukkit.townships.region.SuperRegion;
-import multitallented.redcastlemedia.bukkit.townships.region.SuperRegionType;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
@@ -142,7 +141,7 @@ public class EffectIntruder extends Effect {
             for (Player p : Bukkit.getOnlinePlayers()) {
                 if (sr.hasMember(p.getName()) || sr.hasOwner(p.getName())) {
                     p.sendMessage(message);
-                    p.playSound(p.getLocation(), Sound.WOLF_HOWL, 1, 1);
+                    p.playSound(p.getLocation(), Sound.ENTITY_WOLF_HOWL, 1, 1);
                 }
             }
         }
