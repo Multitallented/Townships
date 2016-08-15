@@ -42,6 +42,7 @@ public class Permissions {
             permissionsFile.delete();
         } catch (Exception e) {
             plugin.getLogger().severe("Failed to read permissions.yml");
+            e.printStackTrace();
             return;
         }
     }
