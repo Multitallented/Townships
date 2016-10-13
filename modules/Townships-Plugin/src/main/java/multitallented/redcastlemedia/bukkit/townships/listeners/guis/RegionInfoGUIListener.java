@@ -177,7 +177,7 @@ public class RegionInfoGUIListener implements Listener {
             playerItem.setItemMeta(im);
             inv.setItem(16, playerItem);
         }
-        {
+        if (region.isOwner(player.getName())) {
             ItemStack playerItem = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
             SkullMeta im = (SkullMeta) playerItem.getItemMeta();
             ArrayList<String> cLore = new ArrayList<String>();
@@ -191,7 +191,7 @@ public class RegionInfoGUIListener implements Listener {
             inv.setItem(17, playerItem);
         }
 
-        {
+        if (region.isOwner(player.getName())) {
             ItemStack backStack = new ItemStack(Material.TNT);
             ItemMeta backMeta = backStack.getItemMeta();
             backMeta.setDisplayName(ChatColor.RESET + "" + ChatColor.RED + "Destroy Region");
@@ -438,7 +438,7 @@ public class RegionInfoGUIListener implements Listener {
             playerItem.setItemMeta(im);
             inv.setItem(14, playerItem);
         }
-        {
+        if (superRegion.hasOwner(player.getName())) {
             ItemStack playerItem = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
             SkullMeta im = (SkullMeta) playerItem.getItemMeta();
             ArrayList<String> cLore = new ArrayList<String>();
@@ -452,7 +452,7 @@ public class RegionInfoGUIListener implements Listener {
             inv.setItem(15, playerItem);
         }
 
-        {
+        if (superRegion.hasOwner(player.getName())) {
             ItemStack backStack = new ItemStack(Material.TNT);
             ItemMeta backMeta = backStack.getItemMeta();
             backMeta.setDisplayName(ChatColor.RESET + "" + ChatColor.RED + "Destroy Region");
@@ -508,12 +508,12 @@ public class RegionInfoGUIListener implements Listener {
 
         if (event.getCurrentItem().getType() == Material.TNT) {
             player.closeInventory();
-            if (region != null) {
+            if (region != null && region.isOwner(player.getName())) {
                 rm.destroyRegion(region.getLocation());
                 rm.removeRegion(region.getLocation());
                 return;
             }
-            if (superRegion != null) {
+            if (superRegion != null && superRegion.hasOwner(player.getName())) {
                 rm.destroySuperRegion(superRegion.getName(), true);
                 return;
             }
@@ -592,12 +592,12 @@ public class RegionInfoGUIListener implements Listener {
                     }
                 } else if (owner.equals("MHF_ArrowDown")) {
                     player.closeInventory();
-                    if (region != null) {
+                    if (region != null && region.isOwner(player.getName())) {
                         ArrayList<String> memberList = new ArrayList<String>();
                         memberList.addAll(region.getMembers());
                         memberList.addAll(region.getOwners());
                         PlayerGUIListener.openPlayerList(player, memberList, "to removeid {name} " + region.getID());
-                    } else if (superRegion != null) {
+                    } else if (superRegion != null && superRegion.hasOwner(player.getName())) {
                         ArrayList<String> memberList = new ArrayList<String>();
                         memberList.addAll(superRegion.getMembers().keySet());
                         memberList.addAll(superRegion.getOwners());
