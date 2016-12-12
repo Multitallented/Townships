@@ -1,17 +1,19 @@
 package multitallented.redcastlemedia.bukkit.townships.checkregiontask;
 
 import static java.lang.Thread.sleep;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+
+import java.io.File;
+import java.util.*;
+
 import multitallented.redcastlemedia.bukkit.townships.Townships;
 import multitallented.redcastlemedia.bukkit.townships.events.ToTwoSecondEvent;
 import multitallented.redcastlemedia.bukkit.townships.region.Region;
 import multitallented.redcastlemedia.bukkit.townships.region.SuperRegion;
 import org.bukkit.Location;
 import org.bukkit.Server;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 
@@ -89,5 +91,62 @@ public class CheckRegionTask implements Runnable {
             hs.getRegionManager().addRegion(r.getLocation(), r.getType(), r.getOwners(), r.getMembers());
         }
         regionsToCreate.clear();
+
+
+        //War Ticks
+        long warTickPeriod = ((long) Townships.getConfigManager().getPowerReduceCycle()) * 60000;
+        if (warTickPeriod > 0) {
+            long currentTime = System.currentTimeMillis();
+            HashMap<SuperRegion, Integer> newPowerMap = new HashMap<SuperRegion, Integer>();
+            for (SuperRegion sr : hs.getRegionManager().getSortedSuperRegions()) {
+                int currentCount = 0;
+                HashSet<String> setMeMap = new HashSet<String>();
+                Map<String, Long> lastTickMap = sr.getLastWarTick();
+                for (String key : lastTickMap.keySet()) {
+                    if (sr.getName().equals(key) || sr.getLastWarTick().get(key) < 0 || currentTime - warTickPeriod < sr.getLastWarTick().get(key)) {
+                        continue;
+                    }
+                    setMeMap.add(key);
+
+                    File superRegionFolder = new File(hs.getDataFolder(), "superregions");
+                    File superRegionFile = new File(superRegionFolder, sr.getName() + ".yml");
+                    FileConfiguration superRegionConfig = new YamlConfiguration();
+
+                    try {
+                        superRegionConfig.load(superRegionFile);
+                    } catch (Exception e) {
+                        System.out.println("[Townships] failed to load " + sr.getName() + ".yml war tick");
+                    }
+
+                    ConfigurationSection warSection = superRegionConfig.getConfigurationSection("wars");
+                    if (warSection != null) {
+                        currentCount = warSection.getInt(key + ".count") + 1;
+                        warSection.set(key + ".last-tick", currentTime);
+                        warSection.set(key + ".count", currentCount);
+                        superRegionConfig.set("wars", warSection);
+                        try {
+                            superRegionConfig.save(superRegionFile);
+                        } catch (Exception e) {
+                            System.out.println("[Townships] failed to save " + sr.getName() + ".yml war tick");
+                        }
+                    }
+                    int currentPower = sr.getPower();
+                    if (newPowerMap.containsKey(sr)) {
+                        currentPower = newPowerMap.get(sr);
+                    }
+                    int newPower = currentPower - currentCount * Townships.getConfigManager().getPowerReduceAdd() - Townships.getConfigManager().getPowerReduceBase();
+                    newPower = newPower < 0 ? 0 : newPower;
+                    newPowerMap.put(sr, newPower);
+                }
+                for (String key : setMeMap) {
+                    lastTickMap.put(key, currentTime);
+                }
+                sr.setLastWarTick(lastTickMap);
+            }
+            for (SuperRegion sr : newPowerMap.keySet()) {
+                System.out.println("[Townships] War attrition for " + sr.getName() + " set to " + newPowerMap.get(sr) + " power");
+                hs.getRegionManager().setPower(sr, newPowerMap.get(sr));
+            }
+        }
     }
 }

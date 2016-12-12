@@ -16,6 +16,7 @@ war:
   base-power-reduce: 0
   base-power-reduce-add: 0
   power-reduce-cycle: 30
+  allow-peace: true
 multiple-town-membership:
   allow: true
   whitelist: []

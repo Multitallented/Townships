@@ -22,6 +22,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -320,9 +321,16 @@ public class RegionManager {
                     List<String> preProcessedLocationList = sRegionDataConfig.getStringList("child-locations");
                     ArrayList<Location> childLocations = processLocationList(preProcessedLocationList);
                     long lastDisable = sRegionDataConfig.getLong("last-disable",0);
-                    
+                    ConfigurationSection warTicks = sRegionDataConfig.getConfigurationSection("wars");
+                    HashMap<String, Long> warTickMap = new HashMap<String, Long>();
+                    if (warTicks != null) {
+                        for (String key : warTicks.getKeys(false)) {
+                            warTickMap.put(key, warTicks.getLong(key + ".last-tick"));
+                        }
+                    }
+
                     if (location != null && type != null) {
-                        liveSuperRegions.put(name.toLowerCase(), new SuperRegion(name, location, type, owners, members, power, taxes, balance, taxRevenue, maxPower, childLocations, lastDisable));
+                        liveSuperRegions.put(name.toLowerCase(), new SuperRegion(name, location, type, owners, members, power, taxes, balance, taxRevenue, maxPower, childLocations, lastDisable, warTickMap));
                         
                         sortedSuperRegions.add(liveSuperRegions.get(name.toLowerCase()));
                     }
@@ -694,7 +702,8 @@ public class RegionManager {
             }
             dataConfig.set("child-locations", childLocationTemp);
             dataConfig.save(dataFile);
-            liveSuperRegions.put(name.toLowerCase(), new SuperRegion(name, loc, type, owners, members, power, 0.0, balance, new LinkedList<Double>(), maxPower, childLocations, 0));
+            HashMap<String, Long> warTickMap = new HashMap<String, Long>();
+            liveSuperRegions.put(name.toLowerCase(), new SuperRegion(name, loc, type, owners, members, power, 0.0, balance, new LinkedList<Double>(), maxPower, childLocations, 0, warTickMap));
             
             sortedSuperRegions.add(liveSuperRegions.get(name.toLowerCase()));
             
@@ -2002,7 +2011,38 @@ public class RegionManager {
             System.out.println("[Townships] failed to load war.yml");
             return;
         }
+        FileConfiguration srtConfig = new YamlConfiguration();
+        FileConfiguration srrConfig = new YamlConfiguration();
+        File superRegionFolder = new File(plugin.getDataFolder(), "superregions");
+        File srtFile = new File(superRegionFolder, sr1.getName() + ".yml");
+        File srrFile = new File(superRegionFolder, sr2.getName() + ".yml");
+
+        try {
+            srtConfig.load(srtFile);
+            srrConfig.load(srrFile);
+        } catch (Exception e) {
+            System.out.println("[Townships] Failed to load war super region file");
+        }
         if (hasWar(sr1, sr2)) {
+            ConfigurationSection srtWarSection = srtConfig.getConfigurationSection("wars");
+            if (srtWarSection != null) {
+                srtWarSection.set(sr2.getName() + ".last-tick", -1);
+                srtWarSection.set(sr2.getName() + ".count", -1);
+                srtConfig.set("wars", srtWarSection);
+            }
+            Map<String, Long> sr2WarTicks = sr2.getLastWarTick();
+            sr2WarTicks.remove(sr1.getName());
+            sr2.setLastWarTick(sr2WarTicks);
+            Map<String, Long> sr1WarTicks = sr1.getLastWarTick();
+            sr1WarTicks.remove(sr2.getName());
+            sr1.setLastWarTick(sr1WarTicks);
+            ConfigurationSection srrWarSection = srrConfig.getConfigurationSection("wars");
+            if (srrWarSection != null) {
+                srrWarSection.set(sr1.getName() + ".last-tick", -1);
+                srrWarSection.set(sr1.getName() + ".count", -1);
+                srtConfig.set("wars", srrWarSection);
+            }
+
             try {
                 if (wars.containsKey(sr1)) {
                     List<String> tempList = warConfig.getStringList(sr1.getName());
@@ -2030,6 +2070,25 @@ public class RegionManager {
                 return;
             }
         } else {
+            long currentTime = System.currentTimeMillis();
+            ConfigurationSection srtWarSection = srtConfig.getConfigurationSection("wars");
+            if (srtWarSection != null) {
+                srtWarSection.set(sr2.getName() + ".last-tick", currentTime);
+                srtWarSection.set(sr2.getName() + ".count", 0);
+                srtConfig.set("wars", srtWarSection);
+            }
+            ConfigurationSection srrWarSection = srrConfig.getConfigurationSection("wars");
+            if (srrWarSection != null) {
+                srrWarSection.set(sr1.getName() + ".last-tick", currentTime);
+                srrWarSection.set(sr1.getName() + ".count", 0);
+                srtConfig.set("wars", srrWarSection);
+            }
+            Map<String, Long> sr2WarTicks = sr2.getLastWarTick();
+            sr2WarTicks.put(sr1.getName(), currentTime);
+            sr2.setLastWarTick(sr2WarTicks);
+            Map<String, Long> sr1WarTicks = sr1.getLastWarTick();
+            sr1WarTicks.put(sr2.getName(), currentTime);
+            sr1.setLastWarTick(sr1WarTicks);
             try {
                 if (wars.containsKey(sr1)) {
                     List<String> tempList = warConfig.getStringList(sr1.getName());
@@ -2056,6 +2115,13 @@ public class RegionManager {
                 System.out.println("[Townships] failed to save new war to war.yml");
                 return;
             }
+        }
+
+        try {
+            srtConfig.save(srtFile);
+            srrConfig.save(srrFile);
+        } catch (Exception e) {
+            System.out.println("[Townships] Failed to save war super region file");
         }
     }
 
@@ -2211,6 +2277,36 @@ public class RegionManager {
                                 tempList.add(ts.getName());
                             }
                             warConfig.set(srt.getName(), tempList);
+                        }
+                        FileConfiguration srtConfig = new YamlConfiguration();
+                        FileConfiguration srrConfig = new YamlConfiguration();
+                        File superRegionFolder = new File(plugin.getDataFolder(), "superregions");
+                        File srtFile = new File(superRegionFolder, srt.getName() + ".yml");
+                        File srrFile = new File(superRegionFolder, srr.getName() + ".yml");
+
+                        try {
+                            srtConfig.load(srtFile);
+                            srrConfig.load(srrFile);
+                        } catch (Exception e) {
+                            System.out.println("[Townships] Failed to load war super region file");
+                        }
+                        ConfigurationSection srtWarSection = srtConfig.getConfigurationSection("wars");
+                        if (srtWarSection != null) {
+                            srtWarSection.set(srr.getName() + ".last-tick", -1);
+                            srtWarSection.set(srr.getName() + ".count", -1);
+                            srtConfig.set("wars", srtWarSection);
+                        }
+                        ConfigurationSection srrWarSection = srrConfig.getConfigurationSection("wars");
+                        if (srrWarSection != null) {
+                            srrWarSection.set(srt.getName() + ".last-tick", -1);
+                            srrWarSection.set(srt.getName() + ".count", -1);
+                            srtConfig.set("wars", srrWarSection);
+                        }
+                        try {
+                            srtConfig.save(srtFile);
+                            srrConfig.save(srrFile);
+                        } catch (Exception e) {
+                            System.out.println("[Townships] Failed to save war super region file");
                         }
                         break;
                     }

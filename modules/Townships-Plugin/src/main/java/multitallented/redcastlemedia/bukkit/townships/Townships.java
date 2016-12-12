@@ -405,6 +405,11 @@ public class Townships extends JavaPlugin {
         } else if (args.length > 2 && args[0].equalsIgnoreCase("peace")) {
             //hs peace mySR urSR
 
+            if (!Townships.getConfigManager().getAllowPeace()) {
+                player.sendMessage(ChatColor.RED + "[Townships] You can't buy peace.");
+                return true;
+            }
+
             //Check for valid super-regions
             SuperRegion myTown = regionManager.getSuperRegion(args[2]);
             SuperRegion enemyTown = regionManager.getSuperRegion(args[1]);

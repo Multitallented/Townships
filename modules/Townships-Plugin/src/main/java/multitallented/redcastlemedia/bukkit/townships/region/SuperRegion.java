@@ -23,10 +23,11 @@ public class SuperRegion {
     private int maxPower;
     private ArrayList<Location> childLocations;
     private long lastDisable;
+    private Map<String, Long> lastWarTick;
     
     public SuperRegion(String name, Location l, String type, List<String> owner, Map<String, List<String>> members,
             int power, double taxes, double balance, LinkedList<Double> taxRevenue, int maxPower, ArrayList<Location> childLocations,
-            long lastDisable) {
+            long lastDisable, Map<String, Long> lastWarTick) {
         this.name = name;
         this.l = l;
         this.type=type;
@@ -39,7 +40,14 @@ public class SuperRegion {
         this.maxPower = maxPower;
         this.childLocations=childLocations;
         this.lastDisable=lastDisable;
+        this.lastWarTick=lastWarTick;
     }
+
+    public void setLastWarTick(Map<String, Long> newLastWarTick) {
+        this.lastWarTick = newLastWarTick;
+    }
+
+    public Map<String, Long> getLastWarTick() { return lastWarTick; }
 
     protected long getLastDisable() {
         return lastDisable;

@@ -51,6 +51,7 @@ public class ConfigManager {
     private final int powerReduceBase;
     private final int powerReduceAdd;
     private final int powerReduceCycle;
+    private final boolean allowPeace;
     
     public ConfigManager(FileConfiguration config, Townships plugin) {
         this.config = config;
@@ -85,7 +86,8 @@ public class ConfigManager {
         categoryMaterials = processMaterialList(config.getConfigurationSection("categories"));
         powerReduceBase = config.getInt("war.power-reduce-base", 0);
         powerReduceAdd = config.getInt("war.power-reduce-add", 0);
-        powerReduceCycle = config.getInt("war.power-reduce-cycle", 60);
+        powerReduceCycle = config.getInt("war.power-reduce-cycle", 0);
+        allowPeace = config.getBoolean("war.allow-peace", true);
         loadCharters();
     }
 
@@ -189,6 +191,7 @@ public class ConfigManager {
             plugin.warning("Could not save charter file " + name + ".yml");
         }
     }
+    public boolean getAllowPeace() {return allowPeace; }
     public int getPowerReduceCycle() {
         return powerReduceCycle;
     }
