@@ -48,6 +48,9 @@ public class ConfigManager {
     private final boolean useTownPrefixes;
     private final List<String> blackListWorlds;
     private final HashMap<String, Material> categoryMaterials;
+    private final int powerReduceBase;
+    private final int powerReduceAdd;
+    private final int powerReduceCycle;
     
     public ConfigManager(FileConfiguration config, Townships plugin) {
         this.config = config;
@@ -80,6 +83,9 @@ public class ConfigManager {
         itemGroups = processGroups(config.getConfigurationSection("item-groups"));
         blackListWorlds = processWorldList(config.getStringList("black-list-worlds"));
         categoryMaterials = processMaterialList(config.getConfigurationSection("categories"));
+        powerReduceBase = config.getInt("war.power-reduce-base", 0);
+        powerReduceAdd = config.getInt("war.power-reduce-add", 0);
+        powerReduceCycle = config.getInt("war.power-reduce-cycle", 60);
         loadCharters();
     }
 
@@ -183,6 +189,16 @@ public class ConfigManager {
             plugin.warning("Could not save charter file " + name + ".yml");
         }
     }
+    public int getPowerReduceCycle() {
+        return powerReduceCycle;
+    }
+    public int getPowerReduceAdd() {
+        return powerReduceAdd;
+    }
+    public int getPowerReduceBase() {
+        return powerReduceBase;
+    }
+
     public HashMap<String, String> getItemGroups() {
         return itemGroups;
     }

@@ -13,6 +13,9 @@ war:
   declare-war-cost-per-member: 500.0
   make-peace-base-cost: 1000.0
   make-peace-cost-per-member: 500.0
+  base-power-reduce: 0
+  base-power-reduce-add: 0
+  power-reduce-cycle: 30
 multiple-town-membership:
   allow: true
   whitelist: []
