@@ -375,6 +375,19 @@ public class RegionManager {
             log.warning("[Townships] failed to load war.yml");
         }
     }
+
+    public void addRegionType(RegionType regionType) {
+        regionTypes.put(regionType.getName(), regionType);
+    }
+    public void removeRegionType(String name) {
+        regionTypes.remove(name);
+    }
+    public void addSuperRegionType(SuperRegionType superRegionType) {
+        superRegionTypes.put(superRegionType.getName(), superRegionType);
+    }
+    public void removeSuperRegionType(String name) {
+        superRegionTypes.remove(name);
+    }
     
     public void setNewSRLocation(SuperRegion sr, Location loc) {
         String name = sr.getName();

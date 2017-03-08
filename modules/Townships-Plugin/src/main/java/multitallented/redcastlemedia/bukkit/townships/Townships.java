@@ -24,6 +24,7 @@ import multitallented.redcastlemedia.bukkit.townships.region.RegionManager;
 import multitallented.redcastlemedia.bukkit.townships.region.RegionType;
 import multitallented.redcastlemedia.bukkit.townships.region.SuperRegion;
 import multitallented.redcastlemedia.bukkit.townships.region.SuperRegionType;
+import multitallented.redcastlemedia.bukkit.townships.tests.TestManager;
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
@@ -133,6 +134,11 @@ public class Townships extends JavaPlugin {
 
         Permissions.assignPermissions(this);
         log.info("[Townships] is now enabled!");
+
+        //Run unit tests
+        if (configManager.test()) {
+            new TestManager(this, log);
+        }
     }
     
     public static ConfigManager getConfigManager() {

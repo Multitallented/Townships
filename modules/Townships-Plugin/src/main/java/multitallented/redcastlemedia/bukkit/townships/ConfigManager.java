@@ -52,6 +52,7 @@ public class ConfigManager {
     private final int powerReduceAdd;
     private final int powerReduceCycle;
     private final boolean allowPeace;
+    private final boolean test;
     
     public ConfigManager(FileConfiguration config, Townships plugin) {
         this.config = config;
@@ -88,7 +89,12 @@ public class ConfigManager {
         powerReduceAdd = config.getInt("war.power-reduce-add", 0);
         powerReduceCycle = config.getInt("war.power-reduce-cycle", 0);
         allowPeace = config.getBoolean("war.allow-peace", true);
+        test = config.getBoolean("test", false);
         loadCharters();
+    }
+
+    public boolean test() {
+        return test;
     }
 
     public Material getCategory(String category) {
