@@ -172,6 +172,11 @@ public class TestManager {
 
         //TODO add more tests
 
+        player2.performCommand("to destroy TestSuper");
+        player2.performCommand("to destroy");
+        rm.removeRegionType("testregion");
+        rm.removeSuperRegionType("testsuper");
+
         Bukkit.getWorlds().get(0).getBlockAt(0, 239, 0).setType(Material.AIR);
         player.setOp(false);
         player2.setOp(false);
