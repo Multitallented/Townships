@@ -92,7 +92,7 @@ public class TownGUIListener implements Listener {
             return;
         }
 
-        /*if (event.getCurrentItem().hasItemMeta() && ChatColor.stripColor(event.getCurrentItem().getItemMeta().getDisplayName()).equals("Back to Categories")) {
+        /*if (event.getCurrentItem().hasItemMeta() && ChatColor.stripColor(event.getCurrentItem().getItemMeta().getDisplayName()).equals("Back to Sections")) {
             player.closeInventory();
             player.performCommand("to list");
             return;

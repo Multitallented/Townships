@@ -48,8 +48,8 @@ public class GUIListener implements Listener {
                 size -= 9;
             }
         }
-        //Inventory inv = Bukkit.createInventory(null, size, ChatColor.RED + "Townships Categories");
-        Inventory inv = Bukkit.createInventory(new MenuHolder(Bukkit.createInventory(null, size)), size, ChatColor.RED + "Townships Categories");
+        //Inventory inv = Bukkit.createInventory(null, size, ChatColor.RED + "Townships Sections");
+        Inventory inv = Bukkit.createInventory(new MenuHolder(Bukkit.createInventory(null, size)), size, ChatColor.RED + "Townships Sections");
         
         
         int i = 0;
@@ -232,7 +232,7 @@ public class GUIListener implements Listener {
         }
         ItemStack is = new ItemStack(Material.REDSTONE_BLOCK);
         ItemMeta isMeta = is.getItemMeta();
-        isMeta.setDisplayName(ChatColor.RESET + "Back to Categories");
+        isMeta.setDisplayName(ChatColor.RESET + "Back to Sections");
         ArrayList<String> lore = new ArrayList<String>();
         lore.add("list " + category);
         isMeta.setLore(lore);
@@ -248,7 +248,7 @@ public class GUIListener implements Listener {
         }
         String name = ChatColor.stripColor(event.getInventory().getName());
         String category = "";
-        boolean isCategory = name.equalsIgnoreCase("Townships Categories");
+        boolean isCategory = name.equalsIgnoreCase("Townships Sections");
         String[] names = name.split(" ");
         if (!isCategory) {
             if (names.length != 2 || !names[1].equals("Regions")) {
@@ -273,7 +273,7 @@ public class GUIListener implements Listener {
             return;
         }
         
-        if (event.getCurrentItem().hasItemMeta() && ChatColor.stripColor(event.getCurrentItem().getItemMeta().getDisplayName()).equals("Back to Categories")) {
+        if (event.getCurrentItem().hasItemMeta() && ChatColor.stripColor(event.getCurrentItem().getItemMeta().getDisplayName()).equals("Back to Sections")) {
             player.closeInventory();
             player.performCommand("to list");
             return;
