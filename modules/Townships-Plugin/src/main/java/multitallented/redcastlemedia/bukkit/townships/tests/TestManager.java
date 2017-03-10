@@ -14,10 +14,8 @@ import net.minecraft.server.v1_11_R1.WorldServer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_11_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_11_R1.entity.CraftPlayer;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -92,40 +90,18 @@ public class TestManager {
 
         RegionManager rm = townships.getRegionManager();
 
-        {
-            ArrayList<ArrayList<TOItem>> tempList = new ArrayList<>();
-            ArrayList<TOItem> temptempList = new ArrayList<>();
-            temptempList.add(new TOItem(Material.COBBLESTONE, 4, 1));
-            tempList.add(temptempList);
-            rm.addRegionType(new RegionType("testregion",
-                    "admin",
-                    new ArrayList<String>(), //groups
-                    5, //radius
-                    5, //build radius
-                    tempList, //requirements
-                    new ArrayList<String>(), //super regions
-                    new ArrayList<ArrayList<TOItem>>(), //reagents
-                    new ArrayList<ArrayList<TOItem>>(), //upkeep
-                    new ArrayList<ArrayList<TOItem>>(), //output
-                    0.0, //moneyRequirement
-                    0.0, //moneyOutput
-                    0.0, //exp
-                    "Description here", //description
-                    0, //powerDrain
-                    0, //housing
-                    new ArrayList<String>(), //biome
-                    new ItemStack(Material.COBBLESTONE, 1), //icon
-                    0, //minY
-                    999, //maxY
-                    0, //unlockCost
-                    0, //salvageValue
-                    new HashMap<String, ArrayList<String>>() //namedItems
-            ));
-        }
+        addRegionTest(rm);
 
 
         player.performCommand("to create testregion");
         assertEqual(rm.getRegionByID(0).getType(), "testregion", "Failed create region");
+        assertEqual(rm.getContainingRegions(player.getLocation()).size(), 1, "Failed Region Check");
+        assertEqual(rm.getContainingBuildRegions(player.getLocation()).size(), 1, "Failed Build Region Check");
+
+        player.performCommand("to reload");
+
+        addRegionTest(rm);
+        assertEqual(rm.getContainingRegions(player.getLocation()).size(), 1, "Failed Region Check Reload");
 
         player.performCommand("to add tTownship2");
         assertEqual(rm.getRegionByID(0).isMember("tTownship2"), true, "Failed add player");
@@ -182,5 +158,36 @@ public class TestManager {
         player2.setOp(false);
         player.remove();
         player2.remove();
+    }
+
+    private void addRegionTest(RegionManager rm) {
+        ArrayList<ArrayList<TOItem>> tempList = new ArrayList<>();
+        ArrayList<TOItem> temptempList = new ArrayList<>();
+        temptempList.add(new TOItem(Material.COBBLESTONE, 4, 1));
+        tempList.add(temptempList);
+        rm.addRegionType(new RegionType("testregion",
+                "admin",
+                new ArrayList<String>(), //groups
+                5, //radius
+                5, //build radius
+                tempList, //requirements
+                new ArrayList<String>(), //super regions
+                new ArrayList<ArrayList<TOItem>>(), //reagents
+                new ArrayList<ArrayList<TOItem>>(), //upkeep
+                new ArrayList<ArrayList<TOItem>>(), //output
+                0.0, //moneyRequirement
+                0.0, //moneyOutput
+                0.0, //exp
+                "Description here", //description
+                0, //powerDrain
+                0, //housing
+                new ArrayList<String>(), //biome
+                new ItemStack(Material.COBBLESTONE, 1), //icon
+                0, //minY
+                999, //maxY
+                0, //unlockCost
+                0, //salvageValue
+                new HashMap<String, ArrayList<String>>() //namedItems
+        ));
     }
 }
