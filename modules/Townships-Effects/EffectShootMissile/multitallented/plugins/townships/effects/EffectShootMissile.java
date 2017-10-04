@@ -1,7 +1,8 @@
 package multitallented.plugins.townships.effects;
 
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Set;
+
 import multitallented.redcastlemedia.bukkit.townships.Townships;
 import multitallented.redcastlemedia.bukkit.townships.effect.Effect;
 import multitallented.redcastlemedia.bukkit.townships.events.ToRegionCreatedEvent;
@@ -9,8 +10,8 @@ import multitallented.redcastlemedia.bukkit.townships.region.Region;
 import multitallented.redcastlemedia.bukkit.townships.region.RegionManager;
 import multitallented.redcastlemedia.bukkit.townships.region.RegionType;
 import org.bukkit.*;
+import org.bukkit.Sound;
 import org.bukkit.block.BlockFace;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
@@ -141,7 +142,7 @@ public class EffectShootMissile extends Effect {
                 player.sendMessage(ChatColor.RED + "[Townships] That " + region.getType() + " is reloading.");
                 return;
             }
-            Location targetLocation = player.getTargetBlock((HashSet<Byte>) null, 100).getLocation();
+            Location targetLocation = player.getTargetBlock((Set<Material>) null, 100).getLocation();
             if (!targetLocation.getWorld().equals(fireLocation.getWorld())) {
                 return;
             }
@@ -216,7 +217,13 @@ public class EffectShootMissile extends Effect {
                 if (currPlayer.getLocation().distanceSquared(fireLocation) > 2500) {
                     continue;
                 }
-                currPlayer.playSound(fireLocation, Sound.ENTITY_GENERIC_EXPLODE, 2, 1);
+//                currPlayer.playSound(fireLocation, Sound.EXPLODE, 2, 1);
+                //TODO fix this sound
+                try {
+                    currPlayer.playSound(fireLocation, "EXPLODE", 2, 1);
+                } catch (Exception e) {
+                    //meh...
+                }
             }
 
             player.sendMessage(ChatColor.GREEN + "[Townships] Your " + region.getType() + " has fired ordinance at your new target.");

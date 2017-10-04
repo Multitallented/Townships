@@ -186,7 +186,7 @@ public class ShopGUIListener implements Listener {
             if (r.getMoneyRequirement() > 0) {
                 lore.add(ChatColor.RESET + "" + ChatColor.BLUE + "Build Cost: " + formatter.format(r.getMoneyRequirement()));
             }
-            if (r.getRequirements().size() > 0) {
+            /*if (r.getRequirements().size() > 0) {
                 lore.add("Requirements");
                 for (ArrayList<TOItem> items : r.getRequirements()) {
                     String reagents = "";
@@ -205,7 +205,7 @@ public class ShopGUIListener implements Listener {
                     }
                     lore.addAll(Util.textWrap("", reagents));
                 }
-            }
+            }*/
             //Trim lore
             trimLore: {
                 boolean addEllipses = lore.size() > 20;
