@@ -37,22 +37,17 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Townships extends JavaPlugin {
-    private PluginServerListener serverListener;
     private Logger log;
     protected FileConfiguration config;
     private RegionManager regionManager;
-    private RegionBlockListener blockListener;
     public static Economy econ;
     public static Permission perms;
-    public static Chat chat;
-    private RegionEntityListener regionEntityListener;
+    private static Chat chat;
     private RegionPlayerInteractListener dpeListener;
-    private Map<String, String> pendingInvites = new HashMap<String, String>();
+    private Map<String, String> pendingInvites = new HashMap<>();
     private static ConfigManager configManager;
-    private Map<String, List<String>> pendingCharters = new HashMap<String, List<String>>();
-    private HashSet<String> effectCommands = new HashSet<String>();
-    private GUIManager guiManager;
-    private static EffectManager effectManager;
+    private Map<String, List<String>> pendingCharters = new HashMap<>();
+    private HashSet<String> effectCommands = new HashSet<>();
     private CheckRegionTask theSender;
     public static HeroScoreboard hsb = null;
     
@@ -73,7 +68,7 @@ public class Townships extends JavaPlugin {
         configManager = new ConfigManager(config, this);
         
         //Setup RegionManager
-        regionManager = new RegionManager(this, config);
+        regionManager = new RegionManager(this);
         
         setupPermissions();
         setupEconomy();
@@ -84,11 +79,11 @@ public class Townships extends JavaPlugin {
         }
 
         //Register Listeners Here
-        serverListener = new PluginServerListener(this);
-        blockListener = new RegionBlockListener(this);
+        PluginServerListener serverListener = new PluginServerListener(this);
+        RegionBlockListener blockListener = new RegionBlockListener(this);
         dpeListener = new RegionPlayerInteractListener(this);
-        regionEntityListener = new RegionEntityListener(this);
-        guiManager = new GUIManager(this);
+        RegionEntityListener regionEntityListener = new RegionEntityListener(this);
+        GUIManager guiManager = new GUIManager(this);
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvents(blockListener, this);
         
@@ -113,7 +108,7 @@ public class Townships extends JavaPlugin {
         pm.registerEvents(new ShopGUIListener(this), this);
         log = Logger.getLogger("Minecraft");
         
-        effectManager = new EffectManager(this);
+        new EffectManager(this);
         
         //Setup repeating sync task for checking regions
         log.info("[Townships] starting synchronous effect task");
@@ -138,10 +133,6 @@ public class Townships extends JavaPlugin {
     public static ConfigManager getConfigManager() {
         return configManager;
     }
-
-    public static EffectManager getEffectManager() {
-        return effectManager;
-    }
     
     public Map<Player, String> getChannels() {
         return dpeListener.getChannels();
@@ -149,13 +140,24 @@ public class Townships extends JavaPlugin {
     
     @Override
     public boolean onCommand(CommandSender sender, org.bukkit.command.Command command, String label, String[] args) {
-        Player player = null;
-        try {
-            player = (Player) sender;
-        } catch (Exception e) {
+
+        if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
+            if (!(Townships.perms == null || Townships.perms.has(sender, "townships.admin"))) {
+                return true;
+            }
+            config = getConfig();
+            configManager = new ConfigManager(config, this);
+            regionManager.reload();
+            sender.sendMessage("[Townships] reloaded");
+            return true;
+        }
+
+        Player player;
+        if (!(sender instanceof Player)) {
             warning("Only players can use Township commands");
             return true;
         }
+        player = (Player) sender;
 
         //Are they in a blacklisted world
         if ((Townships.perms == null || !Townships.perms.has(sender, "townships.admin")) &&
@@ -164,20 +166,6 @@ public class Townships extends JavaPlugin {
             return true;
         }
 
-        if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
-            if (player != null && !(Townships.perms == null || Townships.perms.has(player, "townships.admin"))) {
-                return true;
-            }
-            config = getConfig();
-            regionManager.reload();
-            configManager = new ConfigManager(config, this);
-            sender.sendMessage("[Townships] reloaded");
-            return true;
-        }
-        if (player == null) {
-            sender.sendMessage("[Townships] doesn't recognize non-player commands.");
-            return true;
-        }
         if (args.length > 0 && args[0].equalsIgnoreCase("shop")) {
             if (!perms.has(player, "townships.unlock")) {
                 player.sendMessage(ChatColor.RED + "[Townships] You don't have permission to unlock regions");
@@ -210,11 +198,10 @@ public class Townships extends JavaPlugin {
                 return true;
             }
 
-            int j=0;
             boolean permNull = perms == null;
-            ArrayList<RegionType> regions = new ArrayList<RegionType>();
+            ArrayList<RegionType> regions = new ArrayList<>();
 
-            ArrayList<SuperRegionType> superRegions = new ArrayList<SuperRegionType>();
+            ArrayList<SuperRegionType> superRegions = new ArrayList<>();
 
             boolean createAll = permNull || perms.has(player, "townships.create.all");
             if (createAll) {
@@ -281,7 +268,7 @@ public class Townships extends JavaPlugin {
             return true;
         } else if (args.length > 1 && args[0].equalsIgnoreCase("built")) {
             if (args[1].toLowerCase().equals("towns")) {
-                ArrayList<SuperRegion> townList = new ArrayList<SuperRegion>();
+                ArrayList<SuperRegion> townList = new ArrayList<>();
                 for (SuperRegion sr : regionManager.getSortedSuperRegions()) {
                     if (sr.hasOwner(player.getName()) || sr.hasMember(player.getName())) {
                         townList.add(sr);
@@ -296,7 +283,7 @@ public class Townships extends JavaPlugin {
                 return true;
             }
 
-            ArrayList<Region> regionList = new ArrayList<Region>();
+            ArrayList<Region> regionList = new ArrayList<>();
             for (Region r : regionManager.getSortedRegions()) {
                 if (r.getOwners().contains(player.getName()) && categories.contains(r.getType())) {
                     regionList.add(r);
@@ -535,7 +522,7 @@ public class Townships extends JavaPlugin {
             }
 
             //Add the charter
-            List<String> tempList = new ArrayList<String>();
+            List<String> tempList = new ArrayList<>();
             tempList.add(args[1]);
             tempList.add(player.getName());
             pendingCharters.put(args[2].toLowerCase(), tempList);
@@ -657,7 +644,7 @@ public class Townships extends JavaPlugin {
 
             //Check if player is standing someplace where a chest can be placed.
             Block currentBlock = currentLocation.getBlock();
-            if (currentBlock.getTypeId() != 0) {
+            if (currentBlock.getType() != Material.AIR) {
                 player.sendMessage(ChatColor.GRAY + "[Townships] please stand someplace where a chest can be placed.");
                 return true;
             }
@@ -837,7 +824,7 @@ public class Townships extends JavaPlugin {
             //Create chest at players feet for tracking reagents and removing upkeep items
             currentBlock.setType(Material.CHEST);
 
-            ArrayList<String> owners = new ArrayList<String>();
+            ArrayList<String> owners = new ArrayList<>();
             owners.add(player.getName());
             if (econ != null && costCheck > 0) {
                 econ.withdrawPlayer(player, costCheck);
@@ -912,7 +899,7 @@ public class Townships extends JavaPlugin {
 
             }
 
-            Map<String, List<String>> members = new HashMap<String, List<String>>();
+            Map<String, List<String>> members = new HashMap<>();
             int currentCharter = currentRegionType.getCharter();
             //Make sure the super-region has a valid charter
             if (!Townships.perms.has(player, "townships.admin")) {
@@ -1120,7 +1107,7 @@ public class Townships extends JavaPlugin {
             }
 
             //Assimulate any child super regions
-            List<String> owners = new ArrayList<String>();
+            List<String> owners = new ArrayList<>();
             double balance = 0.0;
             int power = 0;
             for (String s : quietDestroy) {

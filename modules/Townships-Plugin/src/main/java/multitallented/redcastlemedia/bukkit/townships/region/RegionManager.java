@@ -35,188 +35,45 @@ import org.bukkit.inventory.ItemStack;
  * @author Multitallented
  */
 public class RegionManager {
-    private final Map<Location, Region> liveRegions = new HashMap<Location, Region>();
-    private final Map<Integer, Region> idRegions = new HashMap<Integer, Region>();
-    private final ArrayList<Region> sortedRegions = new ArrayList<Region>();
-    private final Map<String, SuperRegion> liveSuperRegions = new HashMap<String, SuperRegion>();
-    private final ArrayList<SuperRegion> sortedSuperRegions = new ArrayList<SuperRegion>();
-    private final Map<String, RegionType> regionTypes = new HashMap<String, RegionType>();
-    private final Map<String, SuperRegionType> superRegionTypes = new HashMap<String, SuperRegionType>();
-    private final Townships plugin;
-    private final FileConfiguration config;
+    private Map<Location, Region> liveRegions = new HashMap<>();
+    private Map<Integer, Region> idRegions = new HashMap<>();
+    private ArrayList<Region> sortedRegions = new ArrayList<>();
+    private Map<String, SuperRegion> liveSuperRegions = new HashMap<>();
+    private ArrayList<SuperRegion> sortedSuperRegions = new ArrayList<>();
+    private Map<String, RegionType> regionTypes = new HashMap<>();
+    private Map<String, SuperRegionType> superRegionTypes = new HashMap<>();
+    private Townships plugin;
     private FileConfiguration dataConfig;
-    private final ConfigManager configManager;
-    private final HashMap<SuperRegion, HashSet<SuperRegion>> wars = new HashMap<SuperRegion, HashSet<SuperRegion>>();
-    private HashMap<String, PermSet> permSets = new HashMap<String, PermSet>();
-    private final HashSet<String> possiblePermSets = new HashSet<String>();
-    private final ArrayList<Region> sortedBuildRegions = new ArrayList<Region>();
-    private final HashMap<String, ArrayList<String>> regionCategories = new HashMap<String, ArrayList<String>>();
+    private HashMap<SuperRegion, HashSet<SuperRegion>> wars = new HashMap<>();
+    private HashMap<String, PermSet> permSets = new HashMap<>();
+    private HashSet<String> possiblePermSets = new HashSet<>();
+    private ArrayList<Region> sortedBuildRegions = new ArrayList<>();
+    private HashMap<String, ArrayList<String>> regionCategories = new HashMap<>();
     
-    public RegionManager(Townships plugin, FileConfiguration config) {
+    public RegionManager(Townships plugin) {
         this.plugin = plugin;
-        this.config = config;
-        
-        configManager = new ConfigManager(config, plugin);
-        plugin.setConfigManager(configManager);
-        load();
+
+        loadRegionTypes();
+        loadData();
     }
     
     public void reload() {
-        liveRegions.clear();
-        idRegions.clear();
-        sortedRegions.clear();
-        liveSuperRegions.clear();
-        regionTypes.clear();
-        superRegionTypes.clear();
-        wars.clear();
-        permSets = new HashMap<String, PermSet>();
-        possiblePermSets.clear();
-        sortedBuildRegions.clear();
-        regionCategories.clear();
+        liveRegions = new HashMap<>();
+        idRegions = new HashMap<>();
+        sortedRegions = new ArrayList<>();
+        liveSuperRegions = new HashMap<>();
+        regionTypes = new HashMap<>();
+        superRegionTypes = new HashMap<>();
+        wars = new HashMap<>();
+        permSets = new HashMap<>();
+        possiblePermSets = new HashSet<>();
+        sortedBuildRegions = new ArrayList<>();
+        regionCategories = new HashMap<>();
 
-        load();
+        loadRegionTypes();
+        loadData();
     }
-    private void load() {
-        permSets = PermSet.loadPermSets(plugin);
-        for (String s : permSets.keySet()) {
-            possiblePermSets.add(s);
-        }
-        
-        File regionFolder = new File(plugin.getDataFolder(), "RegionConfig");
-        if (!regionFolder.exists()) {
-            File regionFile = new File(plugin.getDataFolder(), "regions.yml");
-            if (!regionFile.exists()) {
-                DefaultRegions.createDefaultRegionFiles(plugin);
-            } else {
-                DefaultRegions.migrateRegions(regionFile, plugin);
-            }
-        }
-        for (File currentRegionFile : regionFolder.listFiles()) {
-            if (currentRegionFile.isFile()) {
-                try {
-                    FileConfiguration rConfig = new YamlConfiguration();
-                    rConfig.load(currentRegionFile);
-                    String regionName = currentRegionFile.getName().replace(".yml", "");
-                    HashMap<String, ArrayList<String>> namedItems = processNamedItems(rConfig.getConfigurationSection("named-items"));
-                    regionTypes.put(regionName, new RegionType(regionName,
-                            rConfig.getString("group", regionName),
-                            (ArrayList<String>) rConfig.getStringList("effects"),
-                            Math.pow(rConfig.getInt("radius") + 0.4, 2),
-                            Math.pow(rConfig.getInt("build-radius", rConfig.getInt("radius", 2)) + 0.4, 2),
-                            processItemStackList(rConfig.getStringList("requirements"), currentRegionFile.getName()),
-                            rConfig.getStringList("super-regions"),
-                            processItemStackList(rConfig.getStringList("reagents"), currentRegionFile.getName(), namedItems),
-                            processItemStackList(rConfig.getStringList("input"), currentRegionFile.getName(), namedItems),
-                            processItemStackList(rConfig.getStringList("output"), currentRegionFile.getName(), namedItems),
-                            rConfig.getDouble("cost"),
-                            rConfig.getDouble("payout"),
-                            rConfig.getDouble("exp"),
-                            rConfig.getString("description"),
-                            rConfig.getInt("power-drain", 0),
-                            rConfig.getInt("housing", 0),
-                            rConfig.getStringList("biome"),
-                            Util.stringToItemStack(rConfig.getString("icon","1")),
-                            rConfig.getInt("min-y", -1),
-                            rConfig.getInt("max-y", -1),
-                            rConfig.getDouble("unlock", 0),
-                            rConfig.getDouble("salvage", 0),
-                            namedItems
-                    ));
-                    if (!regionCategories.containsKey("")) {
-                        ArrayList<String> tempList = new ArrayList<String>();
-                        tempList.add(regionName);
-                        regionCategories.put("", tempList);
-                    } else {
-                        regionCategories.get("").add(regionName);
-                    }
-                } catch (Exception e) {
-                    plugin.warning("[Townships] failed to load " + currentRegionFile.getName());
-                    e.printStackTrace();
-                }
-            } else if (currentRegionFile.isDirectory()) {
-                for (File cRegionFile : currentRegionFile.listFiles()) {
-                    try {
-                        FileConfiguration rConfig = new YamlConfiguration();
-                        rConfig.load(cRegionFile);
-                        String regionName = cRegionFile.getName().replace(".yml", "");
-                        HashMap<String, ArrayList<String>> namedItems = processNamedItems(rConfig.getConfigurationSection("named-items"));
-                        regionTypes.put(regionName, new RegionType(regionName,
-                                rConfig.getString("group", regionName),
-                                (ArrayList<String>) rConfig.getStringList("effects"),
-                                Math.pow(rConfig.getInt("radius") + 0.4, 2),
-                                Math.pow(rConfig.getInt("build-radius", rConfig.getInt("radius", 2)) + 0.4, 2),
-                                processItemStackList(rConfig.getStringList("requirements"), cRegionFile.getName()),
-                                rConfig.getStringList("super-regions"),
-                                processItemStackList(rConfig.getStringList("reagents"), cRegionFile.getName(), namedItems),
-                                processItemStackList(rConfig.getStringList("input"), cRegionFile.getName(), namedItems),
-                                processItemStackList(rConfig.getStringList("output"), cRegionFile.getName(), namedItems),
-                                rConfig.getDouble("cost"),
-                                rConfig.getDouble("payout"),
-                                rConfig.getDouble("exp"),
-                                rConfig.getString("description"),
-                                rConfig.getInt("power-drain", 0),
-                                rConfig.getInt("housing", 0),
-                                rConfig.getStringList("biome"),
-                                Util.stringToItemStack(rConfig.getString("icon","1")),
-                                rConfig.getInt("min-y", -1),
-                                rConfig.getInt("max-y", -1),
-                                rConfig.getDouble("unlock", 0),
-                                rConfig.getDouble("salvage", 0),
-                                namedItems
-                        ));
-                        if (!regionCategories.containsKey(currentRegionFile.getName().toLowerCase())) {
-                            ArrayList<String> tempList = new ArrayList<String>();
-                            tempList.add(regionName);
-                            regionCategories.put(currentRegionFile.getName().toLowerCase(), tempList);
-                        } else {
-                            regionCategories.get(currentRegionFile.getName().toLowerCase()).add(regionName);
-                        }
-                    } catch (Exception e) {
-                        plugin.warning("[Townships] failed to load " + cRegionFile.getName());
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
-        
-        File suRegionFolder = new File(plugin.getDataFolder(), "SuperRegionConfig");
-        if (!suRegionFolder.exists()) {
-            File sRegionFile = new File(plugin.getDataFolder(), "super-regions.yml");
-            if (!sRegionFile.exists()) {
-                DefaultRegions.createDefaultSuperRegionFiles(plugin);
-            } else {
-                DefaultRegions.migrateSuperRegions(sRegionFile, plugin);
-            }
-        }
-        for (File currentRegionFile : suRegionFolder.listFiles()) {
-            try {
-                FileConfiguration rConfig = new YamlConfiguration();
-                rConfig.load(currentRegionFile);
-                String regionName = currentRegionFile.getName().replace(".yml", "");
-                superRegionTypes.put(regionName, new SuperRegionType(regionName,
-                        rConfig.getStringList("effects"),
-                        Math.pow(rConfig.getInt("radius") + 0.4, 2),
-                        //processRegionTypeMap(rConfig.getStringList("requirements")),
-                        rConfig.getStringList("requirements"),
-                        rConfig.getDouble("cost", 0),
-                        rConfig.getDouble("payout", 0),
-                        rConfig.getStringList("children"),
-                        rConfig.getInt("max-power", 100),
-                        rConfig.getInt("daily-power-increase", 10),
-                        rConfig.getInt("charter", 0),
-                        rConfig.getDouble("exp", 0),
-                        rConfig.getString("central-structure"),
-                        rConfig.getString("description"),
-                        rConfig.getInt("population", 0),
-                        Util.stringToItemStack(rConfig.getString("icon", "1")),
-                        rConfig.getStringList("limits"),
-                        rConfig.getDouble("unlock", 0)
-                ));
-            } catch (Exception e) {
-                plugin.warning("[Townships] failed to load " + currentRegionFile.getName());
-            }
-        }
-
+    private void loadData() {
         File playerFolder = new File(plugin.getDataFolder(), "data"); // Setup the Data Folder if it doesn't already exist
         playerFolder.mkdirs();
         for (File regionFile : playerFolder.listFiles()) {
@@ -227,11 +84,9 @@ public class RegionManager {
                 String locationString = dataConfig.getString("location");
                 if (locationString != null) {
                     Location location = null;
-                    if (locationString != null) {
-                        String[] params = locationString.split(":");
-                        World world  = plugin.getServer().getWorld(params[0]);
-                        location = new Location(world, Double.parseDouble(params[1]),Double.parseDouble(params[2]),Double.parseDouble(params[3]));
-                    }
+                    String[] params = locationString.split(":");
+                    World world  = plugin.getServer().getWorld(params[0]);
+                    location = new Location(world, Double.parseDouble(params[1]),Double.parseDouble(params[2]),Double.parseDouble(params[3]));
                     String type = dataConfig.getString("type");
                     ArrayList<String> owners = (ArrayList<String>) dataConfig.getStringList("owners");
                     ArrayList<String> members = (ArrayList<String>) dataConfig.getStringList("members");
@@ -241,7 +96,7 @@ public class RegionManager {
                     if (members == null) {
                         members = new ArrayList<String>();
                     }
-                    if (location != null && type != null) {
+                    if (type != null) {
                         try {
                             location.getBlock().getTypeId();
                             getRegionType(type).getRadius();
@@ -373,6 +228,147 @@ public class RegionManager {
         } catch (Exception ioe) {
             Logger log = plugin.getLogger();
             log.warning("[Townships] failed to load war.yml");
+        }
+    }
+
+    private void loadRegionTypes() {
+        permSets = PermSet.loadPermSets(plugin);
+        for (String s : permSets.keySet()) {
+            possiblePermSets.add(s);
+        }
+
+        File regionFolder = new File(plugin.getDataFolder(), "RegionConfig");
+        if (!regionFolder.exists()) {
+            File regionFile = new File(plugin.getDataFolder(), "regions.yml");
+            if (!regionFile.exists()) {
+                DefaultRegions.createDefaultRegionFiles(plugin);
+            } else {
+                DefaultRegions.migrateRegions(regionFile, plugin);
+            }
+        }
+        for (File currentRegionFile : regionFolder.listFiles()) {
+            if (currentRegionFile.isFile()) {
+                try {
+                    FileConfiguration rConfig = new YamlConfiguration();
+                    rConfig.load(currentRegionFile);
+                    String regionName = currentRegionFile.getName().replace(".yml", "");
+                    HashMap<String, ArrayList<String>> namedItems = processNamedItems(rConfig.getConfigurationSection("named-items"));
+                    regionTypes.put(regionName, new RegionType(regionName,
+                            rConfig.getString("group", regionName),
+                            (ArrayList<String>) rConfig.getStringList("effects"),
+                            Math.pow(rConfig.getInt("radius") + 0.4, 2),
+                            Math.pow(rConfig.getInt("build-radius", rConfig.getInt("radius", 2)) + 0.4, 2),
+                            processItemStackList(rConfig.getStringList("requirements"), currentRegionFile.getName()),
+                            rConfig.getStringList("super-regions"),
+                            processItemStackList(rConfig.getStringList("reagents"), currentRegionFile.getName(), namedItems),
+                            processItemStackList(rConfig.getStringList("input"), currentRegionFile.getName(), namedItems),
+                            processItemStackList(rConfig.getStringList("output"), currentRegionFile.getName(), namedItems),
+                            rConfig.getDouble("cost"),
+                            rConfig.getDouble("payout"),
+                            rConfig.getDouble("exp"),
+                            rConfig.getString("description"),
+                            rConfig.getInt("power-drain", 0),
+                            rConfig.getInt("housing", 0),
+                            rConfig.getStringList("biome"),
+                            Util.stringToItemStack(rConfig.getString("icon","1")),
+                            rConfig.getInt("min-y", -1),
+                            rConfig.getInt("max-y", -1),
+                            rConfig.getDouble("unlock", 0),
+                            rConfig.getDouble("salvage", 0),
+                            namedItems
+                    ));
+                    if (!regionCategories.containsKey("")) {
+                        ArrayList<String> tempList = new ArrayList<>();
+                        tempList.add(regionName);
+                        regionCategories.put("", tempList);
+                    } else {
+                        regionCategories.get("").add(regionName);
+                    }
+                } catch (Exception e) {
+                    plugin.warning("[Townships] failed to load " + currentRegionFile.getName());
+                    e.printStackTrace();
+                }
+            } else if (currentRegionFile.isDirectory()) {
+                for (File cRegionFile : currentRegionFile.listFiles()) {
+                    try {
+                        FileConfiguration rConfig = new YamlConfiguration();
+                        rConfig.load(cRegionFile);
+                        String regionName = cRegionFile.getName().replace(".yml", "");
+                        HashMap<String, ArrayList<String>> namedItems = processNamedItems(rConfig.getConfigurationSection("named-items"));
+                        regionTypes.put(regionName, new RegionType(regionName,
+                                rConfig.getString("group", regionName),
+                                (ArrayList<String>) rConfig.getStringList("effects"),
+                                Math.pow(rConfig.getInt("radius") + 0.4, 2),
+                                Math.pow(rConfig.getInt("build-radius", rConfig.getInt("radius", 2)) + 0.4, 2),
+                                processItemStackList(rConfig.getStringList("requirements"), cRegionFile.getName()),
+                                rConfig.getStringList("super-regions"),
+                                processItemStackList(rConfig.getStringList("reagents"), cRegionFile.getName(), namedItems),
+                                processItemStackList(rConfig.getStringList("input"), cRegionFile.getName(), namedItems),
+                                processItemStackList(rConfig.getStringList("output"), cRegionFile.getName(), namedItems),
+                                rConfig.getDouble("cost"),
+                                rConfig.getDouble("payout"),
+                                rConfig.getDouble("exp"),
+                                rConfig.getString("description"),
+                                rConfig.getInt("power-drain", 0),
+                                rConfig.getInt("housing", 0),
+                                rConfig.getStringList("biome"),
+                                Util.stringToItemStack(rConfig.getString("icon","1")),
+                                rConfig.getInt("min-y", -1),
+                                rConfig.getInt("max-y", -1),
+                                rConfig.getDouble("unlock", 0),
+                                rConfig.getDouble("salvage", 0),
+                                namedItems
+                        ));
+                        if (!regionCategories.containsKey(currentRegionFile.getName().toLowerCase())) {
+                            ArrayList<String> tempList = new ArrayList<>();
+                            tempList.add(regionName);
+                            regionCategories.put(currentRegionFile.getName().toLowerCase(), tempList);
+                        } else {
+                            regionCategories.get(currentRegionFile.getName().toLowerCase()).add(regionName);
+                        }
+                    } catch (Exception e) {
+                        plugin.warning("[Townships] failed to load " + cRegionFile.getName());
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+
+        File suRegionFolder = new File(plugin.getDataFolder(), "SuperRegionConfig");
+        if (!suRegionFolder.exists()) {
+            File sRegionFile = new File(plugin.getDataFolder(), "super-regions.yml");
+            if (!sRegionFile.exists()) {
+                DefaultRegions.createDefaultSuperRegionFiles(plugin);
+            } else {
+                DefaultRegions.migrateSuperRegions(sRegionFile, plugin);
+            }
+        }
+        for (File currentRegionFile : suRegionFolder.listFiles()) {
+            try {
+                FileConfiguration rConfig = new YamlConfiguration();
+                rConfig.load(currentRegionFile);
+                String regionName = currentRegionFile.getName().replace(".yml", "");
+                superRegionTypes.put(regionName, new SuperRegionType(regionName,
+                        rConfig.getStringList("effects"),
+                        Math.pow(rConfig.getInt("radius") + 0.4, 2),
+                        rConfig.getStringList("requirements"),
+                        rConfig.getDouble("cost", 0),
+                        rConfig.getDouble("payout", 0),
+                        rConfig.getStringList("children"),
+                        rConfig.getInt("max-power", 100),
+                        rConfig.getInt("daily-power-increase", 10),
+                        rConfig.getInt("charter", 0),
+                        rConfig.getDouble("exp", 0),
+                        rConfig.getString("central-structure"),
+                        rConfig.getString("description"),
+                        rConfig.getInt("population", 0),
+                        Util.stringToItemStack(rConfig.getString("icon", "1")),
+                        rConfig.getStringList("limits"),
+                        rConfig.getDouble("unlock", 0)
+                ));
+            } catch (Exception e) {
+                plugin.warning("[Townships] failed to load " + currentRegionFile.getName());
+            }
         }
     }
 
@@ -564,7 +560,7 @@ public class RegionManager {
         } catch (Exception e) {
             quantity = 1;
         }
-        String unprocessedGroup = new String(configManager.getItemGroups().get(groupName));
+        String unprocessedGroup = new String(Townships.getConfigManager().getItemGroups().get(groupName));
         if (unprocessedGroup == null) {
             return "1.1";
         }
@@ -795,7 +791,7 @@ public class RegionManager {
                 try {
                     if (p.getLocation().distanceSquared(threadL) < 400) {
                         p.sendMessage(ChatColor.GRAY + "[Townships] " + ChatColor.WHITE + regionTypeName + " was disabled!");
-                        if (configManager.getExplode()) {
+                        if (Townships.getConfigManager().getExplode()) {
                             p.sendMessage(ChatColor.GRAY + "[Townships] " + ChatColor.RED + "look out it's going to explode!");
                         }
                     }
@@ -807,13 +803,13 @@ public class RegionManager {
         }.run();
         
         plugin.getServer().getPluginManager().callEvent(new ToRegionDestroyedEvent(currentRegion));
-        if (configManager.getExplode()) {
-            l.getBlock().setTypeId(0);
+        if (Townships.getConfigManager().getExplode()) {
+            l.getBlock().setType(Material.AIR);
             TNTPrimed tnt = l.getWorld().spawn(l, TNTPrimed.class); 
             tnt.setFuseTicks(1);
             
         }
-        l.getBlock().setTypeId(0);
+        l.getBlock().setType(Material.AIR);
     }
     
     public void destroySuperRegion(String name, boolean sendMessage) {
