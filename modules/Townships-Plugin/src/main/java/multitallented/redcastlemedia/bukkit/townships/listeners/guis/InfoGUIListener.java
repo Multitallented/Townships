@@ -400,16 +400,16 @@ public class InfoGUIListener implements Listener {
         
         RegionType rt = rm.getRegionType(regionTypeName);
 
-        if (event.getClickedInventory() != null && event.getClickedInventory().getItem(1) != null &&
-                event.getClickedInventory().getItem(1).equals(event.getCurrentItem())) {
+        if (event.getInventory() != null && event.getInventory().getItem(1) != null &&
+                event.getInventory().getItem(1).equals(event.getCurrentItem())) {
             player.closeInventory();
             RegionType type = rm.getRegionType(event.getCurrentItem().getItemMeta().getDisplayName().toLowerCase());
             InfoGUIListener.openInfoInventory(type, player, "info " + regionTypeName);
 //            player.performCommand("to info " + event.getCurrentItem().getItemMeta().getDisplayName());
             return;
         }
-        if (event.getClickedInventory() != null && event.getClickedInventory().getItem(2) != null &&
-                event.getClickedInventory().getItem(2).equals(event.getCurrentItem())) {
+        if (event.getInventory() != null && event.getInventory().getItem(2) != null &&
+                event.getInventory().getItem(2).equals(event.getCurrentItem())) {
             player.closeInventory();
             RegionType type = rm.getRegionType(event.getCurrentItem().getItemMeta().getDisplayName().toLowerCase());
             InfoGUIListener.openInfoInventory(type, player, "info " + regionTypeName);

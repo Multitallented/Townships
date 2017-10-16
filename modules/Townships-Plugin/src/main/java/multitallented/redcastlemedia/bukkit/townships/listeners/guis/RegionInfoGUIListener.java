@@ -499,11 +499,11 @@ public class RegionInfoGUIListener implements Listener {
 
         Region region = null;
         SuperRegion superRegion = null;
-        String[] nameParts = ChatColor.stripColor(event.getClickedInventory().getItem(0).getItemMeta().getDisplayName()).split(" ");
+        String[] nameParts = ChatColor.stripColor(event.getInventory().getItem(0).getItemMeta().getDisplayName()).split(" ");
         if (nameParts.length > 1 && ChatColor.stripColor(event.getInventory().getName()).equals("Region")) {
             region = rm.getRegionByID(Integer.parseInt(nameParts[1]));
         } else {
-            superRegion = rm.getSuperRegion(ChatColor.stripColor(event.getClickedInventory().getItem(0).getItemMeta().getDisplayName()));
+            superRegion = rm.getSuperRegion(ChatColor.stripColor(event.getInventory().getItem(0).getItemMeta().getDisplayName()));
         }
 
         if (event.getCurrentItem().getType() == Material.TNT) {

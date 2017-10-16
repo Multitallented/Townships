@@ -205,14 +205,12 @@ public class EffectShootMissile extends Effect {
             player.sendMessage(ChatColor.GREEN + "[Townships] Velocity: " + newX + ", " + newY + ", " + newZ);
             player.sendMessage(ChatColor.GREEN + "[Townships] Theta: " + theta);
             player.sendMessage(ChatColor.GREEN + "[Townships] Current: " + current);*/
-            player.getWorld().playEffect(fireLocation.getBlock().getRelative(BlockFace.NORTH, 1).getLocation(), org.bukkit.Effect.EXPLOSION_LARGE, 1);
-            player.getWorld().playEffect(fireLocation.getBlock().getRelative(BlockFace.EAST, 1).getLocation(), org.bukkit.Effect.EXPLOSION_LARGE, 1);
-            player.getWorld().playEffect(fireLocation.getBlock().getRelative(BlockFace.WEST, 1).getLocation(), org.bukkit.Effect.EXPLOSION_LARGE, 1);
-            player.getWorld().playEffect(fireLocation.getBlock().getRelative(BlockFace.SOUTH, 1).getLocation(), org.bukkit.Effect.EXPLOSION_LARGE, 1);
-            player.getWorld().playEffect(fireLocation.getBlock().getRelative(BlockFace.UP, 1).getLocation(), org.bukkit.Effect.EXPLOSION_LARGE, 1);
-            player.getWorld().playEffect(fireLocation, org.bukkit.Effect.EXPLOSION_LARGE, 1);
-            player.getWorld().playEffect(fireLocation, org.bukkit.Effect.EXPLOSION_LARGE, 1);
-            player.getWorld().playEffect(fireLocation, org.bukkit.Effect.EXPLOSION_LARGE, 1);
+            player.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, fireLocation.getBlock().getRelative(BlockFace.NORTH,1).getLocation(), 1);
+            player.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, fireLocation.getBlock().getRelative(BlockFace.EAST,1).getLocation(), 1);
+            player.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, fireLocation.getBlock().getRelative(BlockFace.WEST,1).getLocation(), 1);
+            player.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, fireLocation.getBlock().getRelative(BlockFace.SOUTH,1).getLocation(), 1);
+            player.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, fireLocation.getBlock().getRelative(BlockFace.UP,1).getLocation(), 1);
+            player.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, fireLocation, 3);
             for (Player currPlayer : Bukkit.getOnlinePlayers()) {
                 if (currPlayer.getLocation().distanceSquared(fireLocation) > 2500) {
                     continue;
